@@ -2,6 +2,7 @@ using DifferentialRiccatiEquations
 using MAT, UnPack, HDF5
 
 using LinearAlgebra: BLAS
+BLAS.set_num_threads(16)
 @show BLAS.get_num_threads()
 
 ## Setup
