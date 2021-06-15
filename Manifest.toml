@@ -122,9 +122,7 @@ version = "1.0.2"
 
 [[DifferentialRiccatiEquations]]
 deps = ["CommonSolve", "MatrixEquations", "UnPack"]
-git-tree-sha1 = "b4723413ae884d0aead8ed521d4b6c8953803daf"
-repo-rev = "master"
-repo-url = "https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl"
+path = "src/DifferentialRiccatiEquations.jl"
 uuid = "9819f967-4574-4d9d-b214-002eeba273d9"
 version = "0.1.0"
 
@@ -361,9 +359,7 @@ version = "1.4.1"
 
 [[ParaReal]]
 deps = ["DiffEqBase", "Distributed", "LinearAlgebra", "UnPack"]
-git-tree-sha1 = "22efb9125f67eb7daeef2da2115fdd2f054d30d2"
-repo-rev = "master"
-repo-url = "https://gitlab.mpi-magdeburg.mpg.de/jschulze/parareal.jl"
+path = "src/ParaReal.jl"
 uuid = "d8ab9f86-dde6-11e9-3216-afd74457b932"
 version = "0.1.0"
 
