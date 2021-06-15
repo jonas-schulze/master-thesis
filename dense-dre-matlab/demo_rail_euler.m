@@ -1,5 +1,5 @@
 %% Setup
-P = load('Rail371.mat');
+P = load('../data/Rail371.mat');
 
 if ~exist('tspan')
   tspan = 0:300:900
