@@ -1,7 +1,8 @@
 using DifferentialRiccatiEquations
-using MAT, UnPack
+using MAT, UnPack, HDF5
 
-const DREs = DifferentialRiccatiEquations
+using LinearAlgebra: BLAS
+@show BLAS.get_num_threads()
 
 ## Setup
 dt = @isdefined(dt) ? dt : -1500

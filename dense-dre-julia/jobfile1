@@ -38,5 +38,5 @@ source /etc/profile.d/modules.sh
 # Your changes Below!!!!
 
 module load apps/julia/1.6
-julia --project -E "order=1; dt=-10; include('demo_rail_euler.m');"
+julia --project -E 'order=1; dt=-10; include("demo_rail_euler.jl");'
 
