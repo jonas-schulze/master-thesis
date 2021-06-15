@@ -1,0 +1,42 @@
+#!/bin/bash
+# Your job name.
+#SBATCH -J dense1
+#
+# Output files. .out. is for standard output .err. is for the error output.
+#SBATCH -o %x-%j.out
+#SBATCH -e %x-%j.err
+#
+# Maximum expected runtime.  ( 00 Days, 1 hour, 00 minutes, 00 seconds)
+#SBATCH --time=00-1:00:00
+#
+# Allocate one node with all 16 CPU cores
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
+#
+# Choose Partition (Queue)
+#SBATCH --partition short
+#
+# Mail Options
+#SBATCH --mail-type=FAIL,BEGIN,END
+#SBATCH --mail-user=jschulze@mpi-magdeburg.mpg.de
+#
+### END OF THE SLURM SPECIFIC PART ###
+
+# Setup OpenMP
+if [ -n "$SLURM_CPUS_PER_TASK" ]; then
+  omp_threads=$SLURM_CPUS_PER_TASK
+else
+  omp_threads=1
+fi
+export OMP_NUM_THREADS=$omp_threads
+export MKL_ENABLE_INSTRUCTIONS=AVX2
+# set up the environment (choose whats needed)
+# load the modules system
+source /etc/profile.d/modules.sh
+
+
+# Your changes Below!!!!
+
+module load apps/julia/1.6
+julia --project -E "order=1; dt=-10; include('demo_rail_euler.m');"
+
