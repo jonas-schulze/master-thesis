@@ -1,5 +1,6 @@
 using DifferentialRiccatiEquations
 using MAT, UnPack, HDF5
+using DrWatson
 
 using LinearAlgebra: BLAS
 BLAS.set_num_threads(16)
@@ -18,7 +19,7 @@ else
     exit(1)
 end
 
-P = matread("../data/Rail371.mat")
+P = matread(datadir("Rail371.mat"))
 @unpack E, A, B, C, X0 = P
 Ed = collect(E) # d=dense
 tspan = (4500., 0.) # backwards in time
