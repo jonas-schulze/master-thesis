@@ -1,0 +1,13 @@
+\usepackage{etoolbox} % \ifblank
+\usepackage{xparse} % \NewDocumentCommand
+\usepackage{mathtools} % Math improvements, loads amsmath
+\usepackage[bookmarksnumbered]{hyperref} % Internal links, must be loaded last
+
+\mathtoolsset{
+  showonlyrefs,
+  showmanualtags,
+}
+
+% hyperref/babel/koma
+\renewcaptionname{american}\chapterautorefname{Chapter}
+\renewcaptionname{american}\sectionautorefname{Section}

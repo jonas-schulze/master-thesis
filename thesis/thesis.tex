@@ -1,0 +1,18 @@
+\documentclass[bibliography=totoc]{scrreprt}
+
+\usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
+\usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
+\usepackage[ngerman,american]{babel} % Language settings
+
+\usepackage[style=alphabetic]{biblatex}
+\addbibresource{stuff.bib}
+
+\input{preamble/packages}
+\input{preamble/math}
+
+\begin{document}
+
+\include{content/notes}
+\printbibliography
+
+\end{document}

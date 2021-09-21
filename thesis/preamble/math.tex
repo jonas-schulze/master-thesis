@@ -1,0 +1,36 @@
+\newcommand{\N}{\mathbb{N}} % Natural numbers
+\newcommand{\Z}{\mathbb{Z}} % Whole numbers
+\newcommand{\Q}{\mathbb{Q}} % Rational numbers
+\newcommand{\R}{\mathbb{R}} % Real numbers
+\newcommand{\C}{\mathbb{C}} % Complex numbers
+\newcommand{\K}{\mathbb{K}} % Arbitrary Field
+
+% usage: the transpose of matrix $A$ is $\trans{A}$
+\NewDocumentCommand{\trans}{m}{{#1}^T}
+
+% usage: \{2x\given x\in\N}
+\newcommand{\given}{\mid}
+
+% usage: \Set[\big]{2x \given x\in\N}
+\newcommand\SetSymbol[1][]{%
+  \nonscript\:#1\vert
+  \allowbreak
+  \nonscript\:
+  \mathopen{}}
+\DeclarePairedDelimiterX{\Set}[1]{\lbrace}{\rbrace}{%
+  \renewcommand\given{\SetSymbol[\delimsize]}% this effect is local only
+  #1%
+}
+
+% personal taste:
+\let\epsilon\varepsilon
+\renewcommand{\to}{\longrightarrow}
+\renewcommand{\mapsto}{\longmapsto}
+\renewcommand{\gets}{\longleftarrow}
+
+% some more delimiters:
+\NewDocumentCommand{\optional}{m}{\ifblank{#1}{\,\cdot\,}{#1}}
+\DeclarePairedDelimiterX{\abs}[1]{\lvert}{\rvert}{\optional{#1}}
+\DeclarePairedDelimiterX{\norm}[1]{\lVert}{\rVert}{\optional{#1}}
+\DeclarePairedDelimiterX{\scalar}[2]{\langle}{\rangle}{\optional{#1},\optional{#2}}
+\newcommand{\card}{\abs}

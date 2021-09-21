@@ -1,0 +1,39 @@
+\chapter{Notes}
+
+\begin{align}
+  E\dot{X} &= AX + BU \\
+  Y &= CX + DU \\
+  X(t_0) &= X_0
+\end{align}
+
+\section{Equation Types}
+\subsection{Standard}
+
+Differential and algebraic Riccati equations:
+\begin{align}
+  \dot{X} &= \trans{A}X + XA - XSX + W \\
+  0 &= \trans{A}X + XA - XSX + W \\
+\intertext{Differential and algebraic Lyapunov equations:}
+  \dot{X} &= \trans{A}X + XA + W \\
+  0 &= \trans{A}X + XA + W
+\end{align}
+
+\subsection{Generalized}
+
+Substituting $X\gets\trans{E}XE$ leads to generalized equations.
+Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$):
+\begin{align}
+  \trans{E}\dot{X}E &= \trans{A}XE + \trans{E}XA - \trans{E}XSXE + W \\
+  0 &= \trans{A}XE + \trans{E}XA - \trans{E}XSXE + W \\
+\intertext{Generalized differential and algebraic Lyapunov equations:}
+  \trans{E}\dot{X}E &= \trans{A}XE + \trans{E}XA + W \\
+  0 &= \trans{A}XE + \trans{E}XA + W \\
+\end{align}
+
+\cite{Lang2018}
+
+\section{Alternating Directions Method}
+
+\section{Software}
+
+\cite{DrWatson}
