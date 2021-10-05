@@ -5,8 +5,9 @@
 \newcommand{\C}{\mathbb{C}} % Complex numbers
 \newcommand{\K}{\mathbb{K}} % Arbitrary Field
 
-% usage: the transpose of matrix $A$ is $\trans{A}$
-\NewDocumentCommand{\trans}{m}{{#1}^T}
+% transpose and conjugate/Hermitian transpose:
+\newcommand\T{T}
+\newcommand\HT{H}
 
 % usage: \{2x\given x\in\N}
 \newcommand{\given}{\mid}
@@ -34,3 +35,7 @@
 \DeclarePairedDelimiterX{\norm}[1]{\lVert}{\rVert}{\optional{#1}}
 \DeclarePairedDelimiterX{\scalar}[2]{\langle}{\rangle}{\optional{#1},\optional{#2}}
 \newcommand{\card}{\abs}
+
+% integration:
+\NewDocumentCommand{\intd}{m}{\,\textup{d}#1}
+\newcommand\dt{\intd{t}}

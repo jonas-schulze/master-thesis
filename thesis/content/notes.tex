@@ -11,23 +11,23 @@
 
 Differential and algebraic Riccati equations:
 \begin{align}
-  \dot{X} &= \trans{A}X + XA - XSX + W \\
-  0 &= \trans{A}X + XA - XSX + W \\
+  \dot{X} &= A^\T X + XA - XSX + W \\
+  0 &= A^\T X + XA - XSX + W \\
 \intertext{Differential and algebraic Lyapunov equations:}
-  \dot{X} &= \trans{A}X + XA + W \\
-  0 &= \trans{A}X + XA + W
+  \dot{X} &= A^\T X + XA + W \\
+  0 &= A^\T X + XA + W
 \end{align}
 
 \subsection{Generalized}
 
-Substituting $X\gets\trans{E}XE$ leads to generalized equations.
+Substituting $X\gets E^\T XE$ leads to generalized equations.
 Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$):
 \begin{align}
-  \trans{E}\dot{X}E &= \trans{A}XE + \trans{E}XA - \trans{E}XSXE + W \\
-  0 &= \trans{A}XE + \trans{E}XA - \trans{E}XSXE + W \\
+  E^\T \dot{X}E &= A^\T XE + E^\T XA - E^\T XSXE + W \\
+  0 &= A^\T XE + E^\T XA - E^\T XSXE + W \\
 \intertext{Generalized differential and algebraic Lyapunov equations:}
-  \trans{E}\dot{X}E &= \trans{A}XE + \trans{E}XA + W \\
-  0 &= \trans{A}XE + \trans{E}XA + W \\
+  E^\T \dot{X}E &= A^\T XE + E^\T XA + W \\
+  0 &= A^\T XE + E^\T XA + W \\
 \end{align}
 
 \cite{Lang2018}
@@ -37,3 +37,43 @@ Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$)
 \section{Software}
 
 \cite{DrWatson}
+
+\section{Hamilton-Jacobi Theory}
+
+Consider the optimal control problem
+\begin{equation}
+  \everymath{\displaystyle}
+  \begin{array}{cl}
+    \min_u & \int_{t_0}^{t_f} \ell(t, x(t), u(t)) \dt + m(t_f, x(t_f)) \\
+    \text{s.t.} & \dot{x} = f(t,x,u), \enspace x(t_0) = x_0
+  \end{array}
+  \label{eq:optimal-control}
+\end{equation}
+using \emph{state}~$x:\R\to\R^n$, system \emph{control}~$u:\R\to\R^m$,
+and scalar cost functions~$\ell$ and $m$.
+An optimal control $u^*$ solving \eqref{eq:optimal-control} may be defined by means of the
+\emph{value function}~$V:\R\times\R^n\to\R$ satisfying the \emph{Hamilton-Jacobi} equation
+\begin{equation}
+  V_t(t,x) + H(t,x,u^h,V_x^\T(t,x)) = 0.
+  \label{eq:hamilton-jacobi}
+\end{equation}
+The \emph{Hamiltonian} $H:\R\times\R^n\times\R^m\times\R^n\to\R$ is given by
+\begin{equation}
+  H(t,x,u,\lambda) = \ell(t,x,u) + \lambda^\T f(t,x,u)
+\end{equation}
+and $u^h = u^h(t,x,V_x^\T)$ denotes the $H$-minimizing control.
+In the context of the linear dynamical system
+\begin{equation}
+  \begin{aligned}
+    E\dot{x} &= Ax + Bu \\
+    y &= Cx
+  \end{aligned}
+\end{equation}
+together with the state transformation $z=Ex$ and particular choices for $\ell$ and $m$,
+making the ansatz
+\begin{equation}
+  V(t,z) = z^\T Xz + w^\T z + v
+\end{equation}
+and solving for $X:\R\to\R^{n,n}$, $w:\R\to\R^n$, $v:\R\to\R$ will eventually
+yield a \emph{generalized differential Riccati equation} in $X$ as well as
+ordinary differential equations in $w$ and $v$.
