@@ -34,7 +34,7 @@ end
 [Kc,Xc] = alg(P.E, P.A, P.B, P.C, P.X0, tspan);
 
 %% Store
-container = "baseline_order=" + order + "_dt=" + dt + ".h5";
+container = datadir("matlab_dt=" + dt + "_order=" + order + ".h5");
 for i = 1:length(tspan)
   t = tspan(i);
   K = Kc{i};

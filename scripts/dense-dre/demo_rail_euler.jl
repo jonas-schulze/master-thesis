@@ -29,8 +29,10 @@ dt = abs(dt)
 sol = solve(prob, alg; dt=-dt, save_state=true)
 
 ## Store
-container = "candidate_order=$(order)_dt=$(abs(dt)).h5"
+container = datadir(savename("julia", (; dt, order), "h5"))
 h5open(container, "w") do h5
+    h5["gitcommit"] = gitdescribe()
+    h5["script"] = @__FILE__
     for (i, _t) in enumerate(sol.t)
         t = Int(_t)
         K = sol.K[i]
