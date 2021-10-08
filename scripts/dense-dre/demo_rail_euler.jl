@@ -26,14 +26,16 @@ prob = GDREProblem(Ed, A, B, C, X0, tspan)
 
 ## Solve
 dt = abs(dt)
-sol = solve(prob, alg; dt=-dt)
+sol = solve(prob, alg; dt=-dt, save_state=true)
 
 ## Store
 container = "candidate_order=$(order)_dt=$(abs(dt)).h5"
 h5open(container, "w") do h5
     for (i, _t) in enumerate(sol.t)
         t = Int(_t)
+        K = sol.K[i]
         X = sol.X[i]
+        h5["K/t=$t"] = K
         h5["X/t=$t"] = X
     end
 end
