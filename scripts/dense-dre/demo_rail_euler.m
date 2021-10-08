@@ -1,14 +1,20 @@
 %% Setup
 P = load(datadir('Rail371.mat'));
 
-if ~exist('tspan')
-  tspan = 0:300:900
+if ~exist('dt')
+  dt = str2num(getenv('MY_DT'));
+  if isempty(dt)
+    dt = 1500;
+  end
 end
-if ~exist('order')
-  order = 1
-end
+tspan = 0:dt:4500;
 
-dt = tspan(2) - tspan(1)
+if ~exist('order')
+  order = str2num(getenv('MY_ORDER'));
+  if isempty(order)
+    order = 1;
+  end
+end
 
 switch order
 case 1

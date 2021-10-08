@@ -6,8 +6,8 @@ using LinearAlgebra: BLAS
 @show BLAS.get_num_threads()
 
 ## Setup
-dt = @isdefined(dt) ? dt : -1500
-order = @isdefined(order) ? order : 1
+!@isdefined(dt) && (dt = parse(Int, get(ENV, "MY_DT", "1500")))
+!@isdefined(order) && (order = parse(Int, get(ENV, "MY_ORDER", "1")))
 
 if order == 1
     alg = Ros1()
@@ -25,7 +25,8 @@ tspan = (4500., 0.) # backwards in time
 prob = GDREProblem(Ed, A, B, C, X0, tspan)
 
 ## Solve
-sol = solve(prob, alg; dt=dt)
+dt = abs(dt)
+sol = solve(prob, alg; dt=-dt)
 
 ## Store
 container = "candidate_order=$(order)_dt=$(abs(dt)).h5"

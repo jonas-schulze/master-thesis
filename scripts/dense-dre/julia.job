@@ -1,10 +1,11 @@
 #!/bin/bash
 # Your job name.
-#SBATCH -J dense1
+#SBATCH -J J
 #
 # Output files. .out. is for standard output .err. is for the error output.
-#SBATCH -o %x-%j.out
-#SBATCH -e %x-%j.err
+#SBATCH --array=1-4
+#SBATCH -o %x-%A_%a.out
+#SBATCH -e %x-%A_%a.err
 #
 # Maximum expected runtime.  ( 00 Days, 1 hour, 00 minutes, 00 seconds)
 #SBATCH --time=00-1:00:00
@@ -36,7 +37,9 @@ source /etc/profile.d/modules.sh
 
 
 # Your changes Below!!!!
+export MY_DT=10
+export MY_ORDER=$SLURM_ARRAY_TASK_ID
 
 module load apps/julia/1.6
-julia --project -E 'order=1; dt=-10; include("demo_rail_euler.jl");'
+julia --project demo_rail_euler.jl
 

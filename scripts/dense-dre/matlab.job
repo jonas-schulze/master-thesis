@@ -1,28 +1,29 @@
 #!/bin/bash
 # Your job name.
-#SBATCH -J dense_baseline_1
+#SBATCH -J M
 #
-# Output files. .out. is for standard output .err. is for the error output. 
-#SBATCH -o %x-%j.out
-#SBATCH -e %x-%j.err
+# Output files. .out. is for standard output .err. is for the error output.
+#SBATCH --array=1-4
+#SBATCH -o %x-%A_%a.out
+#SBATCH -e %x-%A_%a.err
 #
-# Maximum expected runtime.  ( 00 Days, 1 hour, 00 minutes, 00 seconds) 
-#SBATCH --time=00-1:00:00   
+# Maximum expected runtime.  ( 00 Days, 1 hour, 00 minutes, 00 seconds)
+#SBATCH --time=00-1:00:00
 #
-# Allocate one node with all 16 CPU cores 
+# Allocate one node with all 16 CPU cores
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16 
+#SBATCH --cpus-per-task=16
 #
-# Choose Partition (Queue) 
-#SBATCH --partition short 
+# Choose Partition (Queue)
+#SBATCH --partition short
 #
-# Mail Options 
+# Mail Options
 #SBATCH --mail-type=FAIL,BEGIN,END
 #SBATCH --mail-user=jschulze@mpi-magdeburg.mpg.de
 #
 ### END OF THE SLURM SPECIFIC PART ###
 
-# Setup OpenMP 
+# Setup OpenMP
 if [ -n "$SLURM_CPUS_PER_TASK" ]; then
   omp_threads=$SLURM_CPUS_PER_TASK
 else
@@ -31,7 +32,7 @@ fi
 export OMP_NUM_THREADS=$omp_threads
 export MKL_ENABLE_INSTRUCTIONS=AVX2
 # set up the environment (choose whats needed)
-# load the modules system 
+# load the modules system
 source /etc/profile.d/modules.sh
 
 
@@ -41,11 +42,13 @@ source /etc/profile.d/modules.sh
 module load apps/matlab/2021a
 
 
-# SETUP Your MATLAB environment 
+# SETUP Your MATLAB environment
 # The default search path for m-files.
-export MATLABPATH=.
+export MATLABPATH=.:$(git rev-parse --show-toplevel)/src/m
 
+export MY_DT=10
+export MY_ORDER=$SLURM_ARRAY_TASK_ID
 
 #run your script
-matlab -nojvm -nosplash -r "order=1; tspan=0:10:4500; run('demo_rail_euler.m'); quit();"
+matlab -nodisplay -batch demo_rail_euler
 
