@@ -1,3 +1,6 @@
+data
+tmp
+
 *.h5
 *.out
 *.err
