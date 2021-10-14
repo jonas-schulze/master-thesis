@@ -34,8 +34,8 @@ end
 [Kc,Xc] = alg(P.E, P.A, P.B, P.C, P.X0, tspan);
 
 %% Store
-[~] = mkdir(datadir("dense-seq"));
-container = datadir("dense-seq", "rail371_dt=" + dt + "_order=" + order + "_matlab.h5");
+[~] = mkdir(datadir('dense-seq'));
+container = datadir('dense-seq', sprintf('rail371_dt=%d_order=%d_matlab.h5', dt, order));
 for i = 1:length(tspan)
   t = tspan(i);
   K = Kc{i};
