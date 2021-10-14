@@ -29,7 +29,8 @@ dt = abs(dt)
 sol = solve(prob, alg; dt=-dt, save_state=true)
 
 ## Store
-container = datadir(savename("julia", (; dt, order), "h5"))
+mkpath(datadir("dense-seq"))
+container = datadir("dense-seq", savename("rail371", (; dt, order), "h5"))
 h5open(container, "w") do h5
     h5["gitcommit"] = gitdescribe()
     h5["script"] = @__FILE__
