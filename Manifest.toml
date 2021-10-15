@@ -121,7 +121,7 @@ uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
 version = "1.0.2"
 
 [[DifferentialRiccatiEquations]]
-deps = ["CommonSolve", "MatrixEquations", "UnPack"]
+deps = ["CommonSolve", "LinearAlgebra", "MatrixEquations", "UnPack"]
 path = "src/DifferentialRiccatiEquations.jl"
 uuid = "9819f967-4574-4d9d-b214-002eeba273d9"
 version = "0.1.0"
