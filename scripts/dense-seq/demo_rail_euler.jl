@@ -1,6 +1,7 @@
 using DifferentialRiccatiEquations
 using MAT, UnPack, HDF5
 using DrWatson
+using DrWatson: recursively_clear_path
 
 using LinearAlgebra: BLAS
 @show BLAS.get_num_threads()
@@ -13,6 +14,10 @@ if order == 1
     alg = Ros1()
 elseif order == 2
     alg = Ros2()
+elseif order == 3
+    alg = Ros3()
+elseif order == 4
+    alg = Ros4()
 else
     error("unknown order: ", order)
     exit(1)
@@ -31,6 +36,7 @@ sol = solve(prob, alg; dt=-dt, save_state=true)
 ## Store
 mkpath(datadir("dense-seq"))
 container = datadir("dense-seq", savename("rail371", (; dt, order), "h5"))
+recursively_clear_path(container)
 h5open(container, "w") do h5
     h5["gitcommit"] = gitdescribe()
     h5["script"] = @__FILE__
