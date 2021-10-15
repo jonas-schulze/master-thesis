@@ -18,7 +18,7 @@
 #SBATCH --partition short
 #
 # Mail Options
-#SBATCH --mail-type=FAIL,BEGIN,END
+#SBATCH --mail-type=FAIL,BEGIN,END,ARRAY_TASKS
 #SBATCH --mail-user=jschulze@mpi-magdeburg.mpg.de
 #
 ### END OF THE SLURM SPECIFIC PART ###
