@@ -34,6 +34,8 @@ container = datadir("dense-seq", savename("rail371", (; dt, order), "h5"))
 h5open(container, "w") do h5
     h5["gitcommit"] = gitdescribe()
     h5["script"] = @__FILE__
+    h5["SLURM_JOB_ID"] = get(ENV, "SLURM_JOB_ID", "")
+
     for (i, _t) in enumerate(sol.t)
         t = Int(_t)
         K = sol.K[i]

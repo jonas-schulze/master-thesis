@@ -7,6 +7,7 @@
 
 * `projectdir` and `datadir` (check out their MATLAB/Octave ports in `src/m`)
 * `savename`
+* `gitdescribe`
 
 ## MATLAB/Octave Setup
 

@@ -30,12 +30,24 @@ otherwise
   quit(1);
 end
 
+%% Prepare output
+[~] = mkdir(datadir('dense-seq', 'matlab'));
+container = datadir('dense-seq', 'matlab', sprintf('rail371_dt=%d_order=%d.h5', dt, order));
+if isfile(container)
+  error("output already exists: " + container)
+  quit(1);
+end
+h5create(container, '/gitcommit', [1], 'Datatype', 'string');
+h5create(container, '/script', [1], 'Datatype', 'string');
+h5create(container, '/SLURM_JOB_ID', [1], 'Datatype', 'string');
+h5write(container, '/gitcommit', string(gitdescribe));
+h5write(container, '/script', string(mfilename('fullpath')));
+h5write(container, '/SLURM_JOB_ID', string(getenv('SLURM_JOB_ID')));
+
 %% Solve
 [Kc,Xc] = alg(P.E, P.A, P.B, P.C, P.X0, tspan);
 
 %% Store
-[~] = mkdir(datadir('dense-seq'));
-container = datadir('dense-seq', sprintf('rail371_dt=%d_order=%d_matlab.h5', dt, order));
 for i = 1:length(tspan)
   t = tspan(i);
   K = Kc{i};
