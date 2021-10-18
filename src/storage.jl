@@ -1,6 +1,3 @@
-using HDF5, ParaReal, UnPack
-using DifferentialRiccatiEquations: DRESolution
-
 function storemeta(dir, data::Dict{String})
     mkpath(dir)
     _write(h5, key, val) = (h5[key] = val; nothing)
@@ -13,16 +10,16 @@ function storemeta(dir, data::Dict{String})
     end
 end
 
-function store(dir, sol::ParaReal.GlobalSolution)
+function DrWatson._wsave(dir, sol::ParaReal.GlobalSolution)
     @sync for rr in sol.sols
         @async remotecall_wait(rr.where) do
             s = fetch(rr)
-            store(dir, s.sol)
+            DrWatson._wsave(dir, s.sol)
         end
     end
 end
 
-function store(dir, sol::DRESolution)
+function DrWatson._wsave(dir, sol::DRESolution)
     @unpack t, K, X = sol
     tmin, tmax = extrema(sol.t)
     fname = "t=$tmin:$tmax.h5"

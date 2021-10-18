@@ -1,6 +1,6 @@
-using DrWatson, Test
+using Stuff, Test
+using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
-using Distributed
 
 include(srcdir("storage.jl"))
 
@@ -27,7 +27,7 @@ include(srcdir("storage.jl"))
             X = dense ? similar(K) : rand(2)
             sol = DRESolution(X, K, t)
             mktempdir() do dir
-                store(dir, sol)
+                wsave(dir, sol)
                 # Don't create spurious files:
                 @test readdir(dir) == ["K", "X"]
                 Kmat = joinpath(dir, "K", "t=1:9.h5")
@@ -65,9 +65,8 @@ include(srcdir("storage.jl"))
             ts = partition(t, n)
             ws = addprocs(n)
             @everywhere ws begin
-                using DrWatson, ParaReal
+                using Stuff
                 using DifferentialRiccatiEquations: DRESolution
-                include(srcdir("storage.jl"))
             end
             sols::Vector{Future} = asyncmap(ws, ts) do w, t
                 remotecall_wait(w, t) do t
@@ -79,7 +78,7 @@ include(srcdir("storage.jl"))
             end
             sol = ParaReal.GlobalSolution(sols, ParaReal.Event[])
             mktempdir() do dir
-                store(dir, sol)
+                wsave(dir, sol)
                 # Individual solutions should still not be fetched locally:
                 @test sol.sols === sols
                 @test all(isready, sols)
