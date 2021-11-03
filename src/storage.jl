@@ -1,6 +1,18 @@
 using HDF5, ParaReal, UnPack
 using DifferentialRiccatiEquations: DRESolution
 
+function storemeta(dir, data::Dict{String})
+    mkpath(dir)
+    _write(h5, key, val) = (h5[key] = val; nothing)
+    _write(h5, key, val::Dict{String}) = foreach(val) do (key′, val′)
+        haskey(h5, key) || create_group(h5, key)
+        _write(h5[key], key′, val′)
+    end
+    h5open(joinpath(dir, "METADATA.h5"), "w") do h5
+        _write(h5, "/", data)
+    end
+end
+
 function store(dir, sol::ParaReal.GlobalSolution)
     @sync for rr in sol.sols
         @async remotecall_wait(rr.where) do

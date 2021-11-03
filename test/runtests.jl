@@ -5,6 +5,20 @@ using Distributed
 include(srcdir("storage.jl"))
 
 @testset "Playground" begin
+    @testset "metadata" begin
+        data = Dict{String,Any}()
+        @tag!(data)
+        data["foo"] = rand(3, 3)
+        data["bar"] = Dict("baz" => rand(3, 3))
+        mktempdir() do dir
+            storemeta(dir, data)
+            fname = joinpath(dir, "METADATA.h5")
+            @test isfile(fname)
+            @test h5read(fname, "foo") == data["foo"]
+            @test h5read(fname, "bar/baz") == data["bar"]["baz"]
+        end
+    end
+
     @testset "$(forward ? "storage" : reverse("storage"))" for forward in (true, false)
         @testset "$(dense ? "dense DRE" : "sparse DRE")" for dense in (true, false)
             t = 1:9
