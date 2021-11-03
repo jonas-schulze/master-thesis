@@ -1,6 +1,15 @@
 using HDF5, ParaReal, UnPack
 using DifferentialRiccatiEquations: DRESolution
 
+function store(dir, sol::ParaReal.GlobalSolution)
+    @sync for rr in sol.sols
+        @async remotecall_wait(rr.where) do
+            s = fetch(rr)
+            store(dir, s.sol)
+        end
+    end
+end
+
 function store(dir, sol::DRESolution)
     @unpack t, K, X = sol
     tmin, tmax = extrema(sol.t)
