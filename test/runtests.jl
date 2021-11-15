@@ -1,6 +1,7 @@
 using Stuff, Test
 using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
+using ParaReal: Event
 
 include(srcdir("storage.jl"))
 
@@ -68,6 +69,7 @@ include(srcdir("storage.jl"))
                 using Stuff
                 using DifferentialRiccatiEquations: DRESolution
             end
+            # Build dummy local solutions
             sols::Vector{Future} = asyncmap(ws, ts) do w, t
                 remotecall_wait(w, t) do t
                     K = [[10.0x] for x in t]
@@ -76,25 +78,44 @@ include(srcdir("storage.jl"))
                     return ParaReal.LocalSolution{DRESolution}(0, 0, s, :Success)
                 end
             end
-            sol = ParaReal.GlobalSolution(sols, ParaReal.Event[])
+            # Build dummy event log
+            stage = [1, 2, 1, 2]
+            status = [:Initialized, :Waiting, :Stub, :Mock]
+            time_sent = sort(rand(4))
+            time_received = time_sent .+ randn()/100
+            eventlog = map(Event, stage, status, time_sent, time_received)
+            # Build dummy global solution
+            sol = ParaReal.GlobalSolution(sols, eventlog)
             mktempdir() do dir
                 wsave(dir, sol)
                 # Individual solutions should still not be fetched locally:
-                @test sol.sols === sols
-                @test all(isready, sols)
-                @test all(rr -> rr.v === nothing, sols)
-                # All local solutions should be stored:
-                files = map(ts) do t
-                    tmin, tmax = extrema(t)
-                    "t=$tmin:$tmax.h5"
+                @testset "no data transfer between processes" begin
+                    @test sol.sols === sols
+                    @test all(isready, sols)
+                    @test all(rr -> rr.v === nothing, sols)
                 end
-                sort!(files)
-                @test readdir(dir) == ["K", "X"]
-                @test readdir(joinpath(dir, "K")) == files
-                @test readdir(joinpath(dir, "X")) == files
-                # Read data:
-                @test readdata(dir, "K", 2n) == [20.0n]
-                @test readdata(dir, "X", 1) == [1.0]
+                @testset "local solutions" begin
+                    # All local solutions should be stored:
+                    files = map(ts) do t
+                        tmin, tmax = extrema(t)
+                        "t=$tmin:$tmax.h5"
+                    end
+                    sort!(files)
+                    @test readdir(dir) == ["EVENTLOG.h5", "K", "X"]
+                    @test readdir(joinpath(dir, "K")) == files
+                    @test readdir(joinpath(dir, "X")) == files
+                    # Read data:
+                    @test readdata(dir, "K", 2n) == [20.0n]
+                    @test readdata(dir, "X", 1) == [1.0]
+                end
+                @testset "event log" begin
+                    logfile = joinpath(dir, "EVENTLOG.h5")
+                    @test isfile(logfile)
+                    @test h5read(logfile, "stage") == stage
+                    @test h5read(logfile, "status") == string.(status)
+                    @test h5read(logfile, "time_sent") == time_sent
+                    @test h5read(logfile, "time_received") == time_received
+                end
             end
             rmprocs(ws)
         end
