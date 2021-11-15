@@ -1,33 +1,36 @@
-"""
-    @addworkers([n::Int])
+insideslurm() = haskey(ENV, "SLURM_JOBID") || haskey(ENV, "SLURM_JOB_ID")
 
-Add workers and set them up to use `n` BLAS threads.
-"""
-macro addworkers()
-    n = something(
-        readenv("SLURM_CPUS_PER_TASK"),
-        readenv("OMP_NUM_THREADS"),
-        1,
-    )
-    return :(@addworkers($n))
-end
-
-macro addworkers(n::Int)
+function addworkers()
     if nprocs() != 1
         @warn "Workers already present; won't spawn any new ones."
-        ws = workers()
-    elseif !haskey(ENV, "SLURM_JOBID") && !haskey(ENV, "SLURM_JOB_ID")
-        @info "Adding workers locally"
-        ws = addprocs()
-    else
+        return workers()
+    elseif insideslurm()
         @info "Adding workers inside Slurm allocation"
-        ws = addprocs(SlurmManager())
+        return addprocs(SlurmManager())
+    else
+        @info "Adding workers locally"
+        return addprocs()
     end
-    quote
-        @everywhere $ws begin
-            using LinearAlgebra
-            BLAS.set_num_threads($n)
-            @info "Hello world!" myid() gethostname() BLAS.get_num_threads() Base.active_project()
-        end
+end
+
+function set_num_threads(n=1)
+    n1 = readenv("SLURM_CPUS_PER_TASK")
+    n2 = readenv("OMP_NUM_THREADS")
+    nt = something(n1, n2, n)
+    BLAS.set_num_threads(nt)
+end
+
+# Querying worker info is not trivial:
+# https://discourse.julialang.org/t/making-code-available-to-workers/
+function log_worker_info()
+    ws = workers()
+    query(f) = asyncmap(w -> remotecall_fetch(f, w), ws)
+    local hn, ap, bt
+    @sync begin
+        @async hn = query(gethostname)
+        @async ap = query(Base.active_project)
+        @async bt = query(BLAS.get_num_threads)
     end
+    groupby(col, groups) = Dict(g => col[findall(==(g), groups)] for g in unique(groups))
+    @info "Worker info" hostname=groupby(ws, hn) active_project=groupby(ws, ap) blas_threads=groupby(ws, bt)
 end

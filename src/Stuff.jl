@@ -3,6 +3,7 @@ module Stuff
 using Reexport
 @reexport using DrWatson
 @reexport using Distributed, HDF5, UnPack
+@reexport using LinearAlgebra
 @reexport using DifferentialRiccatiEquations, ParaReal
 
 using DifferentialRiccatiEquations: DRESolution
@@ -27,7 +28,7 @@ include("storage.jl")
 include("parareal.jl")
 
 export readenv
-export @addworkers
+export addworkers, set_num_threads, log_worker_info
 export storemeta, readdata
 
 end
