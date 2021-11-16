@@ -25,7 +25,7 @@ end
 
 include("addworkers.jl")
 include("storage.jl")
-include("parareal.jl")
+include("parareal_dre.jl")
 
 export readenv
 export addworkers, set_num_threads, log_worker_info
