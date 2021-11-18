@@ -13,14 +13,14 @@ end
 !@isdefined(oc) && (oc = something(readenv("MY_OCOARSE"), 1))
 !@isdefined(nf) && (nf = something(readenv("MY_NFINE"), 1))
 !@isdefined(of) && (of = something(readenv("MY_OFINE"), 1))
-ntasks = something(
+nstages = something(
     nprocs() > 1 ? nworkers() : nothing,
     readenv("SLURM_NTASKS"),
     Sys.CPU_THREADS,
 )
 algc = _alg(oc)
 algf = _alg(of)
-config = (; ntasks, nc, nf, oc, of)
+config = (; nstages, nc, nf, oc, of)
 @info "Configuration valid" config
 
 # Launch workers

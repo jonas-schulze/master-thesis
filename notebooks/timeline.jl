@@ -55,7 +55,6 @@ n_\text{stages} \cdot t_\text{transmit}.
 ```
 
 Note that the initial value has to be sent from the managing process to the first stage.
-(TODO: Find common name for `ntasks = nstages`.)
 Options to remedy this:
 
 1. Warm up all the stages by computing a "dummy" solution.
