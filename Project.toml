@@ -19,4 +19,5 @@ SlurmClusterManager = "c82cd089-7bf7-41d7-976b-6b5d413cbe0a"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
+DrWatson = "2.7.5"
 HDF5 = "0.15.7"

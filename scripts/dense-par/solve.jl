@@ -1,5 +1,11 @@
 using Stuff
 
+# The following package versions are redundant given the gitcommit inside
+# METADATA.h5, but will make it easier to identify different versions as
+# compared to the DrWatson backup strategy (suffix `_#1`, `_#2` etc).
+vpr = gitdescribe(srcdir(("ParaReal.jl")))
+vdre = gitdescribe(srcdir(("DifferentialRiccatiEquations.jl")))
+
 function _alg(order)
     order == 1 && return Ros1()
     order == 2 && return Ros2()
@@ -20,7 +26,7 @@ nstages = something(
 )
 algc = _alg(oc)
 algf = _alg(of)
-config = (; nstages, nc, nf, oc, of)
+config = (; nstages, nc, nf, oc, of, vpr, vdre)
 @info "Configuration valid" config
 
 # Launch workers
@@ -52,9 +58,9 @@ alg = ParaReal.algorithm(csolve, fsolve)
 runtime = @elapsed(sol = solve(prob, alg))
 @info "Solve took $runtime seconds"
 
-dir = datadir("dense-par", savename("rail371", config))
+dir = datadir("dense-par", savename("rail371", config, "dir"))
 @info "Storing solution at $dir"
-wsave(dir, sol)
+safesave(dir, sol)
 metadata = Dict{String,Any}()
 @pack! metadata = runtime
 @tag! metadata
