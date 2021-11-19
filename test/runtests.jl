@@ -1,4 +1,5 @@
 using DrWatson, Test
+using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
 using Distributed
 
