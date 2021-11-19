@@ -25,7 +25,9 @@ include(srcdir("storage.jl"))
             t = 1:9
             forward || (t = reverse(t))
             K = rand(9)
-            X = dense ? similar(K) : rand(2)
+            # Don't use `similar`, as that might yield `NaN` values.
+            # `NaN != NaN` will break things.
+            X = dense ? rand(length(K)) : rand(2)
             sol = DRESolution(X, K, t)
             mktempdir() do dir
                 store(dir, sol)
