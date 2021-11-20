@@ -17,10 +17,17 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
 export MKL_ENABLE_INSTRUCTIONS=AVX2
 export JULIA_PROJECT=@.
 
+# number of steps per stage:
 export MY_NCOARSE=1
 export MY_NFINE=10
+
+# order of solvers:
 export MY_OCOARSE=1
 export MY_OFINE=1
+
+# warm-up solvers:
+export MY_WCOARSE=${MY_WCOARSE:-true}
+export MY_WFINE=${MY_WFINE:-false}
 
 module load apps/julia/1.6
 

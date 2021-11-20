@@ -19,6 +19,8 @@ end
 !@isdefined(oc) && (oc = something(readenv("MY_OCOARSE"), 1))
 !@isdefined(nf) && (nf = something(readenv("MY_NFINE"), 1))
 !@isdefined(of) && (of = something(readenv("MY_OFINE"), 1))
+!@isdefined(wc) && (wc = something(readenv("MY_WCOARSE"), true))
+!@isdefined(wf) && (wf = something(readenv("MY_WFINE"), false))
 nstages = something(
     nprocs() > 1 ? nworkers() : nothing,
     readenv("SLURM_NTASKS"),
@@ -26,7 +28,7 @@ nstages = something(
 )
 algc = _alg(oc)
 algf = _alg(of)
-config = (; nstages, nc, nf, oc, of, vpr, vdre)
+config = (; nstages, nc, nf, oc, of, wc, wf, vpr, vdre)
 @info "Configuration valid" config
 
 # Launch workers
@@ -55,7 +57,7 @@ prob = ParaReal.problem(GDREProblem(Ed, A, B, C, X0, tspan))
 alg = ParaReal.algorithm(csolve, fsolve)
 
 @info "Launching solver"
-runtime = @elapsed(sol = solve(prob, alg))
+runtime = @elapsed(sol = solve(prob, alg; warmupc=wc, warmupf=wf))
 @info "Solve took $runtime seconds"
 
 dir = datadir("dense-par", savename("rail371", config, "dir"))
