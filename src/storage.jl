@@ -1,12 +1,42 @@
+_copyto(h5, key, val) = (h5[key] = val; nothing)
+_copyto(h5, key, val::HDF5.Dataset) = (h5[key] = read(val); nothing)
+
+function _copyto(h5, key, val::Union{Dict{String}, HDF5.File, HDF5.Group})
+    haskey(h5, key) || create_group(h5, key)
+    h6 = h5[key]
+    for (key′, val′) in pairs(val)
+        _copyto(h6, key′, val′)
+    end
+end
+
+function mergedata(dir, out)
+    isdir(dir) || error("input '$dir' is not a directory")
+    ispath(out) && error("output '$out' already exists")
+    # Take metadata as a canvas:
+    cp(joinpath(dir, "METADATA.h5"), out)
+    h5open(out, "r+") do o
+        # Copy the event log:
+        h5open(joinpath(dir, "EVENTLOG.h5")) do i
+            _copyto(o, "eventlog", i)
+        end
+        # Copy solution data:
+        for K in readdir(joinpath(dir, "K"); join=true)
+            h5open(K) do k
+                _copyto(o, "K", k)
+            end
+        end
+        for X in readdir(joinpath(dir, "X"); join=true)
+            h5open(X) do x
+                _copyto(o, "X", x)
+            end
+        end
+    end
+end
+
 function storemeta(dir, data::Dict{String})
     mkpath(dir)
-    _write(h5, key, val) = (h5[key] = val; nothing)
-    _write(h5, key, val::Dict{String}) = foreach(val) do (key′, val′)
-        haskey(h5, key) || create_group(h5, key)
-        _write(h5[key], key′, val′)
-    end
     h5open(joinpath(dir, "METADATA.h5"), "w") do h5
-        _write(h5, "/", data)
+        _copyto(h5, "/", data)
     end
 end
 
@@ -55,6 +85,7 @@ function DrWatson._wsave(dir, sol::DRESolution)
 end
 
 function readdata(dir, mat, t)
+    isfile(dir) && return h5read(dir, "$mat/t=$t")
     # Locate surrounding time span:
     fnames = String[]
     lo = Float64[]

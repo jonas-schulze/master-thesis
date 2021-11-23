@@ -118,6 +118,26 @@ include(srcdir("storage.jl"))
                     @test h5read(logfile, "time_sent") == time_sent
                     @test h5read(logfile, "time_received") == time_received
                 end
+                storemeta(dir, Dict("hello" => "world"))
+                @testset "merge decentral data" begin
+                    out = joinpath(dir, "MERGED.h5")
+                    mergedata(dir, out)
+                    @test isfile(out)
+                    h5open(out) do h5
+                        @test ["eventlog", "K", "X"] ⊆ keys(h5)
+                        @test sort(keys(h5["K"])) == sort(["t=$t" for t in t])
+                        @test sort(keys(h5["X"])) ⊇ sort(["t=$t" for t in extrema(t)])
+                        @test sort(keys(h5["eventlog"])) == ["stage", "status", "time_received", "time_sent"]
+                    end
+                    # Read data:
+                    @test readdata(out, "K", 2n) == [20.0n]
+                    @test readdata(out, "X", 1) == [1.0]
+                    # Event log:
+                    @test h5read(out, "eventlog/stage") == stage
+                    @test h5read(out, "eventlog/status") == string.(status)
+                    @test h5read(out, "eventlog/time_sent") == time_sent
+                    @test h5read(out, "eventlog/time_received") == time_received
+                end
             end
             rmprocs(ws)
         end
