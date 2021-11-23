@@ -5,6 +5,7 @@ function _copyto(h5, key, val::Union{Dict{String}, HDF5.File, HDF5.Group})
     haskey(h5, key) || create_group(h5, key)
     h6 = h5[key]
     for (key′, val′) in pairs(val)
+        haskey(h6, key′) && continue
         _copyto(h6, key′, val′)
     end
 end

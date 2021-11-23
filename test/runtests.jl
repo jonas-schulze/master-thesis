@@ -63,20 +63,22 @@ include(srcdir("storage.jl"))
 
         @testset "ParaReal" begin
             n = 3
-            t = 1:3n
-            forward || (t = reverse(t))
-            ts = partition(t, n)
+            tspan = forward ? (1, 2n+1) : (2n+1, 1)
+            tspans = [ParaReal.local_tspan(i, n, tspan) for i in 1:n]
+            _tstops((a, b)) = forward ? (a:b) : (a:-1:b)
+            tstops = _tstops(tspan)
             ws = addprocs(n)
             @everywhere ws begin
                 using Stuff
                 using DifferentialRiccatiEquations: DRESolution
             end
             # Build dummy local solutions
-            sols::Vector{Future} = asyncmap(ws, ts) do w, t
-                remotecall_wait(w, t) do t
-                    K = [[10.0x] for x in t]
-                    X = [[first(t)], [last(t)]]
-                    s = DRESolution(X, K, t)
+            sols::Vector{Future} = asyncmap(ws, tspans) do w, tspan
+                remotecall_wait(w, tspan) do tspan
+                    local tstops = _tstops(tspan)
+                    K = [[10.0x] for x in tstops]
+                    X = [[x] for x in tspan] # only local boundary values
+                    s = DRESolution(X, K, tstops)
                     return ParaReal.LocalSolution{DRESolution}(0, 0, s, :Success)
                 end
             end
@@ -98,15 +100,25 @@ include(srcdir("storage.jl"))
                 end
                 @testset "local solutions" begin
                     # All local solutions should be stored:
-                    files = map(ts) do t
-                        tmin, tmax = extrema(t)
+                    files = map(tspans) do tspan
+                        tmin, tmax = extrema(tspan)
                         "t=$tmin:$tmax.h5"
                     end
-                    sort!(files)
                     @test readdir(dir) == ["EVENTLOG.h5", "K", "X"]
-                    @test readdir(joinpath(dir, "K")) == files
-                    @test readdir(joinpath(dir, "X")) == files
+                    @test readdir(joinpath(dir, "K")) == sort(files)
+                    @test readdir(joinpath(dir, "X")) == sort(files)
                     # Read data:
+                    @testset "$file" for (file, tspan) in zip(files, tspans)
+                        local tstops = _tstops(tspan)
+                        k = joinpath(dir, "K", file)
+                        x = joinpath(dir, "X", file)
+                        h5open(k) do k5
+                            @test sort(keys(k5)) == sort(["t=$t" for t in tstops])
+                        end
+                        h5open(x) do x5
+                            @test sort(keys(x5)) == sort(["t=$t" for t in tspan])
+                        end
+                    end
                     @test readdata(dir, "K", 2n) == [20.0n]
                     @test readdata(dir, "X", 1) == [1.0]
                 end
@@ -125,8 +137,8 @@ include(srcdir("storage.jl"))
                     @test isfile(out)
                     h5open(out) do h5
                         @test ["eventlog", "K", "X"] ⊆ keys(h5)
-                        @test sort(keys(h5["K"])) == sort(["t=$t" for t in t])
-                        @test sort(keys(h5["X"])) ⊇ sort(["t=$t" for t in extrema(t)])
+                        @test sort(keys(h5["K"])) == sort(["t=$t" for t in 1:2n+1])
+                        @test sort(keys(h5["X"])) == sort(["t=$t" for t in 1:2:2n+1])
                         @test sort(keys(h5["eventlog"])) == ["stage", "status", "time_received", "time_sent"]
                     end
                     # Read data:
