@@ -16,7 +16,7 @@ function δ(f1::String, f2::String, path::String="/")
     catch
         rethrow()
     finally
-        @info "Closing file handles"
+        @debug "Closing file handles"
         close(h5)
         close(h6)
     end

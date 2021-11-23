@@ -190,4 +190,8 @@ Ed = collect(E) # d=dense
             end
         end
     end
+
+    @testset "relative error δ" begin
+        include("compare_test.jl")
+    end
 end
