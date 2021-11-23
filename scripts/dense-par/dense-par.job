@@ -18,16 +18,16 @@ export MKL_ENABLE_INSTRUCTIONS=AVX2
 export JULIA_PROJECT=@.
 
 # number of steps per stage:
-export MY_NCOARSE=1
-export MY_NFINE=10
+export MY_NC=1
+export MY_NF=10
 
 # order of solvers:
-export MY_OCOARSE=1
-export MY_OFINE=1
+export MY_OC=${MY_OC:-1}
+export MY_OF=${MY_OF:-1}
 
 # warm-up solvers:
-export MY_WCOARSE=${MY_WCOARSE:-true}
-export MY_WFINE=${MY_WFINE:-false}
+export MY_WC=${MY_WC:-true}
+export MY_WF=${MY_WF:-false}
 
 module load apps/julia/1.6
 

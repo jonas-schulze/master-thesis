@@ -9,12 +9,12 @@ function _alg(order)
 end
 
 # Read and validate configuration
-!@isdefined(nc) && (nc = something(readenv("MY_NCOARSE"), 1))
-!@isdefined(oc) && (oc = something(readenv("MY_OCOARSE"), 1))
-!@isdefined(nf) && (nf = something(readenv("MY_NFINE"), 1))
-!@isdefined(of) && (of = something(readenv("MY_OFINE"), 1))
-!@isdefined(wc) && (wc = something(readenv("MY_WCOARSE"), true))
-!@isdefined(wf) && (wf = something(readenv("MY_WFINE"), false))
+!@isdefined(nc) && (nc = something(readenv("MY_NC"), 1))
+!@isdefined(oc) && (oc = something(readenv("MY_OC"), 1))
+!@isdefined(nf) && (nf = something(readenv("MY_NF"), 1))
+!@isdefined(of) && (of = something(readenv("MY_OF"), 1))
+!@isdefined(wc) && (wc = something(readenv("MY_WC"), true))
+!@isdefined(wf) && (wf = something(readenv("MY_WF"), false))
 nstages = something(
     nprocs() > 1 ? nworkers() : nothing,
     readenv("SLURM_NTASKS"),
