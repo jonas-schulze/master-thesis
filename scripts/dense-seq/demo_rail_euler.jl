@@ -37,13 +37,14 @@ sol = solve(prob, alg; dt=-dt, save_state=true)
 mkpath(datadir("dense-seq"))
 container = datadir("dense-seq", savename("rail371", (; dt, order), "h5"))
 recursively_clear_path(container)
+_int = parse(Bool, get(ENV, "MY_INTS", "true"))
 h5open(container, "w") do h5
     h5["gitcommit"] = gitdescribe()
     h5["script"] = @__FILE__
     h5["SLURM_JOB_ID"] = get(ENV, "SLURM_JOB_ID", "")
 
     for (i, _t) in enumerate(sol.t)
-        t = Int(_t)
+        t = _int ? Int(_t) : _t
         K = sol.K[i]
         X = sol.X[i]
         h5["K/t=$t"] = K

@@ -3,8 +3,8 @@
 #SBATCH -o %x-%j.out
 #SBATCH -e %x-%j.err
 #
-#SBATCH -n 15
-#SBATCH -c 4
+#SBATCH -n 45
+#SBATCH -c 1
 #
 #SBATCH --time=00-1:00:00
 #SBATCH --partition=short
