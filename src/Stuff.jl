@@ -24,10 +24,12 @@ function readenv(var::String) where {T}
 end
 
 include("addworkers.jl")
+include("compare.jl")
 include("storage.jl")
 include("parareal_dre.jl")
 
 export readenv
+export δ
 export addworkers, set_num_threads, log_worker_info
 export storemeta, readdata, mergedata
 

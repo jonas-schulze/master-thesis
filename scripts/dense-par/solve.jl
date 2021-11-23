@@ -1,11 +1,5 @@
 using Stuff
 
-# The following package versions are redundant given the gitcommit inside
-# METADATA.h5, but will make it easier to identify different versions as
-# compared to the DrWatson backup strategy (suffix `_#1`, `_#2` etc).
-vpr = gitdescribe(srcdir(("ParaReal.jl")))
-vdre = gitdescribe(srcdir(("DifferentialRiccatiEquations.jl")))
-
 function _alg(order)
     order == 1 && return Ros1()
     order == 2 && return Ros2()
@@ -15,12 +9,12 @@ function _alg(order)
 end
 
 # Read and validate configuration
-!@isdefined(nc) && (nc = something(readenv("MY_NCOARSE"), 1))
-!@isdefined(oc) && (oc = something(readenv("MY_OCOARSE"), 1))
-!@isdefined(nf) && (nf = something(readenv("MY_NFINE"), 1))
-!@isdefined(of) && (of = something(readenv("MY_OFINE"), 1))
-!@isdefined(wc) && (wc = something(readenv("MY_WCOARSE"), true))
-!@isdefined(wf) && (wf = something(readenv("MY_WFINE"), false))
+!@isdefined(nc) && (nc = something(readenv("MY_NC"), 1))
+!@isdefined(oc) && (oc = something(readenv("MY_OC"), 1))
+!@isdefined(nf) && (nf = something(readenv("MY_NF"), 1))
+!@isdefined(of) && (of = something(readenv("MY_OF"), 1))
+!@isdefined(wc) && (wc = something(readenv("MY_WC"), true))
+!@isdefined(wf) && (wf = something(readenv("MY_WF"), false))
 nstages = something(
     nprocs() > 1 ? nworkers() : nothing,
     readenv("SLURM_NTASKS"),
@@ -28,7 +22,7 @@ nstages = something(
 )
 algc = _alg(oc)
 algf = _alg(of)
-config = (; nstages, nc, nf, oc, of, wc, wf, vpr, vdre)
+config = (; nstages, nc, nf, oc, of, wc, wf)
 @info "Configuration valid" config
 
 # Launch workers

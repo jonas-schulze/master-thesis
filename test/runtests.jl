@@ -2,8 +2,11 @@ using Stuff, Test
 using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
 using ParaReal: Event
+using MAT
 
-include(srcdir("storage.jl"))
+P = matread(datadir("Rail371.mat"))
+@unpack E, A, B, C, X0 = P
+Ed = collect(E) # d=dense
 
 @testset "Playground" begin
     @testset "metadata" begin
@@ -21,33 +24,35 @@ include(srcdir("storage.jl"))
     end
 
     @testset "$(forward ? "storage" : reverse("storage"))" for forward in (true, false)
-        @testset "$(dense ? "dense DRE" : "sparse DRE")" for dense in (true, false)
-            t = 1:9
-            forward || (t = reverse(t))
-            K = rand(9)
-            # Don't use `similar`, as that might yield `NaN` values.
-            # `NaN != NaN` will break things.
-            X = dense ? rand(length(K)) : rand(2)
-            sol = DRESolution(X, K, t)
+        tspan = forward ? (0., 4500.) : (4500., 0.)
+        prob = GDREProblem(Ed, A, B, C, X0, tspan)
+
+        @testset "DRE (save_state=$save_state)" for save_state in (true, false)
+            dt = forward ? 1500.0 : -1500.0
+            sol = solve(prob, Ros1(); dt=dt, save_state=save_state)
             mktempdir() do dir
                 wsave(dir, sol)
                 # Don't create spurious files:
                 @test readdir(dir) == ["K", "X"]
-                Kmat = joinpath(dir, "K", "t=1:9.h5")
-                Xmat = joinpath(dir, "X", "t=1:9.h5")
-                @test readdir(joinpath(dir, "K"), join=true) == [Kmat]
-                @test readdir(joinpath(dir, "X"), join=true) == [Xmat]
+                datafile = "t=0.0:4500.0.h5"
+                @test readdir(joinpath(dir, "K")) == [datafile]
+                @test readdir(joinpath(dir, "X")) == [datafile]
                 # Data integrity of K:
+                K = sol.K
+                Kmat = joinpath(dir, "K", datafile)
                 @test isfile(Kmat)
-                tstops = ["t=$t" for t in t]
+                tstops = ["t=$t" for t in 0.0:1500:4500.0]
+                forward || reverse!(tstops)
                 h5open(Kmat) do f
                     @test sort(keys(f)) == sort(tstops)
                     @test [read(f, key) for key in tstops] == K
                 end
                 # Data integrity of X:
+                X = sol.X
+                Xmat = joinpath(dir, "X", datafile)
                 @test isfile(Xmat)
-                if !dense
-                    tstops = ["t=1", "t=9"]
+                if !save_state
+                    tstops = ["t=0.0", "t=4500.0"]
                     forward || reverse!(tstops)
                 end
                 h5open(Xmat) do f
@@ -55,46 +60,54 @@ include(srcdir("storage.jl"))
                     @test [read(f, key) for key in tstops] == X
                 end
                 # Read data:
-                K′ = readdata.(dir, "K", 1:9)
+                K′ = readdata.(dir, "K", 0.0:1500.0:4500.0)
                 forward || reverse!(K′)
                 @test K′ == K
             end
         end
 
         @testset "ParaReal" begin
-            n = 3
-            tspan = forward ? (1, 2n+1) : (2n+1, 1)
-            tspans = [ParaReal.local_tspan(i, n, tspan) for i in 1:n]
-            _tstops((a, b)) = forward ? (a:b) : (a:-1:b)
-            tstops = _tstops(tspan)
-            ws = addprocs(n)
-            @everywhere ws begin
+            ws = if nworkers() >= 3 && isinteractive()
+                @info "Reusing existing workers"
+                workers()[1:3]
+            else
+                addprocs(3)
+            end
+            @everywhere [1; ws] begin
                 using Stuff
-                using DifferentialRiccatiEquations: DRESolution
-            end
-            # Build dummy local solutions
-            sols::Vector{Future} = asyncmap(ws, tspans) do w, tspan
-                remotecall_wait(w, tspan) do tspan
-                    local tstops = _tstops(tspan)
-                    K = [[10.0x] for x in tstops]
-                    X = [[x] for x in tspan] # only local boundary values
-                    s = DRESolution(X, K, tstops)
-                    return ParaReal.LocalSolution{DRESolution}(0, 0, s, :Success)
+
+                function _dt(prob, nsteps)
+                    t0, tf = prob.tspan
+                    (tf - t0) / nsteps
                 end
+
+                csolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 1))
+                fsolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 3))
             end
-            # Build dummy event log
-            stage = [1, 2, 1, 2]
-            status = [:Initialized, :Waiting, :Stub, :Mock]
-            time_sent = sort(rand(4))
-            time_received = time_sent .+ randn()/100
-            eventlog = map(Event, stage, status, time_sent, time_received)
-            # Build dummy global solution
-            sol = ParaReal.GlobalSolution(sols, eventlog)
+            alg = ParaReal.algorithm(csolve, fsolve)
+            sol = solve(ParaReal.problem(prob), alg; workers=ws)
+
+            # Individual solutions should not be fetched locally:
+            @testset "no local data before save" begin
+                sols = sol.sols
+                @test all(isready, sols)
+                @test all(rr -> rr.v === nothing, sols)
+            end
+
+            tspans = [(0., 1500.), (1500., 3000.), (3000., 4500.)]
+            tstops = [t0:500:tf for (t0, tf) in tspans]
+            if !forward
+                tspans = map(reverse, tspans)
+                tstops = map(reverse, tstops)
+                reverse!(tspans)
+                reverse!(tstops)
+            end
+
             mktempdir() do dir
                 wsave(dir, sol)
                 # Individual solutions should still not be fetched locally:
-                @testset "no data transfer between processes" begin
-                    @test sol.sols === sols
+                @testset "no local data after save" begin
+                    sols = sol.sols
                     @test all(isready, sols)
                     @test all(rr -> rr.v === nothing, sols)
                 end
@@ -108,27 +121,41 @@ include(srcdir("storage.jl"))
                     @test readdir(joinpath(dir, "K")) == sort(files)
                     @test readdir(joinpath(dir, "X")) == sort(files)
                     # Read data:
-                    @testset "$file" for (file, tspan) in zip(files, tspans)
-                        local tstops = _tstops(tspan)
+                    @testset "$file" for (file, tspan, ts) in zip(files, tspans, tstops)
                         k = joinpath(dir, "K", file)
                         x = joinpath(dir, "X", file)
                         h5open(k) do k5
-                            @test sort(keys(k5)) == sort(["t=$t" for t in tstops])
+                            @test sort(keys(k5)) == sort(["t=$t" for t in ts])
                         end
                         h5open(x) do x5
                             @test sort(keys(x5)) == sort(["t=$t" for t in tspan])
                         end
                     end
-                    @test readdata(dir, "K", 2n) == [20.0n]
-                    @test readdata(dir, "X", 1) == [1.0]
+                    @testset "read data (n=$n)" for n in 1:3
+                        s::DRESolution = fetch(sol.sols[n]).sol
+                        ts = tstops[n]
+                        t0, tf = tspans[n]
+                        X0, Xf = s.X
+                        @test readdata(dir, "X", t0) == s.X[1]
+                        @test readdata(dir, "X", tf) == s.X[2]
+                        @testset "t=$t" for (t, K) in zip(ts, s.K)
+                            @test readdata(dir, "K", t) == K
+                        end
+                    end
                 end
                 @testset "event log" begin
                     logfile = joinpath(dir, "EVENTLOG.h5")
                     @test isfile(logfile)
-                    @test h5read(logfile, "stage") == stage
-                    @test h5read(logfile, "status") == string.(status)
-                    @test h5read(logfile, "time_sent") == time_sent
-                    @test h5read(logfile, "time_received") == time_received
+                    h5open(logfile) do h5
+                        @test haskey(h5, "stage")
+                        @test haskey(h5, "status")
+                        @test haskey(h5, "time_received")
+                        @test haskey(h5, "time_sent")
+                    end
+                    global stage = h5read(logfile, "stage")
+                    global status = h5read(logfile, "status")
+                    global time_sent = h5read(logfile, "time_sent")
+                    global time_received = h5read(logfile, "time_received")
                 end
                 storemeta(dir, Dict("hello" => "world"))
                 @testset "merge decentral data" begin
@@ -137,21 +164,34 @@ include(srcdir("storage.jl"))
                     @test isfile(out)
                     h5open(out) do h5
                         @test ["eventlog", "K", "X"] ⊆ keys(h5)
-                        @test sort(keys(h5["K"])) == sort(["t=$t" for t in 1:2n+1])
-                        @test sort(keys(h5["X"])) == sort(["t=$t" for t in 1:2:2n+1])
+                        @test sort(keys(h5["K"])) == sort(["t=$t" for t in 0.0:500.0:4500.0])
+                        @test sort(keys(h5["X"])) == sort(["t=$t" for t in 0.0:1500.0:4500.0])
                         @test sort(keys(h5["eventlog"])) == ["stage", "status", "time_received", "time_sent"]
                     end
                     # Read data:
-                    @test readdata(out, "K", 2n) == [20.0n]
-                    @test readdata(out, "X", 1) == [1.0]
-                    # Event log:
-                    @test h5read(out, "eventlog/stage") == stage
-                    @test h5read(out, "eventlog/status") == string.(status)
-                    @test h5read(out, "eventlog/time_sent") == time_sent
-                    @test h5read(out, "eventlog/time_received") == time_received
+                    @testset "read data (n=$n)" for n in 1:3
+                        s::DRESolution = fetch(sol.sols[n]).sol
+                        ts = tstops[n]
+                        t0, tf = tspans[n]
+                        X0, Xf = s.X
+                        @test readdata(out, "X", t0) == s.X[1]
+                        @test readdata(out, "X", tf) == s.X[2]
+                        @testset "t=$t" for (t, K) in zip(ts, s.K)
+                            @test readdata(out, "K", t) == K
+                        end
+                    end
+                    @testset "eventlog" begin
+                        @test h5read(out, "eventlog/stage") == stage
+                        @test h5read(out, "eventlog/status") == string.(status)
+                        @test h5read(out, "eventlog/time_sent") == time_sent
+                        @test h5read(out, "eventlog/time_received") == time_received
+                    end
                 end
             end
-            rmprocs(ws)
         end
+    end
+
+    @testset "relative error δ" begin
+        include("compare_test.jl")
     end
 end

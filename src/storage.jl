@@ -14,11 +14,15 @@ function mergedata(dir, out)
     isdir(dir) || error("input '$dir' is not a directory")
     ispath(out) && error("output '$out' already exists")
     # Take metadata as a canvas:
-    cp(joinpath(dir, "METADATA.h5"), out)
-    h5open(out, "r+") do o
+    metadata = joinpath(dir, "METADATA.h5")
+    isfile(metadata) && cp(metadata, out)
+    h5open(out, "cw") do o
         # Copy the event log:
-        h5open(joinpath(dir, "EVENTLOG.h5")) do i
-            _copyto(o, "eventlog", i)
+        eventlog = joinpath(dir, "EVENTLOG.h5")
+        if isfile(eventlog)
+            h5open(eventlog) do l
+                _copyto(o, "eventlog", l)
+            end
         end
         # Copy solution data:
         for K in readdir(joinpath(dir, "K"); join=true)
