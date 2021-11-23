@@ -29,6 +29,6 @@ include("parareal_dre.jl")
 
 export readenv
 export addworkers, set_num_threads, log_worker_info
-export storemeta, readdata
+export storemeta, readdata, mergedata
 
 end
