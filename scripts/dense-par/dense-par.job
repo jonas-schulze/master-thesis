@@ -18,8 +18,8 @@ export MKL_ENABLE_INSTRUCTIONS=AVX2
 export JULIA_PROJECT=@.
 
 # number of steps per stage:
-export MY_NC=1
-export MY_NF=10
+export MY_NC=${MY_NC:-1}
+export MY_NF=${MY_NF:-10}
 
 # order of solvers:
 export MY_OC=${MY_OC:-1}
