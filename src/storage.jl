@@ -52,13 +52,6 @@ function DrWatson._wsave(dir, sol::ParaReal.GlobalSolution)
             DrWatson._wsave(dir, s.sol)
         end
     end
-    @unpack eventlog = sol
-    h5open(joinpath(dir, "EVENTLOG.h5"), "w") do h5
-        h5["stage"] = map(e -> e.stage, eventlog)
-        h5["status"] = map(e -> string(e.status), eventlog)
-        h5["time_sent"] = map(e -> e.time_sent, eventlog)
-        h5["time_received"] = map(e -> e.time_received, eventlog)
-    end
 end
 
 function DrWatson._wsave(dir, sol::DRESolution)

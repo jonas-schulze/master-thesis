@@ -579,6 +579,12 @@ git-tree-sha1 = "8076680b162ada2a031f707ac7b4953e30667a37"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.2"
 
+[[JSON3]]
+deps = ["Dates", "Mmap", "Parsers", "StructTypes", "UUIDs"]
+git-tree-sha1 = "7d58534ffb62cd947950b3aa9b993e63307a6125"
+uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+version = "1.9.2"
+
 [[KernelDensity]]
 deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
 git-tree-sha1 = "591e8dc09ad18386189610acafb970032c519707"
@@ -680,6 +686,18 @@ version = "0.3.5"
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
+[[LoggingExtras]]
+deps = ["Dates", "Logging"]
+git-tree-sha1 = "dfeda1c1130990428720de0024d4516b1902ce98"
+uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+version = "0.4.7"
+
+[[LoggingFormats]]
+deps = ["JSON3", "Logging", "StructTypes"]
+git-tree-sha1 = "7f45c62b94cf97217f063744e470c21c0b35f2d5"
+uuid = "98105f81-4425-4516-93fd-1664fb551ab6"
+version = "1.1.0"
+
 [[Lz4_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "5d494bc6e85c4c9b626ee0cab05daa4085486ab1"
@@ -706,9 +724,9 @@ version = "0.19.1"
 
 [[MPICH_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "09864c823da1a606dbc151534c1a134fd5506170"
+git-tree-sha1 = "480a8be51647c9dec19ff2211e26c9f30787840b"
 uuid = "7cb0a576-ebde-5e09-9194-50597f1243b4"
-version = "3.4.2+1"
+version = "3.4.2+2"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -766,9 +784,9 @@ uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 
 [[MicrosoftMPI_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "bb2fe65544e6efd883bb2060088df7dfb7273b41"
+git-tree-sha1 = "a16aa086d335ed7e0170c5265247db29172af2f9"
 uuid = "9237b28f-5490-5468-be7b-bb81f5f5e6cf"
-version = "10.1.3+1"
+version = "10.1.3+2"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -843,9 +861,9 @@ uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
 
 [[OpenMPI_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "872077914c8a8cab9ea1430f338ae6b59258577d"
+git-tree-sha1 = "04f95bf6987a4a29253427b4c59e30fd94fbc16f"
 uuid = "fe0851c0-eecd-5654-98d4-656369965a5c"
-version = "4.1.1+3"
+version = "4.1.1+4"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -907,10 +925,10 @@ uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.47.0+0"
 
 [[ParaReal]]
-deps = ["CommonSolve", "Distributed", "LinearAlgebra", "Requires", "UnPack"]
+deps = ["CommonSolve", "Distributed", "LinearAlgebra", "Logging", "LoggingExtras", "Requires", "UnPack"]
 path = "src/ParaReal.jl"
 uuid = "d8ab9f86-dde6-11e9-3216-afd74457b932"
-version = "0.2.0"
+version = "0.2.1"
 
 [[Parsers]]
 deps = ["Dates"]
@@ -1142,6 +1160,12 @@ deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
 git-tree-sha1 = "2ce41e0d042c60ecd131e9fb7154a3bfadbf50d3"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.3"
+
+[[StructTypes]]
+deps = ["Dates", "UUIDs"]
+git-tree-sha1 = "d24a825a95a6d98c385001212dc9020d609f2d4f"
+uuid = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
+version = "1.8.1"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
