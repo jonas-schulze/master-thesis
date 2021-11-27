@@ -1,4 +1,5 @@
 using Stuff
+using ParaReal: TimingFileObserver
 
 function _alg(order)
     order == 1 && return Ros1()
@@ -50,8 +51,13 @@ tspan = (4500., 0.) # backwards in time
 prob = ParaReal.problem(GDREProblem(Ed, A, B, C, X0, tspan))
 alg = ParaReal.algorithm(csolve, fsolve)
 
+# Set-up logs
+lconfig = (; config..., jobid=get(ENV, "SLURM_JOBID", "0"))
+ldir = datadir("logfiles", savename("rail371", lconfig))
+o = TimingFileObserver(LoggingFormats.LogFmt(), Base.time, ldir)
+
 @info "Launching solver"
-runtime = @elapsed(sol = solve(prob, alg; warmupc=wc, warmupf=wf))
+runtime = @elapsed(sol = solve(prob, alg; logger=o, warmupc=wc, warmupf=wf))
 @info "Solve took $runtime seconds"
 
 dir = datadir("dense-par", savename("rail371", config, "dir"))

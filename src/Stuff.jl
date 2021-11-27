@@ -4,6 +4,7 @@ using Reexport
 @reexport using DrWatson
 @reexport using Distributed, HDF5, UnPack
 @reexport using LinearAlgebra
+@reexport using LoggingFormats
 @reexport using DifferentialRiccatiEquations, ParaReal
 
 using DifferentialRiccatiEquations: DRESolution
