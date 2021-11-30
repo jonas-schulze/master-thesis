@@ -26,11 +26,14 @@ end
 
 include("addworkers.jl")
 include("compare.jl")
+include("logging.jl")
+include("eventlog.jl")
 include("storage.jl")
 include("parareal_dre.jl")
 
 export readenv
 export δ
+export logdir, timeline, load_eventlog
 export addworkers, set_num_threads, log_worker_info
 export storemeta, readdata, mergedata
 
