@@ -109,14 +109,38 @@ Comparing \cite[Equation (15)]{MPIMD11-06} and \eqref{eq:mpi11:15},
   \item
     the right-hand side of the first stage uses $t_{k+1}$ instead of $t_k$,
   \item
-    the second stage only differs in notation,
+    the second stage has wrong coefficients for all occurrences of $\bar{K}_1$,
   \item
     the update equation lacks a factor of $\frac{1}{\gamma}$ for the stage values.
     This could also be interpreted as implicitly fixing $\gamma := 1$.
+    \label{item:implicit gamma=1}
 \end{enumerate}
+These inconsistent coefficients carry on to \cite[Equation (16)]{MPIMD11-06},
+which would read
+\begin{multline}
+  -F(t_{k+1}, X_k) - \tfrac{1}{\gamma} K_1 + \gamma h F_{t_k} + h^2 K_1 R_{k+1} K_1 + 2K_1 \\
+  -h \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T K_1
+  -K_1 \big( A_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big) h
+\end{multline}
+or, equivalently, in terms of $\bar{K_1}$,
+\begin{multline}
+  -F(t_{k+1}, X_k) - \tfrac{1}{h\gamma^2} \bar{K}_1 + \gamma h F_{t_k} + \tfrac{1}{\gamma^2} \bar{K}_1 R_{k+1} \bar{K}_1 + \tfrac{2}{\gamma h}\bar{K}_1 \\
+  -\tfrac{1}{\gamma} \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T \bar{K}_1
+  -\bar{K}_1 \big( A_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big) \tfrac{1}{\gamma}
+\end{multline}
+having different signs for $K_1$ and $K_1R_{k+1}K_1$,
+as well as missing factors of $h$ for the $K_1$-Sylvester coefficients, $(h\bar{B}_k) K_1 + K_1 (h\bar{A}_k)$.
 
+In the autonomous setting, ...
 
 \section{Following \cite{MPIMD12-13}}
+
+Essentially, all mistakes or differences already mentioned, are visible as well.
+The first stage equation \cite[Equation (3.14)]{MPIMD12-13} yields to a scaled $\bar{K}_1 = \frac{1}{\gamma h}K_1$, as in \cite{MPIMD11-06}.
+Given Equation (3.16), the quadratic term in (3.15) has the wrong sign, as in \cite{Mena2007}.
+
+Even if setting $\gamma=1$ as claimed in \cite[17]{MPIMD12-13} would resolve some issues,
+\cite{Lang2015} uses $\gamma = 1 + 1/\sqrt{2}$.
 
 \section{Following \cite{Lang2015}}
 
