@@ -1,6 +1,6 @@
 [submodule "src/DifferentialRiccatiEquations.jl"]
 	path = src/DifferentialRiccatiEquations.jl
-	url = https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl
+	url = ../DifferentialRiccatiEquations.jl
 [submodule "src/ParaReal.jl"]
 	path = src/ParaReal.jl
-	url = https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl
+	url = ../ParaReal.jl
