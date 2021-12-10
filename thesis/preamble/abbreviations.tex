@@ -1,0 +1,8 @@
+% https://tex.stackexchange.com/questions/22561/what-is-the-proper-use-of-i-e-backslash-at?noredirect=1&lq=1
+\makeatletter % no idea why this is needed. \@ifnextchar doesn't work without it.
+\newcommand\cf{cf.\@\xspace} % confer
+\newcommand\eg{e.g.\@\xspace} % exempli gratia
+\newcommand\etc{etc\@ifnextchar.{}{.\@\xspace}} % et cetera
+\newcommand\ie{i.e.\@\xspace} % id est
+\newcommand\wrt{w.r.t.\@\xspace} % with respect to
+\makeatother
