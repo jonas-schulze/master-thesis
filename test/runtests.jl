@@ -1,7 +1,6 @@
 using Stuff, Test
 using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
-using ParaReal: Event
 using MAT
 
 P = matread(datadir("Rail371.mat"))
@@ -117,7 +116,7 @@ Ed = collect(E) # d=dense
                         tmin, tmax = extrema(tspan)
                         "t=$tmin:$tmax.h5"
                     end
-                    @test readdir(dir) == ["EVENTLOG.h5", "K", "X"]
+                    @test readdir(dir) == ["K", "X"]
                     @test readdir(joinpath(dir, "K")) == sort(files)
                     @test readdir(joinpath(dir, "X")) == sort(files)
                     # Read data:
@@ -143,30 +142,15 @@ Ed = collect(E) # d=dense
                         end
                     end
                 end
-                @testset "event log" begin
-                    logfile = joinpath(dir, "EVENTLOG.h5")
-                    @test isfile(logfile)
-                    h5open(logfile) do h5
-                        @test haskey(h5, "stage")
-                        @test haskey(h5, "status")
-                        @test haskey(h5, "time_received")
-                        @test haskey(h5, "time_sent")
-                    end
-                    global stage = h5read(logfile, "stage")
-                    global status = h5read(logfile, "status")
-                    global time_sent = h5read(logfile, "time_sent")
-                    global time_received = h5read(logfile, "time_received")
-                end
                 storemeta(dir, Dict("hello" => "world"))
                 @testset "merge decentral data" begin
                     out = joinpath(dir, "MERGED.h5")
                     mergedata(dir, out)
                     @test isfile(out)
                     h5open(out) do h5
-                        @test ["eventlog", "K", "X"] ⊆ keys(h5)
+                        @test ["K", "X"] ⊆ keys(h5)
                         @test sort(keys(h5["K"])) == sort(["t=$t" for t in 0.0:500.0:4500.0])
                         @test sort(keys(h5["X"])) == sort(["t=$t" for t in 0.0:1500.0:4500.0])
-                        @test sort(keys(h5["eventlog"])) == ["stage", "status", "time_received", "time_sent"]
                     end
                     # Read data:
                     @testset "read data (n=$n)" for n in 1:3
@@ -179,12 +163,6 @@ Ed = collect(E) # d=dense
                         @testset "t=$t" for (t, K) in zip(ts, s.K)
                             @test readdata(out, "K", t) == K
                         end
-                    end
-                    @testset "eventlog" begin
-                        @test h5read(out, "eventlog/stage") == stage
-                        @test h5read(out, "eventlog/status") == string.(status)
-                        @test h5read(out, "eventlog/time_sent") == time_sent
-                        @test h5read(out, "eventlog/time_received") == time_received
                     end
                 end
             end
