@@ -28,24 +28,81 @@ where
 \end{align}
 \end{subequations}
 adapted from \cite[Equations (4.37) to (4.39)]{Mena2007}.
+Rewrite the Riccati operator of a shifted argument as
+\begin{subequations}
+\begin{align}
+  F(t_{k+1}, X_k + hK_1)
+  &= \begin{multlined}[t]
+    F(t_{k+1}, X_k) + h K_1 A_{k+1} + h B_{k+1} K_1 \\
+    - h K_1 R_{k+1} X_k - h X_k R_{k+1} K_1 - h^2 K_1 R_{k+1} K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    F(t_{k+1}, X_k) - h^2 K_1 R_{k+1} K_1 \\
+    + h K_1 (A_{k+1} - R_{k+1} X_k) + h(B^T_{k+1} - R_{k+1} X_k)^T K_1
+  \end{multlined}
+\end{align}
+\end{subequations}
+and use that to write the second stage:
+\begin{subequations}\label{eq:mena:stage2:rhs}
+\begin{align}
+  \MoveEqLeft
+  -F(t_{k+1}, X_k + hK_1) + 2K_1 + h\gamma F_{t_k}
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R_{k+1} K_1 + 2K_1 + h\gamma F_{t_k}\\
+    - h K_1 (A_{k+1} - R_{k+1} X_k) - h(B_{k+1}^T - R_{k+1} X_k)^T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R_{k+1} K_1 + h\gamma F_{t_k}\\
+    - K_1 \big(h(A_{k+1} - R_{k+1} X_k) - I\big)
+    - \big(h(B_{k+1}^T - R_{k+1} X_k) - I\big)^T K_1
+  \end{multlined}
+\end{align}
+\end{subequations}
+
 Now, we restrict ourselves to autonomous differential Riccati equations,
 \ie $Q, A$, \etc are constant and we neglect their subscripts.
-Following \cite[Equation (4.40)]{Mena2007}, we can reformulate this method to
+Therefore, $F_{t_k}\equiv 0$ and the right-hand side of the second stage reads
+\begin{subequations}
+\begin{align}
+  \MoveEqLeft
+  -F(t_{k+1}, X_k + hK_1) + 2K_1
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R K_1 \\
+    - K_1
+    \underbrace{
+      \big(h(A - R X_k) - I\big)
+    }_{\frac{1}{\gamma} \hat{A}_k - (1-\frac{1}{2\gamma}) I}
+    - \underbrace{
+      \big(h(B^T - R X_k) - I\big)^T
+    }_{\frac{1}{\gamma} \hat{B}_k - (1-\frac{1}{2\gamma}) I}
+    K_1
+  \end{multlined} \\
+  &=
+  -F(t_{k+1}, X_k) + h^2 K_1 R K_1
+  -\tfrac{1}{\gamma}
+  \underbrace{
+    (K_1 \hat{A}_k + \hat{B}_k K_1)
+  }_{-F(t_k,X_k)}
+  + (2-\tfrac{1}{\gamma}) K_1 \\
+  &= -\big(1-\tfrac{1}{\gamma}\big) F(t_k, X_k)
+  + h^2 K_1 R K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{align}
+\end{subequations}
+using the first stage equation and $F(t_{k+1}, \cdot) = F(t_k,\cdot)$.
+For arbitrary $\gamma$, this allows a decomposition according to:
 \begin{subequations}
 \begin{align}
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
-  \hat{B}_k K_{21} + K_{21} \hat{A}_k &= \begin{multlined}[t]
-    -\big( h(B^T - RX_k) - I \big)^T K_1 \\
-    - K_1 \big( h(A - RX_k) - I \big) + h^2 K_1RK_1
-    \label{eq:mena:err:quadratic}
-  \end{multlined} \\
-  K_2 &= K_1 + K_{21}
+  \hat{B}_k K_{21} + K_{21} \hat{A}_k &= h^2 K_1RK_1 + (2-\tfrac{1}{\gamma}) K_1 \\
+  K_2 &= (1-\tfrac{1}{\gamma}) K_1 + K_{21}
 \end{align}
 \end{subequations}
-
-If in addition we choose $\gamma=1$, then the method further simplifies to:
-\begin{subequations}
+For $\gamma=1$ the method further simplifies to:
+\begin{subequations}\label{eq:mena:gamma=1}
 \begin{align}
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
@@ -55,12 +112,11 @@ If in addition we choose $\gamma=1$, then the method further simplifies to:
 \end{subequations}
 
 Note that the sign of $h^2 K_1RK_1$ in
-\eqref{eq:mena:err:quadratic} and \eqref{eq:mena:err:linear}
-differs from \cite[Equations (4.43) and (4.47)]{Mena2007}.
-The same holds for the sign of $K_1$
-in \eqref{eq:mena:err:linear},
-as compared to \cite[Equation (4.47)]{Mena2007}.
-These might be wrong in the original.
+\eqref{eq:mena:stage2:rhs} through \eqref{eq:mena:gamma=1}
+matches \cite[Equation~(4.40)]{Mena2007} but not \cite[Equations (4.43) and (4.47)]{Mena2007}.
+Furthermore, the sign of $K_1$ in \eqref{eq:mena:err:linear} does not match \cite[Equation~(4.47)]{Mena2007}.
+In \cite[Algorithm 4.3.1]{Mena2007}, however, the signs match the present derivation.
+Thus, the signs in the equations mentioned of \cite{Mena2007} are (very likely) wrong.
 
 Unrelated but remaining issues:
 \begin{enumerate}
@@ -122,7 +178,7 @@ which would read
   -h \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T K_1
   -K_1 \big( A_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big) h
 \end{multline}
-or, equivalently, in terms of $\bar{K_1}$,
+or, equivalently, in terms of $\bar{K}_1$,
 \begin{multline}
   -F(t_{k+1}, X_k) - \tfrac{1}{h\gamma^2} \bar{K}_1 + \gamma h F_{t_k} + \tfrac{1}{\gamma^2} \bar{K}_1 R_{k+1} \bar{K}_1 + \tfrac{2}{\gamma h}\bar{K}_1 \\
   -\tfrac{1}{\gamma} \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T \bar{K}_1
