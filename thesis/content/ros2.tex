@@ -63,7 +63,7 @@ and use that to write the second stage:
 Now, we restrict ourselves to autonomous differential Riccati equations,
 \ie $Q, A$, \etc are constant and we neglect their subscripts.
 Therefore, $F_{t_k}\equiv 0$ and the right-hand side of the second stage reads
-\begin{subequations}
+\begin{subequations}\label{eq:mena:stage2:rhs:autonomous}
 \begin{align}
   \MoveEqLeft
   -F(t_{k+1}, X_k + hK_1) + 2K_1
@@ -92,8 +92,19 @@ Therefore, $F_{t_k}\equiv 0$ and the right-hand side of the second stage reads
 \end{align}
 \end{subequations}
 using the first stage equation and $F(t_{k+1}, \cdot) = F(t_k,\cdot)$.
-For arbitrary $\gamma$, this allows a decomposition according to:
+In summary:
 \begin{subequations}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
+  \hat{B}_k K_2 + K_2 \hat{A}_k &=
+  -\big(1-\tfrac{1}{\gamma}\big) F(t_k, X_k)
+  + h^2 K_1 R K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{align}
+\end{subequations}
+For arbitrary $\gamma$, this allows a decomposition according to:
+\begin{subequations}\label{eq:mena:stages:autonomous}
 \begin{align}
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
@@ -102,7 +113,7 @@ For arbitrary $\gamma$, this allows a decomposition according to:
 \end{align}
 \end{subequations}
 For $\gamma=1$ the method further simplifies to:
-\begin{subequations}\label{eq:mena:gamma=1}
+\begin{subequations}\label{eq:mena:stages:gamma=1}
 \begin{align}
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
@@ -112,7 +123,7 @@ For $\gamma=1$ the method further simplifies to:
 \end{subequations}
 
 Note that the sign of $h^2 K_1RK_1$ in
-\eqref{eq:mena:stage2:rhs} through \eqref{eq:mena:gamma=1}
+\eqref{eq:mena:stage2:rhs} through \eqref{eq:mena:stages:gamma=1}
 matches \cite[Equation~(4.40)]{Mena2007} but not \cite[Equations (4.43) and (4.47)]{Mena2007}.
 Furthermore, the sign of $K_1$ in \eqref{eq:mena:err:linear} does not match \cite[Equation~(4.47)]{Mena2007}.
 In \cite[Algorithm 4.3.1]{Mena2007}, however, the signs match the present derivation.
@@ -136,7 +147,7 @@ Unrelated but remaining issues:
 
 \section{Following \cite{MPIMD11-06}}
 
-The remaining expressions will follow the scheme of the preprint.
+Unless mentioned otherwise, any variable introduced in this section matches the notation of \cite{MPIMD11-06}.
 Defining the coefficient matrices as
 $\bar{A}_k := \frac{1}{\gamma h} \hat{A}_k$ and
 $\bar{B}_k := \frac{1}{\gamma h} \hat{B}_k$,
@@ -187,7 +198,16 @@ or, equivalently, in terms of $\bar{K}_1$,
 having different signs for $K_1$ and $K_1R_{k+1}K_1$,
 as well as missing factors of $h$ for the $K_1$-Sylvester coefficients, $(h\bar{B}_k) K_1 + K_1 (h\bar{A}_k)$.
 
-In the autonomous setting, ...
+In the autonomous setting,
+the factor of $h$ that was missing from \cite[Equation~(16)]{MPIMD11-06}
+got reintroduced in \cite[Equation~(17)]{MPIMD11-06} in an erroneous way.
+Unlike \eqref{eq:mena:stage2:rhs:autonomous},
+the authors replaced part of the second stage by $h F(X_k)$ instead of $\frac{1}{\gamma} F(X_k)$.
+Furthermore, another factor of $h$ was wrongly added to the stage update \cite[Equations (18) and (21)]{MPIMD11-06}
+instead of the actually missing $\frac{1}{\gamma}$,
+and the quadratic term has the wrong sign as mentioned in the previous section on \cite{Mena2007}.
+Therefore, the method further derived in \cite[Equations (21) to (24)]{MPIMD11-06} differs from \eqref{eq:mena:stages:autonomous}
+and is (likely) wrong.
 
 \section{Following \cite{MPIMD12-13}}
 
