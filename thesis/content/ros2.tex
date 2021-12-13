@@ -106,9 +106,12 @@ In summary:
 For arbitrary $\gamma$, this allows a decomposition according to:
 \begin{subequations}\label{eq:mena:stages:autonomous}
 \begin{align}
+  \label{eq:mena:autonomous update}
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
+  \label{eq:mena:autonomous K21}
   \hat{B}_k K_{21} + K_{21} \hat{A}_k &= h^2 K_1RK_1 + (2-\tfrac{1}{\gamma}) K_1 \\
+  \label{eq:mena:autonomous K2}
   K_2 &= (1-\tfrac{1}{\gamma}) K_1 + K_{21}
 \end{align}
 \end{subequations}
@@ -212,11 +215,14 @@ and is (likely) wrong.
 \section{Following \cite{MPIMD12-13}}
 
 Essentially, all mistakes or differences already mentioned, are visible as well.
-The first stage equation \cite[Equation (3.14)]{MPIMD12-13} yields to a scaled $\bar{K}_1 = \frac{1}{\gamma h}K_1$, as in \cite{MPIMD11-06}.
+The first stage equation \cite[Equation (3.14)]{MPIMD12-13} leads to a scaled $\bar{K}_1 = \frac{1}{\gamma h}K_1$, as in \cite{MPIMD11-06}.
 Given Equation (3.16), the quadratic term in (3.15) has the wrong sign, as in \cite{Mena2007}.
 
-Even if setting $\gamma=1$ as claimed in \cite[17]{MPIMD12-13} would resolve some issues,
-\cite{Lang2015} uses $\gamma = 1 + 1/\sqrt{2}$.
+Combining the stage equations \eqref{eq:mena:autonomous update} and \eqref{eq:mena:autonomous K2} yields
+\begin{equation}
+  X_{k+1} = X_k + \tfrac{4 - 1/\gamma}{2} h K_1 + \tfrac{1}{2} h K_{21}
+\end{equation}
+which, again, differs from \cite[Equation~(3.17)]{MPIMD12-13}.
 
 \section{Following \cite{Lang2015}}
 
