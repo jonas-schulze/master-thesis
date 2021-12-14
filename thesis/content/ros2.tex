@@ -1,5 +1,11 @@
 \chapter{Second order Rosenbrock method}
 
+TL;DR:
+While investigating the odd behavior of Ros2 noted in \cite[63]{Lang2015},
+I couldn't find an obvious problem in that paper,
+but several (potential) issues in \cite{Mena2007,MPIMD11-06,MPIMD12-13}.
+\bigskip
+
 Starting from the differential Riccati equation as in \cite{MPIMD11-06},
 \begin{equation}
   \dot X = F(t, X) := Q + XA + BX - XRX
@@ -98,7 +104,7 @@ In summary:
   X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
   \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
   \hat{B}_k K_2 + K_2 \hat{A}_k &=
-  -\big(1-\tfrac{1}{\gamma}\big) F(t_k, X_k)
+  -\big(1-\tfrac{1}{\gamma}\big) F(X_k)
   + h^2 K_1 R K_1
   + (2-\tfrac{1}{\gamma}) K_1
 \end{align}
@@ -220,10 +226,75 @@ Given Equation (3.16), the quadratic term in (3.15) has the wrong sign, as in \c
 
 Combining the stage equations \eqref{eq:mena:autonomous update} and \eqref{eq:mena:autonomous K2} yields
 \begin{equation}
-  X_{k+1} = X_k + \tfrac{4 - 1/\gamma}{2} h K_1 + \tfrac{1}{2} h K_{21}
+  X_{k+1} = X_k + \big( 2 - \tfrac{1}{2\gamma} \big) h K_1 + \tfrac{1}{2} h K_{21}
 \end{equation}
 which, again, differs from \cite[Equation~(3.17)]{MPIMD12-13}.
 
 \section{Following \cite{Lang2015}}
 
-Unless I made a mistake, this could be the reason of the odd behavior of Ros2 as noted in \cite[63]{Lang2015}.
+Given the autonomous generalized DRE
+\begin{equation*}
+  E^T \dot{X} E = Q + XA + BX - E^T X R X E
+\end{equation*}
+and the factorizations $ Q = L_Q D_Q L_Q^T $ and $ X_k = L_{X_k} D_{X_k} L_{X_k}^T $,
+the second order Rosenbrock method following \cite{Verwer1999} and \cite{Mena2007} reads
+\begin{subequations}
+\label{eq:lang:stages}
+\begin{align}
+  X_{k+1} &= X_k + \big( 2 - \tfrac{1}{2\gamma}\big) h K_1 + \tfrac{1}{2} h K_{21} \\
+  E^T K_1 \hat{A}_k + \hat{B}_k K_1 E &= -F(E^T X_k E) \\
+  E^T K_{21} \hat{A}_k + \hat{B}_k K_{21} E &= h^2 E^T K_1 R K_1 E + \big(2-\tfrac{1}{\gamma}\big) E^T K_1 E
+\end{align}
+\end{subequations}
+using coefficient matrices
+\begin{align*}
+  \hat{A}_k &= \gamma h (A - R X_k E) - \tfrac{1}{2} E \\
+  \hat{B}_k &= \big( \gamma h (B^T - R X_k E) - \tfrac{1}{2} E \big)^T
+\end{align*}
+The right-hand side of the first stage may be written as $-G_1 S_1 G_1^T$ using
+\begin{subequations}
+\begin{align}
+  G_1 &= \begin{bmatrix}
+    L_Q & A^T L_{X_k} & B L_{X_k} & E^T L_{X_k}
+  \end{bmatrix} \\
+  \label{eq:lang:asymmetric S}
+  S_1 &= \begin{bmatrix}
+    D_Q &.&.&. \\
+    .&.&.&.\\
+    .&.&.& D_{X_k} \\
+    .& D_{X_k} & . & -D_{X_k} L_{X_k}^T R L_{X_k} D_{X_k}
+  \end{bmatrix}
+\end{align}
+\end{subequations}
+where the blocks have been rearranged similar to \cite[60]{Lang2015}.
+Similarly, the right-hand side of the second stage may be written as $G_2 S_2 G_2^T$ using
+$K_1 = L_{K_1} D_{K_1} L_{K_1}^T$ and
+\begin{align*}
+  G_2 &= E^T L_{K_1} \\
+  S_2 &= h^2 D_{K_1} L_{K_1}^T R L_{K_1} D_{K_1} + \big(2-\tfrac{1}{\gamma}\big) D_{K_1}
+\end{align*}
+
+\begin{remark}
+$S_1$ as in \eqref{eq:lang:asymmetric S} is asymmetric.
+If $B=A^T$ one can safely drop the empty row and column of $S_1$ and
+one of the $A^T L_{X_k} = B L_{X_k}$ blocks of $G_1$ to
+recover the matrices of \cite[Equation~(28)]{Lang2015}:
+\begin{align*}
+  G_1 &= \begin{bmatrix}
+    L_Q & A^T L_{X_k} & E^T L_{X_k}
+  \end{bmatrix} \\
+  S_1 &= \begin{bmatrix}
+    D_Q &.&. \\
+    .&.& D_{X_k} \\
+    .& D_{X_k} & -D_{X_k} L_{X_k}^T R L_{X_k} D_{X_k}
+  \end{bmatrix}
+\end{align*}
+\end{remark}
+
+Note the opposite signs of $-G_1 S_1 G_1^T$ and $G_2 S_2 G_2^T$.
+The algorithm \cite[Equation~(12)]{Lang2015} has $K_{21}$ negated compared to \eqref{eq:lang:stages},
+\ie has the right-hand side $-G_2 S_2 G_2^T$ instead,
+as does the code:
+\begin{center}
+  \texttt{g\_lrLDL\_rb2o.m:118-128}
+\end{center}
