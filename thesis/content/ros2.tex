@@ -1,0 +1,300 @@
+\chapter{Second order Rosenbrock method}
+
+TL;DR:
+While investigating the odd behavior of Ros2 noted in \cite[63]{Lang2015},
+I couldn't find an obvious problem in that paper,
+but several (potential) issues in \cite{Mena2007,MPIMD11-06,MPIMD12-13}.
+\bigskip
+
+Starting from the differential Riccati equation as in \cite{MPIMD11-06},
+\begin{equation}
+  \dot X = F(t, X) := Q + XA + BX - XRX
+\end{equation}
+where all $X, Q, A, B, R$ are matrix-valued time-dependent functions,
+$t$ denotes time, and $\dot X$ the derivative of $X$ \wrt time.
+In the context of \cite{Mena2007,MPIMD12-13,Lang2015}, $B:=A^T$ and $R:=S$.
+Discretize the time span according to $t_{k+1} = t_k + h$
+and set $X_k \approx X(t_k)$, $A_k \approx A(t_k)$, \etc.
+
+\section{Following \cite{Mena2007}}
+
+Applying the method introduced in \cite{Verwer1999}, we obtain
+\begin{subequations}\label{eq:mena:stages}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(t_k, X_k) - h\gamma F_{t_k} \\
+  \hat{B}_k K_2 + K_2 \hat{A}_k &= -F(t_{k+1}, X_k + hK_1) + 2K_1 + h\gamma F_{t_k}
+\end{align}
+\end{subequations}
+where
+\begin{subequations} \label{eq:mena:coeffs}
+\begin{align}
+  \hat{A}_k &:= \gamma h (A_k - R_k X_k) - \tfrac{1}{2} I \\
+  \hat{B}_k &:= \big( \gamma h (B^T_k - R_k X_k) - \tfrac{1}{2} I \big)^T
+\end{align}
+\end{subequations}
+adapted from \cite[Equations (4.37) to (4.39)]{Mena2007}.
+Rewrite the Riccati operator of a shifted argument as
+\begin{subequations}
+\begin{align}
+  F(t_{k+1}, X_k + hK_1)
+  &= \begin{multlined}[t]
+    F(t_{k+1}, X_k) + h K_1 A_{k+1} + h B_{k+1} K_1 \\
+    - h K_1 R_{k+1} X_k - h X_k R_{k+1} K_1 - h^2 K_1 R_{k+1} K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    F(t_{k+1}, X_k) - h^2 K_1 R_{k+1} K_1 \\
+    + h K_1 (A_{k+1} - R_{k+1} X_k) + h(B^T_{k+1} - R_{k+1} X_k)^T K_1
+  \end{multlined}
+\end{align}
+\end{subequations}
+and use that to write the second stage:
+\begin{subequations}\label{eq:mena:stage2:rhs}
+\begin{align}
+  \MoveEqLeft
+  -F(t_{k+1}, X_k + hK_1) + 2K_1 + h\gamma F_{t_k}
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R_{k+1} K_1 + 2K_1 + h\gamma F_{t_k}\\
+    - h K_1 (A_{k+1} - R_{k+1} X_k) - h(B_{k+1}^T - R_{k+1} X_k)^T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R_{k+1} K_1 + h\gamma F_{t_k}\\
+    - K_1 \big(h(A_{k+1} - R_{k+1} X_k) - I\big)
+    - \big(h(B_{k+1}^T - R_{k+1} X_k) - I\big)^T K_1
+  \end{multlined}
+\end{align}
+\end{subequations}
+
+Now, we restrict ourselves to autonomous differential Riccati equations,
+\ie $Q, A$, \etc are constant and we neglect their subscripts.
+Therefore, $F_{t_k}\equiv 0$ and the right-hand side of the second stage reads
+\begin{subequations}\label{eq:mena:stage2:rhs:autonomous}
+\begin{align}
+  \MoveEqLeft
+  -F(t_{k+1}, X_k + hK_1) + 2K_1
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -F(t_{k+1}, X_k) + h^2 K_1 R K_1 \\
+    - K_1
+    \underbrace{
+      \big(h(A - R X_k) - I\big)
+    }_{\frac{1}{\gamma} \hat{A}_k - (1-\frac{1}{2\gamma}) I}
+    - \underbrace{
+      \big(h(B^T - R X_k) - I\big)^T
+    }_{\frac{1}{\gamma} \hat{B}_k - (1-\frac{1}{2\gamma}) I}
+    K_1
+  \end{multlined} \\
+  &=
+  -F(t_{k+1}, X_k) + h^2 K_1 R K_1
+  -\tfrac{1}{\gamma}
+  \underbrace{
+    (K_1 \hat{A}_k + \hat{B}_k K_1)
+  }_{-F(t_k,X_k)}
+  + (2-\tfrac{1}{\gamma}) K_1 \\
+  &= -\big(1-\tfrac{1}{\gamma}\big) F(t_k, X_k)
+  + h^2 K_1 R K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{align}
+\end{subequations}
+using the first stage equation and $F(t_{k+1}, \cdot) = F(t_k,\cdot)$.
+In summary:
+\begin{subequations}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
+  \hat{B}_k K_2 + K_2 \hat{A}_k &=
+  -\big(1-\tfrac{1}{\gamma}\big) F(X_k)
+  + h^2 K_1 R K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{align}
+\end{subequations}
+For arbitrary $\gamma$, this allows a decomposition according to:
+\begin{subequations}\label{eq:mena:stages:autonomous}
+\begin{align}
+  \label{eq:mena:autonomous update}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
+  \label{eq:mena:autonomous K21}
+  \hat{B}_k K_{21} + K_{21} \hat{A}_k &= h^2 K_1RK_1 + (2-\tfrac{1}{\gamma}) K_1 \\
+  \label{eq:mena:autonomous K2}
+  K_2 &= (1-\tfrac{1}{\gamma}) K_1 + K_{21}
+\end{align}
+\end{subequations}
+For $\gamma=1$ the method further simplifies to:
+\begin{subequations}\label{eq:mena:stages:gamma=1}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \hat{B}_k K_1 + K_1 \hat{A}_k &= -F(X_k) \\
+  \hat{B}_k K_2 + K_2 \hat{A}_k &= h^2 K_1RK_1 + K_1
+  \label{eq:mena:err:linear}
+\end{align}
+\end{subequations}
+
+Note that the sign of $h^2 K_1RK_1$ in
+\eqref{eq:mena:stage2:rhs} through \eqref{eq:mena:stages:gamma=1}
+matches \cite[Equation~(4.40)]{Mena2007} but not \cite[Equations (4.43) and (4.47)]{Mena2007}.
+Furthermore, the sign of $K_1$ in \eqref{eq:mena:err:linear} does not match \cite[Equation~(4.47)]{Mena2007}.
+In \cite[Algorithm 4.3.1]{Mena2007}, however, the signs match the present derivation.
+Thus, the signs in the equations mentioned of \cite{Mena2007} are (very likely) wrong.
+
+Unrelated but remaining issues:
+\begin{enumerate}
+  \item
+    The motivation of (4.40) was to extract the \enquote{common factor of the right hand sides of (4.38)--(4.39)}.
+    This can only refer to $-F(X_k) = -F(t_k, X_k)$ in (4.38) and $-F(t_{k+1}, X_k)$ in (4.40),
+    which in the general case do not coincide.
+    A sufficient condition, namely the autonomous case of $E$, $A$, \etc being constant,
+    is studied only in the next section.
+    So, is this reformulation even correct in the time-dependent setting?
+  \item
+    Furthermore, the reasoning given about why solving a third equation is beneficial,
+    is that its coefficients $\hat{A}_k$ and $\hat{B}_k$ are the same and, therefore, only one decomposition is needed.
+    This is true even for the original form of \eqref{eq:mena:stages}.
+    So, why is this reformulation truly beneficial, even in the autonomous setting?
+\end{enumerate}
+
+\section{Following \cite{MPIMD11-06}}
+
+Unless mentioned otherwise, any variable introduced in this section matches the notation of \cite{MPIMD11-06}.
+Defining the coefficient matrices as
+$\bar{A}_k := \frac{1}{\gamma h} \hat{A}_k$ and
+$\bar{B}_k := \frac{1}{\gamma h} \hat{B}_k$,
+\cf \eqref{eq:mena:coeffs} and \cite[7]{MPIMD11-06},
+the stage equations \eqref{eq:mena:stages} read
+\begin{subequations}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} h K_1 + \tfrac{1}{2} h K_2 \\
+  \bar{B}_k (\gamma h K_1) + (\gamma h K_1) \bar{A}_k &= -F(t_k, X_k) - h\gamma F_{t_k} \\
+  \bar{B}_k (\gamma h K_2) + (\gamma h K_2) \bar{A}_k &= -F(t_{k+1}, X_k + hK_1) + 2K_1 + h\gamma F_{t_k}
+\end{align}
+\end{subequations}
+If we denote the stage values as $\bar{K}_1 := \gamma h K_1$ and $\bar{K}_2 := \gamma h K_2$
+in contrast to the notation used in \cite{MPIMD11-06},
+these equations read
+\begin{subequations}\label{eq:mpi11:15}
+\begin{align}
+  X_{k+1} &= X_k + \tfrac{3}{2} \tfrac{1}{\gamma} \bar{K}_1 + \tfrac{1}{2} \tfrac{1}{\gamma} \bar{K}_2 \\
+  \bar{B}_k \bar{K}_1 + \bar{K}_1 \bar{A}_k &= -F(t_k, X_k) - h\gamma F_{t_k} \\
+  \bar{B}_k \bar{K}_2 + \bar{K}_2 \bar{A}_k &= -F(t_{k+1}, X_k + \tfrac{1}{\gamma}\bar{K}_1) + \tfrac{2}{\gamma h}\bar{K}_1 + h\gamma F_{t_k}
+\end{align}
+\end{subequations}
+
+Comparing \cite[Equation (15)]{MPIMD11-06} and \eqref{eq:mpi11:15},
+\begin{enumerate}
+  \item
+    the right-hand side of the first stage uses $t_{k+1}$ instead of $t_k$,
+  \item
+    the second stage has wrong coefficients for all occurrences of $\bar{K}_1$,
+  \item
+    the update equation lacks a factor of $\frac{1}{\gamma}$ for the stage values.
+    This could also be interpreted as implicitly fixing $\gamma := 1$.
+    \label{item:implicit gamma=1}
+\end{enumerate}
+These inconsistent coefficients carry on to \cite[Equation (16)]{MPIMD11-06},
+which would read
+\begin{multline}
+  -F(t_{k+1}, X_k) - \tfrac{1}{\gamma} K_1 + \gamma h F_{t_k} + h^2 K_1 R_{k+1} K_1 + 2K_1 \\
+  -h \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T K_1
+  -K_1 \big( A_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big) h
+\end{multline}
+or, equivalently, in terms of $\bar{K}_1$,
+\begin{multline}
+  -F(t_{k+1}, X_k) - \tfrac{1}{h\gamma^2} \bar{K}_1 + \gamma h F_{t_k} + \tfrac{1}{\gamma^2} \bar{K}_1 R_{k+1} \bar{K}_1 + \tfrac{2}{\gamma h}\bar{K}_1 \\
+  -\tfrac{1}{\gamma} \big( B^T_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big)^T \bar{K}_1
+  -\bar{K}_1 \big( A_{k+1} - R_{k+1}X_k - \tfrac{1}{2h\gamma}I \big) \tfrac{1}{\gamma}
+\end{multline}
+having different signs for $K_1$ and $K_1R_{k+1}K_1$,
+as well as missing factors of $h$ for the $K_1$-Sylvester coefficients, $(h\bar{B}_k) K_1 + K_1 (h\bar{A}_k)$.
+
+In the autonomous setting,
+the factor of $h$ that was missing from \cite[Equation~(16)]{MPIMD11-06}
+got reintroduced in \cite[Equation~(17)]{MPIMD11-06} in an erroneous way.
+Unlike \eqref{eq:mena:stage2:rhs:autonomous},
+the authors replaced part of the second stage by $h F(X_k)$ instead of $\frac{1}{\gamma} F(X_k)$.
+Furthermore, another factor of $h$ was wrongly added to the stage update \cite[Equations (18) and (21)]{MPIMD11-06}
+instead of the actually missing $\frac{1}{\gamma}$,
+and the quadratic term has the wrong sign as mentioned in the previous section on \cite{Mena2007}.
+Therefore, the method further derived in \cite[Equations (21) to (24)]{MPIMD11-06} differs from \eqref{eq:mena:stages:autonomous}
+and is (likely) wrong.
+
+\section{Following \cite{MPIMD12-13}}
+
+Essentially, all mistakes or differences already mentioned, are visible as well.
+The first stage equation \cite[Equation (3.14)]{MPIMD12-13} leads to a scaled $\bar{K}_1 = \frac{1}{\gamma h}K_1$, as in \cite{MPIMD11-06}.
+Given Equation (3.16), the quadratic term in (3.15) has the wrong sign, as in \cite{Mena2007}.
+
+Combining the stage equations \eqref{eq:mena:autonomous update} and \eqref{eq:mena:autonomous K2} yields
+\begin{equation}
+  X_{k+1} = X_k + \big( 2 - \tfrac{1}{2\gamma} \big) h K_1 + \tfrac{1}{2} h K_{21}
+\end{equation}
+which, again, differs from \cite[Equation~(3.17)]{MPIMD12-13}.
+
+\section{Following \cite{Lang2015}}
+
+Given the autonomous generalized DRE
+\begin{equation*}
+  E^T \dot{X} E = Q + XA + BX - E^T X R X E
+\end{equation*}
+and the factorizations $ Q = L_Q D_Q L_Q^T $ and $ X_k = L_{X_k} D_{X_k} L_{X_k}^T $,
+the second order Rosenbrock method following \cite{Verwer1999} and \cite{Mena2007} reads
+\begin{subequations}
+\label{eq:lang:stages}
+\begin{align}
+  X_{k+1} &= X_k + \big( 2 - \tfrac{1}{2\gamma}\big) h K_1 + \tfrac{1}{2} h K_{21} \\
+  E^T K_1 \hat{A}_k + \hat{B}_k K_1 E &= -F(E^T X_k E) \\
+  E^T K_{21} \hat{A}_k + \hat{B}_k K_{21} E &= h^2 E^T K_1 R K_1 E + \big(2-\tfrac{1}{\gamma}\big) E^T K_1 E
+\end{align}
+\end{subequations}
+using coefficient matrices
+\begin{align*}
+  \hat{A}_k &= \gamma h (A - R X_k E) - \tfrac{1}{2} E \\
+  \hat{B}_k &= \big( \gamma h (B^T - R X_k E) - \tfrac{1}{2} E \big)^T
+\end{align*}
+The right-hand side of the first stage may be written as $-G_1 S_1 G_1^T$ using
+\begin{subequations}
+\begin{align}
+  G_1 &= \begin{bmatrix}
+    L_Q & A^T L_{X_k} & B L_{X_k} & E^T L_{X_k}
+  \end{bmatrix} \\
+  \label{eq:lang:asymmetric S}
+  S_1 &= \begin{bmatrix}
+    D_Q &.&.&. \\
+    .&.&.&.\\
+    .&.&.& D_{X_k} \\
+    .& D_{X_k} & . & -D_{X_k} L_{X_k}^T R L_{X_k} D_{X_k}
+  \end{bmatrix}
+\end{align}
+\end{subequations}
+where the blocks have been rearranged similar to \cite[60]{Lang2015}.
+Similarly, the right-hand side of the second stage may be written as $G_2 S_2 G_2^T$ using
+$K_1 = L_{K_1} D_{K_1} L_{K_1}^T$ and
+\begin{align*}
+  G_2 &= E^T L_{K_1} \\
+  S_2 &= h^2 D_{K_1} L_{K_1}^T R L_{K_1} D_{K_1} + \big(2-\tfrac{1}{\gamma}\big) D_{K_1}
+\end{align*}
+
+\begin{remark}
+$S_1$ as in \eqref{eq:lang:asymmetric S} is asymmetric.
+If $B=A^T$ one can safely drop the empty row and column of $S_1$ and
+one of the $A^T L_{X_k} = B L_{X_k}$ blocks of $G_1$ to
+recover the matrices of \cite[Equation~(28)]{Lang2015}:
+\begin{align*}
+  G_1 &= \begin{bmatrix}
+    L_Q & A^T L_{X_k} & E^T L_{X_k}
+  \end{bmatrix} \\
+  S_1 &= \begin{bmatrix}
+    D_Q &.&. \\
+    .&.& D_{X_k} \\
+    .& D_{X_k} & -D_{X_k} L_{X_k}^T R L_{X_k} D_{X_k}
+  \end{bmatrix}
+\end{align*}
+\end{remark}
+
+Note the opposite signs of $-G_1 S_1 G_1^T$ and $G_2 S_2 G_2^T$.
+The algorithm \cite[Equation~(12)]{Lang2015} has $K_{21}$ negated compared to \eqref{eq:lang:stages},
+\ie has the right-hand side $-G_2 S_2 G_2^T$ instead,
+as does the code:
+\begin{center}
+  \texttt{g\_lrLDL\_rb2o.m:118-128}
+\end{center}
