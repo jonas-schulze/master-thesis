@@ -1,0 +1,31 @@
+\chapter{Parareal Method}
+
+The parareal method goes back to \cite{Lions2001},
+but the most common form first appeared in \cite{Baffico2002}.
+\cite{Gander2007} derives the parareal method as a special case of multiple shooting.
+
+Consider the initial value problem
+\begin{align}
+  \label{eq:ivp:dummy}
+  \dot u(t) &= f(u(t)) \\
+  u(0) &= u_0
+\end{align}
+for $t \in [0,T]$ and a time discretization $0 = t_0 < \ldots < t_N = T$.
+Let $U_n \approx u(t_n)$ denote the approximation of the solution $u$.
+Then the parareal method defines a converging sequence $U_n^k \to U_n$ for $k\to\infty$ following $U_0^0=u_0$ and
+\begin{align*}
+  U_{n+1}^0 &= G(t_{n+1}, t_n, U_n^0) \\
+  U_{n+1}^{k+1} &=
+  G(t_{n+1}, t_n, U_n^{k+1}) +
+  F(t_{n+1}, t_n, U_n^k) -
+  G(t_{n+1}, t_n, U_n^k)
+\end{align*}
+where $F$ and $G$ are fine and coarse solvers of \eqref{eq:ivp:dummy}, respectively,
+for the given time span and initial value.
+Note that due to $U_0^k = U_0^0 = u_0 \enspace \forall k\geq 0$ it is by induction
+\begin{equation}
+  U_{n+1}^{k+1} = U_{n+1}^{n+1} = F(t_{n+1}, t_n, U_n^n)
+  \quad
+  \forall k \geq n
+\end{equation}
+but convergence may be reached for $k<n$.
