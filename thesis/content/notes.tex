@@ -39,6 +39,7 @@ Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$)
 \section{Hamilton-Jacobi Theory}
 
 Consider the optimal control problem
+(linear quadratic regulator)
 \begin{equation}
   \everymath{\displaystyle}
   \begin{array}{cl}
@@ -75,3 +76,10 @@ making the ansatz
 and solving for $X:\R\to\R^{n,n}$, $w:\R\to\R^n$, $v:\R\to\R$ will eventually
 yield a \emph{generalized differential Riccati equation} in $X$ as well as
 ordinary differential equations in $w$ and $v$.
+\cite{Locatelli2011}
+
+\begin{align}
+  \ell(t, z, u) &= z^\T \tilde C^\T Q \tilde C z - 2z^\T \tilde C^\T Q \hat y + \hat y^\T Q \hat y + u^\T R u \\
+  \ell(t, x, u) &= x^\T C^\T Q C x - 2x^\T C^\T Q \hat y + \hat y^\T Q \hat y + u^\T R u
+\end{align}
+\cite[(3.12)]{Lang2017}

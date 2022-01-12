@@ -1,4 +1,8 @@
-\documentclass[bibliography=totoc]{scrreprt}
+\documentclass[
+  bibliography=totoc,
+  listof=totoc,
+  oneside,
+]{scrbook}
 
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
@@ -7,21 +11,68 @@
 \usepackage[style=alphabetic]{biblatex}
 \addbibresource{stuff.bib}
 
+\usepackage{todonotes}
+
 \input{preamble/packages}
 \input{preamble/math}
 \input{preamble/abbreviations}
 \input{preamble/environments}
+\input{preamble/other}
+
+\makeglossaries
 
 \begin{document}
+
+% -----------------------------------------------------------------------------
+\frontmatter
+
+\include{content/abstract}
 
 \cleardoublepage
 \pdfbookmark{\contentsname}{toc}
 \tableofcontents
+\listoffigures
+\listoftodos
+\todototoc
 
-\include{content/ros2}
+% -----------------------------------------------------------------------------
+\mainmatter
+\include{content/intro}
+
+\chapter{Mathematical Basics}
+\section{Linear Systems and Related Matrix Equations}
+\section{Hamilton-Jacobi Theory}
+
+\include{content/lowrank}
 \include{content/parareal}
+\include{content/rosenbrock}
 \include{content/adi}
+
+\chapter{Experimental Results}
+\chapter{Conclusion}
+
+% -----------------------------------------------------------------------------
+\appendix
 \include{content/notes}
+\include{content/ros2}
+
+\chapter{Things we don't need}
+
+\dots or don't need yet.
+\begin{itemize}
+  \item
+    Optimal Control terminology:
+    exponentially stable matrix,
+    stabilizable matrix pair,
+    reachable/controllable/unobservable state,
+    detectable/reachable/observable system,
+    \etc
+\end{itemize}
+
+% -----------------------------------------------------------------------------
+\backmatter
+\glsaddallunused
+\printglossaries
 \printbibliography
 
 \end{document}

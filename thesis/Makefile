@@ -5,6 +5,7 @@ DEPS = Makefile *.bib *.tex content/*.tex
 $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 	biber --output-directory $(BUILDDIR) thesis
+	makeglossaries -d $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
 
