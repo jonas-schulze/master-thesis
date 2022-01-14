@@ -5,7 +5,15 @@
 \usepackage{amsthm}
 \usepackage{array} % >{...} column modifiers
 \usepackage{xspace}
-\usepackage[bookmarksnumbered]{hyperref} % Internal links, must be loaded last
+
+% hyperref should be loaded last
+\usepackage[
+  bookmarksopen,
+  bookmarksopenlevel=1, % up to chapters
+  bookmarksnumbered,
+]{hyperref}
+
+% glossaries must be loaded after hyperref
 \usepackage[toc,shortcuts]{glossaries}
 
 \mathtoolsset{
