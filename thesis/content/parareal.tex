@@ -250,6 +250,9 @@ Discuss ramp-up difficulties:
     as \eg the \ac{ALE} solvers are mostly common to $G$.
 
     \todo[inline]{Warm-up transmission code on workers}
+
+    Maybe, this could be combined with a different initial value for the Newton / multiple shooting scheme.
+    Instead of using $U^0_n = G(U^0_{n-1})$, try $U^0_n = u_0$.
 \end{itemize}
 
 General scheduling comments:
