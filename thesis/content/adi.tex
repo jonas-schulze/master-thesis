@@ -1,9 +1,231 @@
 \chapter{Alternating-Directions Implicit Method}
 
-The alternating-direction implicit method goes back to \cite{Peaceman1955}.
-Using the self-generating parameters from \cite{Kuerschner2016}, we obtain
+The \ac{ADI} method goes back to \cite{Peaceman1955}.
+It has originally been designed to solve linear systems
+\begin{equation}
+  Ax = b
+\end{equation}
+for symmetric positive-definite $A\in\Rnn$
+and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
+Suppose $A=A_1+A_2$ for commuting $A_1, A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
+Then it is easy to see that
+\begin{align*}
+  (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
+  (A_2 + \alpha I_n)x &= b - (A_1 - \alpha I_n) x
+\end{align*}
+for any $\alpha\in\R$ or even $\C$.
+Use the short-hand notation $ A_i^\pm := A_i \pm \alpha_k I_n$,
+$i\in\Set{1,2}$,
+to convert the above to an iteration scheme:
+\begin{equation}
+  \label{eq:adi:general2step}
+  \left\{
+  \begin{aligned}
+    \Aip  x^{k+\frac{1}{2}} &= b - \Aiim x^k \\
+    \Aiip x^{k+1}           &= b - \Aim x^{k+\frac{1}{2}}
+  \end{aligned}
+  \right.
+\end{equation}
+Note that parameter $\alpha_k$ is free to choose for every iteration.
+Conversely, a fixpoint $\hat x := x^{k+1} = x^k$ of the above is a solution to $Ax=b$,
+provided that $\alpha_k$ is invertible.
+We will prove this in the following section.
+
+\begin{remark}
+  The \ac{ADI} method may be further generalized by using separate parameters
+  $\alpha_k$ and $\beta_k$ in the first and second equation of \eqref{eq:adi:general2step}, respectively.
+\end{remark}
+
+\section{ADI as a One-Step Method}
+
+\begin{lemma}[Commuting Operators]
+\label{thm:adi:commuting-matrices}
+  Let $\alpha, \beta\in\R$ and let $A, B \in\Rnn$ commute.
+  If $A$ is invertible, then $A^{-1}B = BA^{-1}$.
+  If $(A+\alpha I_n)$ is invertible, then
+  \begin{equation*}
+    (A+\alpha I_n)^{-1} (B+\beta I_n)
+    =
+    (B+\beta I_n) (A+\alpha I_n)^{-1}
+    .
+  \end{equation*}
+\end{lemma}
+\begin{proof}
+  Multiplying $AB=BA$ with $A^{-1}$ from either side yields $A^{-1}B=BA^{-1}$.
+  Furthermore, $AB=BA$ implies
+  $
+    (A+\alpha I_n) (B+\beta I_n)
+    =
+    (B+\beta I_n) (A+\alpha I_n)
+  $.
+  Applying the first claim yields the desired equation.
+\end{proof}
+
+Write \eqref{eq:adi:general2step} as a one-step iteration:
+\begin{equation*}
+  \Aiip \hat x = b - \Aim \mathop{(\Aip)^{-1}} (b - \Aiim \hat x)
+\end{equation*}
+By \autoref{thm:adi:commuting-matrices} it is $\Aim (\Aip)^{-1} = (\Aip)^{-1} \Aim$.
+Multiplying by $\Aip$ and rearranging the terms leads to:
+\begin{equation*}
+  \underbrace{%
+  (\Aip \Aiip - \Aim \Aiim)
+  }_{2\alpha A}
+  \hat x =
+  \underbrace{%
+  (\Aip - \Aim)
+  }_{2\alpha I}
+  b
+\end{equation*}
+
+More rigorously, as a general one-step iteration the \ac{ADI} reads
+\begin{equation}
+\begin{aligned}
+  x^{k+1}
+  &= \mathop{(\Aiip)^{-1}} \big( b - \Aim \mathop{(\Aip)^{-1}} (b - \Aiim x^k) \big) \\
+  &= \mathop{(\Aiip)^{-1}} \Aim \mathop{(\Aip)^{-1}} \Aiim x^k + \mathop{(\Aiip)^{-1}} \big( I_n - \Aim \mathop{(\Aip)^{-1}} \big) b \\
+  &=: Mx^k + Nb
+  .
+\end{aligned}
+\end{equation}
+By \autoref{thm:adi:commuting-matrices}, the iteration matrices equal
+\begin{equation}
+\label{eq:adi:general1step}
+  \begin{alignedat}{2}
+    M
+    &= \mathop{(\Aiip)^{-1}} \mathop{(\Aip)^{-1}} \Aim \Aiim
+    &&= (\Aip\Aiip)^{-1} \Aim\Aiim
+    \\
+    N
+    &= \mathop{(\Aiip)^{-1}} \big( I_n - \mathop{(\Aip)^{-1}} \Aim \big)
+    &&= 2\alpha_k (\Aip\Aiip)^{-1}
+  \end{alignedat}
+\end{equation}
+since $\mathop{(\Aip)^{-1}} \Aim = I_n - 2\alpha_k (\Aip)^{-1}$ by \autoref{thm:adi:cayley}.
+
+We have already seen that a fixpoint of the iteration solves $Ax=b$.
+\todo{find reference}
+Following the standard literature,
+the iteration converges iff $\rho(M) < 1$.
+Obviously, $M$ is symmetric.
+Therefore ...
+
+\todo[inline]{%
+  Maybe state a simplified form of \cite[Proposition~2.16]{Kuerschner2016}.
+  Downside: need to introduce control theory jargon.
+  Upside: mentioning that, and a Cayley transformation, might give future readers hints to more context.
+}
+
+\begin{definition}[Cayley Transformation]
+  ...
+\end{definition}
+
+\begin{lemma}[Property of Cayley Transformation]
+\label{thm:adi:cayley}
+  Let $A\in\Cnn$ and $\alpha, \beta\in\C$ with $-\alpha\notin\Lambda(A)$.
+  Then it holds
+  \begin{equation*}
+    (A+\alpha I_n)^{-1} (A-\beta I_n)
+    =
+    I_n - (\alpha + \beta)(A+\alpha I_n)^{-1}
+    .
+  \end{equation*}
+\end{lemma}
+\begin{proof}
+  \cite[Proposition~2.16]{Kuerschner2016}.
+\end{proof}
+
+\todo[inline]{The \ac{ADI} method can be seen as an operator splitting scheme.}
+
+\begin{remark}
+  $M$ as in \eqref{eq:adi:general1step} is a generalized Cayley transformation:
+  \begin{align*}
+    M
+    &= \mathcal C(A_1A_2 + \alpha^2 I_n, A, \alpha, \alpha) \\
+    &= I - 2\alpha(\Aip \Aiip)^{-1} A
+  \end{align*}
+  \todo[inline]{%
+    Applying this to an \ac{ALE}, $L = L_L + L_R$, leads to
+    $
+      X^{k+1} = X^k - 2\alpha_k A_+^{-1} (A X^k + X^k A^\T + W) A_+^{-\HT}
+    $
+    which doesn't seem beneficial.
+    Is this worth mentioning?
+  }
+\end{remark}
 
 \section{Application to \act{ALE}s}
+
+Consider the \ac{ALE}
+\begin{equation*}
+  L(X) := AX + XA^\T = -W
+\end{equation*}
+where $W = W^\T$.
+The \Lyapunov operator $L = L_L + L_R$ naturally decomposes into
+left-multiplication $L_L : X \mapsto AX$ and
+right-multiplication $L_R : X \mapsto XA^\T$.
+Furthermore, $L_L$ and $L_R$ commute:
+\begin{equation*}
+  L_L \circ L_R = L_R \circ L_L = X \mapsto AXA^\T
+\end{equation*}
+All the operators above are linear and act on $\Rnn$.
+Let $A_\pm := A \pm \alpha_k I_n$ and
+apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    A_+ X_{k+\frac{1}{2}} &= -W - X_k A_-^\HT \\
+    X_{k+\frac{1}{2}} A_+^\HT &= -W - A_- X_k
+  \end{aligned}
+  \right.
+\end{equation}
+Following \eqref{eq:adi:general1step}
+(or: \autoref{thm:adi:commuting-matrices})
+and \autoref{thm:adi:cayley}
+the one-step formulation reads:
+\begin{align*}
+  X_{k+1}
+  &= (A_+^{-1} A_-) X_k (A_+^{-1} A_-)^\HT
+  - (I_n - A_+^{-1} A_-) W A_+^{-\HT}
+  \\
+  &= (A_+^{-1} A_-) X_k (A_+^{-1} A_-)^\HT
+  - 2\alpha_k A_+^{-1} W A_+^{-\HT}
+\end{align*}
+
+\todo[inline]{Where did the conjugate of $A_-$ go?}
+
+Next, using the \acp{LRSIF} $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$,
+the \ac{ADI} becomes
+\begin{align*}
+  \hat L_{k+1} &= \begin{bmatrix}
+    A_+^{-1} A_- L_k &
+    A_+^{-1} G
+  \end{bmatrix} \\
+  \hat D_{k+1} &= \begin{bmatrix}
+    D_k \\
+    & -2\alpha_k S
+  \end{bmatrix}
+\end{align*}
+and a compression $L_{k+1} D_{k+1} L_{k+1}^\T :\approx \hat L_{k+1} \hat D_{k+1} \hat L_{k+1}^\T$
+following \autoref{sec:lr:compression}.
+Assuming $X_0 = 0$, the first iterate reads
+\begin{align*}
+  \hat L_1 &= A_+^{-1} G \\
+  \hat D_1 &= -2\alpha_k S
+\end{align*}
+
+\todo[inline]{%
+Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
+\ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
+}
+
+\section{Parameter Selection}
+
+Precomputed options:
+optimal Wachspress,
+heuristic Penzl.
+We resort to self-generating shifts described in \cite[Section~5.3]{Kuerschner2016}.
+
 \section{Alternative Lyapunov Solvers}
 Krylov subspace,
 projection-based,

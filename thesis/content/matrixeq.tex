@@ -3,17 +3,26 @@
 \section{Sparse Matrices}
 Describe data structures to store sparse matrices.
 
+\begin{example}[Non-zeros of Steel Profile]
+  The Steel Profile of the Oberwolfach Benchmark Collection of size $n=371$
+  contains of sparse matrices having
+  $\nnz(E) = 2343$ or \SI{1.7}{\percent},
+  $\nnz(A) = 2341$ or \SI{1.7}{\percent}, and
+  $\nnz(B) = 87$ or \SI{3.4}{\percent} non-zero entries.
+  Although not being stored sparsely, $\nnz(C) = 17$ or \SI{0.8}{\percent}.
+\end{example}
+
 Even if the system matrices $E, A, B, C$ are sparse,
 the solution $X$ is dense.
 However, it usually is of low numerical rank.
+
+\section{Low-Rank Representations}
 
 \todo{Find reference. Max Behr had a slide on that in his defense.}
 \begin{theorem}[Low-Rank Solutions]
 \label{thm:lowrank}
 The solution $X$ to a \ac{DRE} is of low numerical rank.
 \end{theorem}
-
-\section{Low-Rank Representations}
 
 Briefly describe classical Cholesky-type factorization, $X=ZZ^\T$.
 This does only exist for symmetric positive-definite matrices $X$.
@@ -86,6 +95,7 @@ though there exist equivalent triangular decompositions.
 \end{proof}
 
 \subsection{Low-Rank Update Formula}
+\label{sec:lr:update}
 
 Let $A, B \in\R^{n\times r}$ and $C, D\in\R^{r\times r}$.
 While an update for the \ac{LRCF} is straight-forward,
@@ -149,6 +159,33 @@ and with iterative algorithms in sight,
 the inner dimension must not grow arbitrarily.
 
 \subsection{Column Compression}
+\label{sec:lr:compression}
+
+maximum-rank truncation,
+singular value tolerance,
+...
+
+\todo{use proper algorithm}
+Taken from \cite[Section 6.3.3]{Lang2017}:
+Given $GSG^\T$, $G\in\Rnk$, and a tolerance $\epsilon\in\R$,
+compute $G_rS_rG_r^\T \approx GSG^\T$, $G_r\in\Rnr$.
+\begin{enumerate}
+  \item
+    Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$.
+  \item
+    Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
+    and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$.
+  \item
+    Set $G_r := QV_r \in\Rnr$ and $S := \Lambda_r$ with $r\leq k$ and $\abs{\lambda_{r+1}}\leq\epsilon$.
+    $V_r$ consists of the first $r$ columns of $V$ and $\Lambda_r$ of the first diagonal block of $\Lambda$.
+\end{enumerate}
+
+\todo[inline]{%
+The algorithm above uses an absolute cut-off $\epsilon$.
+How to integrate $G,S$ into a relative cut-off?
+Maybe a \enquote{cheap} adaptation of \cite[Algorithm~2.2, line~2]{Lang2017},
+or the even simpler $\epsilon\abs{\lambda_1}$?
+}
 
 \section{Model Order Reduction}
 Give brief overview.

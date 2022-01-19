@@ -28,6 +28,7 @@ $F(t, t_0, u_0) \approx u(t)$,
 and $G$ a coarse/lower-precision one.
 Then the parareal method to compute $U_n \approx u(t_n)$ reads
 \begin{equation}
+  \label{eq:pr:method}
   \left\{
   \begin{aligned}
     U^0_{n+1} &:= G(U^0_n) \\
@@ -39,7 +40,7 @@ where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$
 integrates from $t_n$ to $t_{n+1}$,
 and similarly does $F$.
 
-\begin{proposition}
+\begin{proposition}[Diagonal Convergence]
 \label{thm:pr:conv}
   Stage $n$ of the parareal method converges after at most $n$ iterations:
   \begin{equation*}
@@ -82,7 +83,7 @@ there is no need to compute $G(U^{k+1}_n)$.
   \caption{Dependencies between approximations $U^k_n$ within parareal scheme}
 \end{figure}
 
-\begin{example}
+\begin{example}[Linear \acs*{ODE}]
   Consider the \ac{IVP}
   \todo{Use a different random numbers}
   \begin{equation}
@@ -211,6 +212,44 @@ A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U
 \label{sec:pr:DRE}
 
 \todo[inline]{Formulate parareal update \wrt low-rank factorization $LDL^\T$}
+
+Let the \acp{LRSIF}
+\begin{align}
+  G(X^{k+1}_i) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
+  F(X^k_i)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
+  G(X^k_i)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
+\end{align}
+be given.
+Using the low-rank update formulas described in \autoref{sec:lr:update},
+the parareal update of \eqref{eq:pr:method} reads
+\begin{equation}
+  \hat L \hat D \hat L^\T :=
+  \begin{pmatrix}
+    L_{G,k+1} &
+    L_{F,k} &
+    L_{G,k}
+  \end{pmatrix}
+  \begin{pmatrix}
+    D_{G,k+1} \\
+    & D_{F,k} \\
+    && -D_{G,k}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{G,k+1}^\T \\
+    L_{F,k}^\T \\
+    L_{G,k}^\T
+  \end{pmatrix}
+  .
+\end{equation}
+Note the downdate in the last block component.
+The actual low-rank representation of $X^{k+1}_{i+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
+using any of the techniques described in \autoref{sec:lr:compression},
+\begin{equation}
+  X^{k+1}_{i+1}
+  := LDL^\T
+  :\approx \hat L \hat D \hat L^\T
+  .
+\end{equation}
 
 \section{Parallel Scheduling and Implementation Details}
 
