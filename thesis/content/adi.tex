@@ -2,11 +2,15 @@
 
 The \ac{ADI} method goes back to \cite{Peaceman1955}.
 It has originally been designed to solve linear systems
-\begin{equation}
-  Ax = b
-\end{equation}
+$Ax=b$
 for symmetric positive-definite $A\in\Rnn$
 and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
+In this chapter, after stating the classical parametrized intermediate-/two-step formulation,
+we describe its properties as a one-step method.
+Next, we will apply the method to \ac{ALE} in \autoref{sec:adi:ale},
+and determine suitable parameters in \autoref{sec:adi:parameters}.
+Finally, we will mention some alternative solvers for \ac{ALE}.
+
 Suppose $A=A_1+A_2$ for commuting $A_1, A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
 \begin{align*}
@@ -30,6 +34,9 @@ and convert the above into an iteration scheme
   \right.
 \end{equation}
 where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
+
+\section{ADI as a One-Step Method}
+
 Obviously, a solution to $Ax=b$ is a fixpoint of this iteration, $x = x^{k+1} = x^{k+\frac{1}{2}} = x^k$.
 Conversely, a fixpoint $\hat x := x^{k+1} = x^k$ of the above is a solution to $Ax=b$,
 provided that $\alpha_k + \beta_k$ is invertible.
@@ -81,8 +88,6 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows $A \hat x = b$.
 \end{proof}
 
 \todo[inline]{The \ac{ADI} method can be seen as an operator splitting scheme.}
-
-\section{ADI as a One-Step Method}
 
 More rigorously,
 using the notation defined at the beginning of the chapter,
@@ -194,6 +199,7 @@ By \autoref{thm:adi:cayley} ...
 }
 
 \section{Application to \act{ALE}s}
+\label{sec:adi:ale}
 
 Consider the \ac{ALE}
 \begin{equation*}
@@ -289,8 +295,8 @@ and a compression $L_{k+1} D_{k+1} L_{k+1}^\T :\approx \hat L_{k+1} \hat D_{k+1}
 following \autoref{sec:lr:compression}.
 Taking the initial value $X_0 = 0$, the first iterate reads
 \begin{align*}
-  L_1 &= A_+^{-1} G \\
-  D_1 &= -2\alpha_k S
+  L_1 &= (A+\alpha_0 I_n)^{-1} G \\
+  D_1 &= -2\Re(\alpha_0) S
   .
 \end{align*}
 
@@ -308,6 +314,7 @@ Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify 
 }
 
 \section{Parameter Selection}
+\label{sec:adi:parameters}
 
 Precomputed options:
 optimal Wachspress,
