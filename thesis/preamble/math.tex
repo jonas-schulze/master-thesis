@@ -16,6 +16,7 @@
 \newcommand\nnz{\operatorname{nnz}}
 
 % transpose and conjugate/Hermitian transpose:
+\newcommand\conj[1]{\overline{\optional{#1}}}
 \newcommand\T{T}
 \newcommand\HT{H}
 
@@ -24,6 +25,7 @@
 \newcommand\Aim{\mathop{A_1^-}}
 \newcommand\Aiip{\mathop{A_2^+}}
 \newcommand\Aiim{\mathop{A_2^-}}
+\newcommand\Cayley{\mathcal{C}}
 
 % usage: \{2x\given x\in\N}
 \newcommand{\given}{\mid}
@@ -44,6 +46,8 @@
 \renewcommand{\to}{\longrightarrow}
 \renewcommand{\mapsto}{\longmapsto}
 \renewcommand{\gets}{\longleftarrow}
+\renewcommand{\Re}{\operatorname{Re}} % real part of a complex number
+\renewcommand{\Im}{\operatorname{Im}} % imaginary part
 
 % some more delimiters:
 \NewDocumentCommand{\optional}{m}{\ifblank{#1}{\,\cdot\,}{#1}}
