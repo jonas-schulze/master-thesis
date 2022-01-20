@@ -316,9 +316,12 @@ Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify 
 \section{Parameter Selection}
 \label{sec:adi:parameters}
 
-Precomputed options:
-optimal Wachspress,
-heuristic Penzl.
+After deriving the structure of the algorithm for \ac{ALE},
+and the need of $\beta_k := \conj{\alpha_k}$ for a low-rank formulation,
+we have to determine suitable parameters $\Set{\alpha_k : k\in\N}$.
+Classical choices of pre-computed values include
+optimal Wachspress shifts \cite{Wachspress1992,Wachspress2013} and
+heuristic Penzl shifts \cite{Penzl1999}.
 We resort to self-generating shifts described in \cite[Section~5.3]{Kuerschner2016}.
 
 \section{Alternative Lyapunov Solvers}
