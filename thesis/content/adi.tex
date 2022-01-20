@@ -149,10 +149,15 @@ such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
   If $\alpha_k = \beta_k =: \gamma$,
   $M$ is itself a Cayley transformation,
   \begin{align*}
-    \Aip\Aiip &= (A_1A_2 + \alpha_k\beta_k I_n) + \beta_k  A_2 + \alpha_k A_1 \\
-    \Aim\Aiim &= (A_1A_2 + \beta_k\alpha_k I_n) + \alpha_k A_2 + \beta_k  A_1
+    \Aip\Aiip
+    &= (A_1A_2 + \alpha_k\beta_k I_n) + \alpha_k A_2 + \beta_k  A_1
+    = (A_1A_2 + \gamma^2 I_n) + \gamma(A_1 + A_2)
+    \\
+    \Aim\Aiim
+    &= (A_1A_2 + \beta_k\alpha_k I_n) - \beta_k  A_2 - \alpha_k A_1
+    = (A_1A_2 + \gamma^2 I_n) - \gamma(A_1 + A_2)
   \end{align*}
-  such that
+  such that with $A=A_1+A_2$
   \begin{align*}
     M
     &= (\Aip\Aiip)^{-1} \Aim\Aiim \\
