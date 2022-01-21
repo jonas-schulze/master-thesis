@@ -13,10 +13,13 @@ Finally, we will mention some alternative solvers for \ac{ALE}.
 
 Suppose $A=A_1+A_2$ for commuting $A_1, A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
-\begin{align*}
+\begin{equation}
+\label{eq:adi:shorthand}
+\begin{aligned}
   (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
   (A_2 + \beta I_n)x &= b - (A_1 - \beta I_n) x
-\end{align*}
+\end{aligned}
+\end{equation}
 for any $\alpha, \beta \in\C$.
 Define the short-hand notation
 \begin{align*}
@@ -256,7 +259,7 @@ Apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
 \end{remark}
 
 The one-step formulation following \eqref{eq:adi:general1step} reads:
-\begin{multline*}
+\begin{multline}
   X_{k+1} =
   (A + \alpha_k I_n)^{-1}
   (A - \beta_k I_n)
@@ -268,10 +271,10 @@ The one-step formulation following \eqref{eq:adi:general1step} reads:
   (A + \alpha_k I_n)^{-1}
   W
   (A + \conj{\beta_k} I_n)^{-\HT}
-\end{multline*}
+\end{multline}
 Choosing $\beta_k := \conj{\alpha_k}$
 the above simplifies to
-\begin{multline*}
+\begin{multline}
   X_{k+1} =
   (A + \alpha_k I_n)^{-1}
   (A - \conj{\alpha_k} I_n)
@@ -283,7 +286,7 @@ the above simplifies to
   (A + \alpha_k I_n)^{-1}
   W
   (A + \alpha_k I_n)^{-\HT}
-\end{multline*}
+\end{multline}
 which allows to apply a \ac{LRSIF}.
 Taking $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$
 the \ac{ADI} becomes
