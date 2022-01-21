@@ -320,6 +320,9 @@ Taking the initial value $X_0 = 0$, the first iterate reads
 \todo[inline]{%
 Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
 \ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
+As we are dealing with low-rank formulations of known rank $r$,
+given that we ensure full rank of the factors,
+we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A}_2$.
 }
 
 \section{Parameter Selection}
