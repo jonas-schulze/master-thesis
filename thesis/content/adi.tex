@@ -159,48 +159,72 @@ such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
   \end{aligned}
 \end{equation}
 
-\begin{remark}
-  If $\alpha_k = \beta_k =: \gamma$,
-  $M$ is itself a Cayley transformation,
+\begin{lemma}[Composition of Cayley Transformations]
+\label{thm:adi:cayley-compose}
+  Let $\alpha\in\C$ and let $A_1, A_2 \in\Rnn$ commute.
+  Then there exists $B\in\Cnn$,
+  \begin{equation*}
+    B := A_1A_2 + \abs{\alpha}^2 I_n - 2\im \Im(\alpha) A_1
+  \end{equation*}
+  where $\im^2 = -1$,
+  such that the composition
   \begin{align*}
-    \Aip\Aiip
-    &= (A_1A_2 + \alpha_k\beta_k I_n) + \alpha_k A_2 + \beta_k  A_1
-    = (A_1A_2 + \gamma^2 I_n) + \gamma(A_1 + A_2)
+    \MoveEqLeft
+    \Cayley(A_1, I_n, \alpha, \conj{\alpha}) \cdot
+    \Cayley(A_2, I_n, \conj{\alpha}, \alpha)
     \\
-    \Aim\Aiim
-    &= (A_1A_2 + \beta_k\alpha_k I_n) - \beta_k  A_2 - \alpha_k A_1
-    = (A_1A_2 + \gamma^2 I_n) - \gamma(A_1 + A_2)
+    &= \Cayley\big( B, A_1 + A_2, \alpha, \conj\alpha \big) \\
+    &= I_n - 2\Re(\alpha)(\Aip\Aiip)^{-1}(A_1+A_2)
   \end{align*}
-  such that with $A=A_1+A_2$
-  \begin{align*}
-    M
-    &= (\Aip\Aiip)^{-1} \Aim\Aiim \\
-    &= \mathcal C(A_1A_2 + \gamma^2 I_n, A, \gamma, \gamma) \\
-    &= I - 2\gamma(\Aip \Aiip)^{-1} A
+  is a Cayley transformation.
+\end{lemma}
+\begin{proof}
+  Observe that
+  $\Cayley(A_1, I_n, \alpha, \beta) = \Aipinv\Aim$ and
+  $\Cayley(A_2, I_n, \beta, \alpha) = \Aiipinv\Aiim$
+  using the short-hand notation~\eqref{eq:adi:shorthand},
+  such that by \autoref{thm:adi:commuting-matrices}
+  \begin{equation*}
+    \Cayley(A_1, I_n, \alpha, \conj{\alpha})
+    \cdot
+    \Cayley(A_2, I_n, \conj{\alpha}, \alpha)
+    =
+    (\Aip\Aiip)^{-1} \Aim\Aiim
     .
+  \end{equation*}
+  Furthermore:
+  \begin{align*}
+    \Aip\Aiip &= A_1A_2 + \alpha\beta I_n + (\beta A_1 + \alpha A_2) \\
+    \Aim\Aiim &= A_1A_2 + \alpha\beta I_n - (\alpha A_1 + \beta A_2)
   \end{align*}
-  Unfortunately, \autoref{thm:adi:cayley} is only applicable to $\rho(M)$ if $\gamma=\conj\gamma$,
-  \ie $\gamma\in\R$.
-  \todo[inline]{%
-    Applying this to an \ac{ALE}, $L = L_L + L_R$, leads to
-    $
-      X^{k+1} = X^k - 2\gamma A_+^{-1} (A X^k + X^k A^\T + W) A_+^{-\HT}
-    $
-    which doesn't seem beneficial.
-    Is this worth mentioning?
-  }
-\end{remark}
+  Applying $\beta := \conj\alpha$ as well as $\alpha = \conj\alpha + 2\im\Im(\alpha)$ yields:
+  \begin{align*}
+    \Aip\Aiip &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) + \alpha (A_1+A_2) \\
+    \Aim\Aiim &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) - \conj\alpha (A_1+A_2)
+  \end{align*}
+  The final equality follows directly from \autoref{thm:adi:cayley}.
+\end{proof}
+
+\todo[inline]{%
+  Applying this together with \autoref{thm:adi:cayley-compose}
+  to an \ac{ALE}, $L = L_L + L_R$, leads to
+  $
+    X^{k+1} = X^k - 2\Re(\alpha_k) A_+^{-1} (A X^k + X^k A^\T + W) A_+^{-\HT}
+  $
+  which looks pretty but doesn't seem to be beneficial.
+  Is this worth mentioning?
+}
 
 We have already seen that a fixpoint of the iteration solves $Ax=b$.
 Following the standard literature,
 the iteration converges iff $\rho(M) < 1$.
 By \autoref{thm:adi:cayley} ...
 
-\todo[inline]{%
-  Ich hab mich verrant.
-  Mit Hinblick auf die \ac{ALE} mit $\beta_k = \conj{\alpha_k}$ ist $M$ keine Cayley Transformation,
-  d.h. obiges Lemma nicht anwendbar.
-}
+\begin{hypothesis}[Convergence of ADI]
+\label{thm:adi:convergence}
+\todo{Rephrase in terms of eigenvalues}
+  If $A$ is stable, then $\rho(M) < 1$.
+\end{hypothesis}
 
 \todo[inline]{%
   The ADI has super-linear convergence if $A_1A_2 = A_2A_1$.
