@@ -11,7 +11,7 @@ Next, we will apply the method to \ac{ALE} in \autoref{sec:adi:ale},
 and determine suitable parameters in \autoref{sec:adi:parameters}.
 Finally, we will mention some alternative solvers for \ac{ALE}.
 
-Suppose $A=A_1+A_2$ for commuting $A_1, A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
+Suppose $A=A_1+A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
 \begin{equation}
 \label{eq:adi:shorthand}
@@ -41,19 +41,21 @@ where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iter
 \section{ADI as a One-Step Method}
 \label{sec:adi:1step}
 
-Obviously, a solution to $Ax=b$ is a fixpoint of this iteration, $x = x^{k+1} = x^{k+\frac{1}{2}} = x^k$.
-Conversely, a fixpoint $\hat x := x^{k+1} = x^k$ of the above is a solution to $Ax=b$,
+A solution to $Ax=b$ is, by construction, a fixpoint of the \ac{ADI} iteration~\eqref{eq:adi:general2step},
+$x = x^{k+1} = x^{k+\frac{1}{2}} = x^k$.
+Conversely, a fixpoint $\hat x := x^{k+1} = x^k$ is a solution to $Ax=b$,
 provided that $\alpha_k + \beta_k$ is invertible.
 Therefore, formulate the \ac{ADI}~\eqref{eq:adi:general2step} as a one-step scheme.
 
-First, note that all the matrices $\Aip, \Aim, \Aiip, \Aiim$ commute as $A_1A_2 = A_2A_1$.
-Thus, substituting the intermediate step $x^{k+\frac{1}{2}}$ into the final part of \eqref{eq:adi:general2step} leads to
+Obviously, $\Aip\Aim = \Aim\Aip$.
+Thus, by \autoref{thm:adi:commuting-matrices} below, $\Aim\Aipinv = \Aipinv\Aim$.
+Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the final part of \eqref{eq:adi:general2step} leads to
 \begin{align*}
   \Aiip \hat x
   &= b - \Aim \mathop{(\Aip)^{-1}} (b - \Aiim \hat x) \\
   &= b - \mathop{(\Aip)^{-1}} \Aim (b - \Aiim \hat x)
+  .
 \end{align*}
-by the lemma below.
 Multiplying by $\Aip$ and rearranging the terms then gives
 \begin{equation*}
   \underbrace{%
@@ -70,13 +72,18 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows $A \hat x = b$.
 
 \begin{lemma}[Commuting Matrices]
 \label{thm:adi:commuting-matrices}
-  Let $\alpha, \beta\in\R$ and let $A, B \in\Rnn$ commute.
+  Let $\alpha, \beta\in\C$ and let $A, B \in\Cnn$ commute.
   If $A$ is invertible, then $A^{-1}B = BA^{-1}$.
   If $(A+\alpha I_n)$ is invertible, then
   \begin{equation*}
-    (A+\alpha I_n)^{-1} (B+\beta I_n)
-    =
-    (B+\beta I_n) (A+\alpha I_n)^{-1}
+    (A+\alpha I_n)^{-1} (B-\beta I_n)
+    = (B-\beta I_n) (A+\alpha I_n)^{-1}
+    .
+  \end{equation*}
+  Furthermore, for $M\in\Cnn$ it holds
+  \begin{equation*}
+    (A+\alpha M)^{-1} (A-\beta M)
+    = I_n - (\alpha+\beta) (A+\alpha M)^{-1} M
     .
   \end{equation*}
 \end{lemma}
@@ -84,14 +91,15 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows $A \hat x = b$.
   Multiplying $AB=BA$ with $A^{-1}$ from either side yields $A^{-1}B=BA^{-1}$.
   Furthermore, $AB=BA$ implies
   $
-    (A+\alpha I_n) (B+\beta I_n)
+    (A+\alpha I_n) (B-\beta I_n)
     =
-    (B+\beta I_n) (A+\alpha I_n)
+    (B-\beta I_n) (A+\alpha I_n)
   $.
   Applying the first claim yields the desired equality.
+  The last claim follows from noting
+  $A-\beta M = (A+\alpha M) - (\alpha+\beta)M$
+  and multiplying by $(A+\alpha M)^{-1}$.
 \end{proof}
-
-\todo[inline]{The \ac{ADI} method can be seen as an operator splitting scheme.}
 
 More rigorously,
 using the notation defined at the beginning of the chapter,
@@ -114,6 +122,25 @@ as a general one-step iteration the \ac{ADI} reads
   .
 \end{aligned}
 \end{equation*}
+By \autoref{thm:adi:commuting-matrices},
+$\Aipinv\Aim = I_n - (\alpha_k + \beta_k)\Aipinv$,
+such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
+\begin{equation}
+\label{eq:adi:general1step}
+  \begin{aligned}
+    M &= (\Aip\Aiip)^{-1} (\Aim\Aiim) \\
+    N &= (\alpha_k + \beta_k) (\Aip\Aiip)^{-1}
+  \end{aligned}
+\end{equation}
+
+\todo{Find reference.}
+Such an iteration converges iff $\rho(M) < 1$.
+We restrict the analysis to commuting $A_1, A_2$.
+In this case,
+there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
+such that the \ac{ADI} shows
+\todo{Can I show this?}
+superlinear convergence \cite{Beckermann2010}.
 
 \begin{lemma}[Cayley Transformation]
 \label{thm:adi:cayley}
@@ -122,12 +149,6 @@ as a general one-step iteration the \ac{ADI} reads
   the rational matrix function
   \begin{equation*}
     \Cayley(A, M, \alpha, \beta) := (A+\alpha M)^{-1} (A-\beta M).
-  \end{equation*}
-  Then it holds
-  \begin{equation*}
-    \Cayley(A, M, \alpha, \beta)
-    = I_n - (\alpha+\beta) (A+\alpha M)^{-1} M
-    .
   \end{equation*}
   \todo[inline]{
     Furthermore, $\Lambda(A,M) \subset\C_- \implies \rho(\Cayley(A,M,\alpha,\conj\alpha)) < 1$,
@@ -141,24 +162,7 @@ as a general one-step iteration the \ac{ADI} reads
   $(A, M)$ is c-stable.
 \end{remark}
 \begin{proof}
-  Note $A-\beta M = (A+\alpha M) - (\alpha+\beta)M$
-  and multiply by $(A+\alpha M)^{-1}$.
 \end{proof}
-
-Therefore,
-$
-  (\Aip)^{-1}\Aim
-  = \Cayley(A_1, I_n, \alpha_k, \beta_k)
-  = I_n - (\alpha_k+\beta_k)(\Aip)^{-1}
-$,
-such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
-\begin{equation}
-\label{eq:adi:general1step}
-  \begin{aligned}
-    M &= \mathop{(\Aiip)^{-1}} \mathop{(\Aip)^{-1}} \Aim \Aiim \\
-    N &= (\alpha_k + \beta_k) \mathop{(\Aiip)^{-1}} \mathop{(\Aip)^{-1}}
-  \end{aligned}
-\end{equation}
 
 \begin{lemma}[Composition of Cayley Transformations]
 \label{thm:adi:cayley-compose}
@@ -203,7 +207,7 @@ such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
     \Aip\Aiip &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) + \alpha (A_1+A_2) \\
     \Aim\Aiim &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) - \conj\alpha (A_1+A_2)
   \end{align*}
-  The final equality follows directly from \autoref{thm:adi:cayley}.
+  The final equality follows directly from \autoref{thm:adi:commuting-matrices}.
 \end{proof}
 
 \todo[inline]{%
@@ -216,21 +220,11 @@ such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
   Is this worth mentioning?
 }
 
-We have already seen that a fixpoint of the iteration solves $Ax=b$.
-Following the standard literature,
-the iteration converges iff $\rho(M) < 1$.
-By \autoref{thm:adi:cayley} ...
-
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
 \todo{Rephrase in terms of eigenvalues}
   If $A$ is stable, then $\rho(M) < 1$.
 \end{hypothesis}
-
-\todo[inline]{%
-  The ADI has super-linear convergence if $A_1A_2 = A_2A_1$.
-  If this is easy to show, do so.
-}
 
 \section{Application to \act{ALE}s}
 \label{sec:adi:ale}
