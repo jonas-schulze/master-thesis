@@ -167,54 +167,38 @@ superlinear convergence \cite{Beckermann2010}.
 \begin{proof}
 \end{proof}
 
-\begin{lemma}[Composition of Cayley Transformations]
-\label{thm:adi:cayley-compose}
-  Let $\alpha\in\C$ and let $A_1, A_2 \in\Rnn$ commute.
-  Then there exists $B\in\Cnn$,
+\begin{lemma}
+  Let $\alpha_k,\beta_k\in\C$ and $A=A_1+A_2$ be given.
+  Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
+  The \ac{ADI} iteration matrix $M$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
+  Furthermore,
   \begin{equation*}
-    B := A_1A_2 + \abs{\alpha}^2 I_n - 2\im \Im(\alpha) A_1
+    M = I_n - (\alpha_k + \beta_k) (\Aip\Aiip)^{-1} A
   \end{equation*}
-  where $\im^2 = -1$,
-  such that the composition
-  \begin{align*}
-    \MoveEqLeft
-    \Cayley(A_1, I_n, \alpha, \conj{\alpha}) \cdot
-    \Cayley(A_2, I_n, \conj{\alpha}, \alpha)
-    \\
-    &= \Cayley\big( B, A_1 + A_2, \alpha, \conj\alpha \big) \\
-    &= I_n - 2\Re(\alpha)(\Aip\Aiip)^{-1}(A_1+A_2)
-  \end{align*}
-  is a Cayley transformation.
 \end{lemma}
 \begin{proof}
-  Observe that
-  $\Cayley(A_1, I_n, \alpha, \beta) = \Aipinv\Aim$ and
-  $\Cayley(A_2, I_n, \beta, \alpha) = \Aiipinv\Aiim$
-  using the short-hand notation~\eqref{eq:adi:shorthand},
-  such that by \autoref{thm:adi:commuting-matrices}
+  For brevity, we omit the subscript $k$.
+  Observe
+  \begin{align*}
+    \Aip\Aiip
+    &= A_1A_2 + \alpha\beta I_n + \beta A_1 + \alpha A_2 \\
+    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 + \alpha(A_1 + A_2) \\
+    \Aim\Aiim
+    &= A_1A_2 + \alpha\beta I_n - \alpha A_1 - \beta A_2 \\
+    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 - \beta(A_1 + A_2)
+  \end{align*}
+  such that
+  \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
+  $M = \Cayley(B, A_1+A_2, \alpha, \beta)$ for
   \begin{equation*}
-    \Cayley(A_1, I_n, \alpha, \conj{\alpha})
-    \cdot
-    \Cayley(A_2, I_n, \conj{\alpha}, \alpha)
-    =
-    (\Aip\Aiip)^{-1} \Aim\Aiim
-    .
+    B := A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1
   \end{equation*}
-  Furthermore:
-  \begin{align*}
-    \Aip\Aiip &= A_1A_2 + \alpha\beta I_n + (\beta A_1 + \alpha A_2) \\
-    \Aim\Aiim &= A_1A_2 + \alpha\beta I_n - (\alpha A_1 + \beta A_2)
-  \end{align*}
-  Applying $\beta := \conj\alpha$ as well as $\alpha = \conj\alpha + 2\im\Im(\alpha)$ yields:
-  \begin{align*}
-    \Aip\Aiip &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) + \alpha (A_1+A_2) \\
-    \Aim\Aiim &= \big(A_1A_2 + \abs{\alpha}^2 I_n - 2\im\Im(\alpha)A_1\big) - \conj\alpha (A_1+A_2)
-  \end{align*}
+  where $\im^2 = -1$.
   The final equality follows directly from \autoref{thm:adi:commuting-matrices}.
 \end{proof}
 
 \todo[inline]{%
-  Applying this together with \autoref{thm:adi:cayley-compose}
+  Applying the above
   to an \ac{ALE}, $L = L_L + L_R$, leads to
   $
     X^{k+1} = X^k - 2\Re(\alpha_k) A_+^{-1} (A X^k + X^k A^\T + W) A_+^{-\HT}
@@ -223,10 +207,27 @@ superlinear convergence \cite{Beckermann2010}.
   Is this worth mentioning?
 }
 
+If $A_1, A_2$ commute,
+all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
+By \autoref{thm:adi:commuting-matrices} this extends to their inverses.
+Thus,
+\begin{equation*}
+  M =
+  \Aipinv\Aim
+  \Aiipinv\Aiim
+  =:
+  \Cayley(A_1, I_n, \alpha, \beta)
+  \cdot
+  \Cayley(A_2, I_n, \beta, \alpha)
+  ,
+\end{equation*}
+\todo{Does this help with $\rho(M)<1$?}
+\ie $M$ is even a sequence of Cayley transformations.
+
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
 \todo{Rephrase in terms of eigenvalues}
-  If $A$ is stable, then $\rho(M) < 1$.
+  If $A_1$ and $A_2$ are stable, then $\rho(M) < 1$.
 \end{hypothesis}
 
 \section{Application to \act{ALE}s}
