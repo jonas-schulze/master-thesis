@@ -174,6 +174,7 @@ superlinear convergence \cite{Beckermann2010}.
   Furthermore,
   \begin{equation*}
     M = I_n - (\alpha_k + \beta_k) (\Aip\Aiip)^{-1} A
+    .
   \end{equation*}
 \end{lemma}
 \begin{proof}
@@ -190,10 +191,9 @@ superlinear convergence \cite{Beckermann2010}.
   such that
   \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
   $M = \Cayley(B, A_1+A_2, \alpha, \beta)$ for
-  \begin{equation*}
+  $
     B := A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1
-  \end{equation*}
-  where $\im^2 = -1$.
+  $.
   The final equality follows directly from \autoref{thm:adi:commuting-matrices}.
 \end{proof}
 
@@ -201,7 +201,7 @@ superlinear convergence \cite{Beckermann2010}.
   Applying the above
   to an \ac{ALE}, $L = L_L + L_R$, leads to
   $
-    X^{k+1} = X^k - 2\Re(\alpha_k) A_+^{-1} (A X^k + X^k A^\T + W) A_+^{-\HT}
+    X^{k+1} = X^k - 2\Re(\alpha_k) A_+^{-1} (A X^k + X^k A^\HT + W) A_+^{-\HT}
   $
   which looks pretty but doesn't seem to be beneficial.
   Is this worth mentioning?
@@ -256,31 +256,6 @@ Apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
   \end{aligned}
   \right.
 \end{equation}
-
-\begin{remark}
-  Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
-  As a mapping of matrices,
-  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
-  $
-    U A^\HT + \alpha U =
-    U(A+\conj{\alpha} I_n)^\HT \neq
-    U A_+^\HT
-  $.
-  Therefore, the notation is slightly more involved than in the previous section.
-
-  In the notation of the previous section,
-  vectorize $\Cnn$ as $\C^{n^2}$ and identify the mappings
-  \begin{gather*}
-    A_1^\pm = L_L \pm \alpha_k I_{n^2}
-    \qquad\text{with}\qquad
-    A \pm \alpha_k I_n \in\Cnn \\
-    A_2^\pm = L_R \pm \alpha_k I_{n^2}
-    \qquad\text{with}\qquad
-    A \pm \conj{\alpha_k} I_n \in\Cnn
-  \end{gather*}
-  together with left- and right-multiplication, respectively.
-\end{remark}
-
 The one-step formulation following \eqref{eq:adi:general1step} reads:
 \begin{multline}
   X_{k+1} =
@@ -296,8 +271,9 @@ The one-step formulation following \eqref{eq:adi:general1step} reads:
   (A + \conj{\beta_k} I_n)^{-\HT}
 \end{multline}
 Choosing $\beta_k := \conj{\alpha_k}$
-the above simplifies to
+the above becomes Hermitean:
 \begin{multline}
+\label{eq:adi:ale1step}
   X_{k+1} =
   (A + \alpha_k I_n)^{-1}
   (A - \conj{\alpha_k} I_n)
@@ -310,19 +286,29 @@ the above simplifies to
   W
   (A + \alpha_k I_n)^{-\HT}
 \end{multline}
-which allows to apply a \ac{LRSIF}.
-Taking $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$
-the \ac{ADI} becomes
+Define
+$A^+_k := A + \alpha_k I_n$ and
+$A^-_k := A - \conj\alpha_k I_n$.
+For $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$,
+the \ac{ADI} can be stated in \ac{LRSIF} directly:
 \begin{align*}
   \hat L_{k+1} &= \begin{bmatrix}
-    (A+\alpha_k I_n)^{-1} (A - \conj{\alpha_k} I_n) L_k &
-    (A+\alpha_k I_n)^{-1} G
+    (A^+_k)^{-1} A^-_k L_k &
+    (A^+_k)^{-1} G
   \end{bmatrix} \\
   \hat D_{k+1} &= \begin{bmatrix}
     D_k \\
     & -2\Re(\alpha_k) S
   \end{bmatrix}
 \end{align*}
+
+\todo[inline]{%
+  Exploit commutativity of $L_L, L_R$ to reorder ADI parameters.
+  This way, $L_{k+1}$ is created from $L_k$ by augmenting a single block column
+  instead of needing to multiplying $L_k$.
+  Also, find reference to where does this idea came from?
+}
+...
 and a compression $L_{k+1} D_{k+1} L_{k+1}^\T :\approx \hat L_{k+1} \hat D_{k+1} \hat L_{k+1}^\T$
 following \autoref{sec:lr:compression}.
 Taking the initial value $X_0 = 0$, the first iterate reads
@@ -333,11 +319,25 @@ Taking the initial value $X_0 = 0$, the first iterate reads
 \end{align*}
 
 \begin{remark}
+  Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
+  As a mapping of matrices,
+  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
+  $
+    U A^\HT + \alpha U =
+    U(A+\conj{\alpha} I_n)^\HT \neq
+    U A_+^\HT
+  $.
+  Therefore, the notation is slightly more involved than in the previous section.
+  For more details, refer to \autoref{sec:vectorization}.
+\end{remark}
+
+\begin{remark}
   \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
   right-multiplication $\tilde L_R :X \mapsto XA^\T$, $\tilde L_R \neq L_R$.
   The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
-  This leads to the impression that the ADI is a one-parameter ADI, $\beta_k=\alpha_k$,
-  instead of a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
+  This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
+  instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
+  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is identical to \eqref{eq:adi:ale1step}.
 \end{remark}
 
 \todo[inline]{%
