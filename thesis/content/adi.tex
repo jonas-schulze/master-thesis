@@ -13,19 +13,22 @@ Finally, we will mention some alternative solvers for \ac{ALE}.
 
 Suppose $A=A_1+A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
+\begin{align*}
+  (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
+  (A_2 + \beta I_n)x &= b - (A_1 - \beta I_n) x
+\end{align*}
+for any $\alpha, \beta \in\C$.
+Define the short-hand notation
 \begin{equation}
 \label{eq:adi:shorthand}
 \begin{aligned}
-  (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
-  (A_2 + \beta I_n)x &= b - (A_1 - \beta I_n) x
+  \Aip  &:= A_1 + \alpha_k I_n &
+  \qquad\qquad\qquad %FIXME
+  \Aiip &:= A_2 + \beta_k  I_n \\
+  \Aim  &:= A_1 - \beta_k  I_n &
+  \Aiim &:= A_2 - \alpha_k I_n
 \end{aligned}
 \end{equation}
-for any $\alpha, \beta \in\C$.
-Define the short-hand notation
-\begin{align*}
-  \Aip &:= A_1 + \alpha_k I_n & \Aiip &:= A_2 + \beta_k I_n \\
-  \Aim &:= A_1 - \beta_k I_n  & \Aiim &:= A_2 - \alpha_k I_n
-\end{align*}
 and convert the above into an iteration scheme
 \begin{equation}
   \label{eq:adi:general2step}
