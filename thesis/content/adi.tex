@@ -197,15 +197,11 @@ superlinear convergence \cite{Beckermann2010}.
   The final equality follows directly from \autoref{thm:adi:commuting-matrices}.
 \end{proof}
 
-\todo[inline]{%
-  Applying the above
-  to an \ac{ALE}, $L = L_L + L_R$, leads to
-  $
-    X^{k+1} = X^k - 2\Re(\alpha_k) A_+^{-1} (A X^k + X^k A^\HT + W) A_+^{-\HT}
-  $
-  which looks pretty but doesn't seem to be beneficial.
-  Is this worth mentioning?
-}
+\begin{remark}
+  Observe that $M = I_n - NA$.
+  Thus, $x^{k+1} = Mx^k + Nb = x^k - N(Ax^k - b)$,
+  the second normal form of the \ac{ADI} as a one-step method.
+\end{remark}
 
 If $A_1, A_2$ commute,
 all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
