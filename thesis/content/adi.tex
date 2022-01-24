@@ -127,17 +127,17 @@ as a general one-step iteration the \ac{ADI} reads
 \end{equation*}
 By \autoref{thm:adi:commuting-matrices},
 $\Aipinv\Aim = I_n - (\alpha_k + \beta_k)\Aipinv$,
-such that the iteration matrices for $x^{k+1} = M x^k + N b$ are given by:
+such that the iteration matrices for $x^{k+1} = M_k x^k + N_k b$ are given by:
 \begin{equation}
 \label{eq:adi:general1step}
   \begin{aligned}
-    M &= (\Aip\Aiip)^{-1} (\Aim\Aiim) \\
-    N &= (\alpha_k + \beta_k) (\Aip\Aiip)^{-1}
+    M_k &= (\Aip\Aiip)^{-1} (\Aim\Aiim) \\
+    N_k &= (\alpha_k + \beta_k) (\Aip\Aiip)^{-1}
   \end{aligned}
 \end{equation}
 
 \todo[inline]{Maybe I should reformulate the method as $Mx^{k+1} = Nx + b$ instead, such that $M$ and $N$ are compatible to \cite{Golub2013}.}
-Such an iteration converges iff $\rho(M) < 1$ \cite[Theorem~11.2.1]{Golub2013}.
+Such an iteration converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
 We restrict the analysis to commuting $A_1, A_2$.
 In this case,
 there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
@@ -168,12 +168,15 @@ superlinear convergence \cite{Beckermann2010}.
 \end{proof}
 
 \begin{lemma}
+\label{thm:adi:2nf}
   Let $\alpha_k,\beta_k\in\C$ and $A=A_1+A_2$ be given.
   Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
   The \ac{ADI} iteration matrix $M$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
   Furthermore,
   \begin{equation*}
-    M = I_n - (\alpha_k + \beta_k) (\Aip\Aiip)^{-1} A
+    M_k
+    = I_n - (\alpha_k + \beta_k) (\Aip\Aiip)^{-1} A
+    = I_n - N_k A
     .
   \end{equation*}
 \end{lemma}
@@ -198,8 +201,10 @@ superlinear convergence \cite{Beckermann2010}.
 \end{proof}
 
 \begin{remark}
-  Observe that $M = I_n - NA$.
+  Observe that $M = I_n - NA$,
+  as to be expected for a consistent algorithm.
   Thus, $x^{k+1} = Mx^k + Nb = x^k - N(Ax^k - b)$,
+  which is called
   the second normal form of the \ac{ADI} as a one-step method.
 \end{remark}
 
@@ -219,6 +224,48 @@ Thus,
 \end{equation*}
 \todo{Does this help with $\rho(M)<1$?}
 \ie $M$ is even a sequence of Cayley transformations.
+
+\begin{proposition}[Independence of Order of Parameters]
+  Let $A=A_1 + A_2$ be given for commuting $A_1,A_2$.
+  Further, fix $K\in\N$ and parameters $\Set{(\alpha_k, \beta_k) \given 1 \leq k \leq K} \subseteq \C^2$.
+  Define the \ac{ADI} $x^{k+1} := M_k x^k + N_k b$ according to \eqref{eq:adi:general1step}.
+  Then, the value of $x^K$ does not depend on the order of the parameters.
+\end{proposition}
+\begin{remark}
+  Any previous $x^k$, $k < K$, may take a different value depending on which parameters
+  $\Set{(\alpha_\ell,\beta_\ell) \given k < \ell \leq K}$ are yet to be chosen.
+\end{remark}
+\begin{proof}
+  The following is a generalization of \cite[proof of Theorem~4.1]{Li2002}.
+  By \autoref{thm:adi:commuting-matrices}, all the matrices $A_1, A_2, M_i, M_j, N_i, N_j$ commute, $\forall i,j\in\N$.
+  Therefore, any neighboring parameters $(\alpha_k,\beta_k)$ and $(\alpha_{k-1},\beta_{k-1})$ may be exchanged,
+  \begin{align*}
+    x^{k+1}
+    &= M_k x^k + N_k b \\
+    &= M_k (M_{k_1} x^{k-1} + N_{k-1} b) + N_k b \\
+    &= \underbrace{
+      (M_k M_{k-1})
+    }_{
+      M_{k-1} M_k
+    } x^{k-1} + \underbrace{
+      (M_k N_{k-1} + N_k)
+    }_{
+      M_{k-1} N_k + N_{k-1}
+    } b
+    ,
+  \end{align*}
+  since by \autoref{thm:adi:2nf}
+  \begin{align*}
+    M_k N_{k-1} + N_k
+    &= (I - N_k A)N_{k-1} + N_k \\
+    &= N_{k-1} + N_k (A_1+A_2) N_{k-1} + N_k \\
+    &= N_{k-1} + (I - N_{k-1} A) N_k \\
+    &= N_{k-1} + M_{k-1} N_k
+    .
+  \end{align*}
+  As any permutation of $(\alpha_k,\beta_k)_{1\leq k \leq K}$ may be obtained by exchanging neighboring parameters,
+  $x^K$ does thus not depend on the order of the parameters.
+\end{proof}
 
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
