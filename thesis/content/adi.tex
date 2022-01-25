@@ -226,6 +226,7 @@ Thus,
 \ie $M$ is even a sequence of Cayley transformations.
 
 \begin{proposition}[Independence of Order of Parameters]
+\label{thm:adi:permutation}
   Let $A=A_1 + A_2$ be given for commuting $A_1,A_2$.
   Further, fix $K\in\N$ and parameters $\Set{(\alpha_k, \beta_k) \given 1 \leq k \leq K} \subseteq \C^2$.
   Define the \ac{ADI} $x^{k+1} := M_k x^k + N_k b$ according to \eqref{eq:adi:general1step}.
@@ -236,7 +237,7 @@ Thus,
   $\Set{(\alpha_\ell,\beta_\ell) \given k < \ell \leq K}$ are yet to be chosen.
 \end{remark}
 \begin{proof}
-  The following is a generalization of \cite[proof of Theorem~4.1]{Li2002}.
+  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
   By \autoref{thm:adi:commuting-matrices}, all the matrices $A_1, A_2, M_i, M_j, N_i, N_j$ commute, $\forall i,j\in\N$.
   Therefore, any neighboring parameters $(\alpha_k,\beta_k)$ and $(\alpha_{k-1},\beta_{k-1})$ may be exchanged,
   \begin{align*}
@@ -267,10 +268,38 @@ Thus,
   $x^K$ does thus not depend on the order of the parameters.
 \end{proof}
 
-\todo[inline]{%
-  The construction of \cite{Li2002,Benner2009} results in a somewhat \enquote{diagonal} subsequence of ADI iterates:
-  $x^k$ depends on $\Set{\alpha_{K-k+1},\ldots,\alpha_K}$.
+\cite{Li2002} formulate a reordering of the parameters to simplifiy computations.
+Formulate the \ac{ADI} for $x^0 = 0$,
+\begin{align*}
+  x^{k+1}
+  &= M_k x^k + N_k b \\
+  &= M_k M_{k-1} x^{k-1} + (M_k N_{k-1} + N_k) b \\
+  &= M_k M_{k-1} (M_{k-2} x^{k-2} + N_{k-2}b) + (M_k N_{k-1} + N_k) b \\
+  &= M_k \cdots M_{k-2} x^{k-2} + (M_k M_{k-1} N_{k-2} + M_k N_{k-1} + N_k) b \\
+  &\vdotswithin{=} \\
+  &= \underbrace{M_k \cdots M_0 x^0}_0 + (M_k \cdots M_1 N_0 + \ldots + M_k N_{k-1} + N_k) b \\
+  &= (M_{\sigma(k)} \cdots M_{\sigma(1)} N_{\sigma(0)} + \ldots + M_{\sigma(k)} N_{\sigma(k-1)} + N_{\sigma(k)}) b \\
+\intertext{%
+  by \autoref{thm:adi:permutation}
+  for any permutation $\sigma$ of $\Set{0,\ldots,k}$.
+  Choosing $\sigma := \sigma_k : i \mapsto k-i$,
+  and exploiting that $M_* N_* = N_* M_*$ commute,
+  yields
 }
+  &= (M_0 \cdots M_{k-1} N_k + \ldots + M_0 N_1 + N_0) b \\
+  &= (N_k M_{k-1} \cdots M_0 + \ldots + N_1 M_0 + N_0) b \\
+  &= x^k + v^k
+\end{align*}
+\todo{A reformulation similar to \cite{Golub2013} will make the last step easier to digest.}
+for
+\begin{equation}
+\left\{
+\begin{aligned}
+  v^k &:= N_k M_{k-1} v^{k-1} (FIXME) \\
+  v^1 &:= b
+\end{aligned}
+\right.
+\end{equation}
 
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
