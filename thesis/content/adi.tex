@@ -41,37 +41,80 @@ and convert the above into an iteration scheme
 \end{equation}
 where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
 
-\section{ADI as a One-Step Method}
+\section{ADI as a Linear Splitting Scheme}
 \label{sec:adi:1step}
 
-A solution to $Ax=b$ is, by construction, a fixpoint of the \ac{ADI} iteration~\eqref{eq:adi:general2step},
-$x = x^{k+1} = x^{k+\frac{1}{2}} = x^k$.
-Conversely, a fixpoint $\hat x := x^{k+1} = x^k$ is a solution to $Ax=b$,
-provided that $\alpha_k + \beta_k$ is invertible.
-Therefore, formulate the \ac{ADI}~\eqref{eq:adi:general2step} as a one-step scheme.
+Many iterative methods solving $Ax=b$ can be written in a one-step \emph{splitting} form
+\begin{equation}
+\label{eq:adi:1nf}
+  Mx^{k+1} = Nx^k + b
+\end{equation}
+where $M-N = A$ and $M$ is \enquote{easy} to invert \cite[Section~11.2.3]{Golub2013}.
+These methods are \emph{consistent} by construction,
+\ie every solution $\hat x$ to $Ax=b$ is a fixpoint of the iteration.
+Conversely, every fixpoint $x^{k+1} = x^k$ is a solution as well.
+\todo{The proof may need to be adjusted for variable $G_k$.}
+The method converges if $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
+$G$ is called \emph{iteration matrix} of the scheme.
+
+Obviously, every sub-step of the \ac{ADI}~\eqref{eq:adi:general2step} is a splitting scheme.
+First, we will show how this property is passed onto its one-step formulation.
+Then, we will provide an alternative formulation of the ADI following \cite{Li2002} that simplifies computations.
+Finally, we will analyse the convergence.
+
+\begin{remark}
+  \eqref{eq:adi:1nf} is often called \emph{first normal form} of a linear one-step method.
+  \todo{Find reference. Until then, see Warnecke lecture notes, Lemma~3.5.}
+  Consistency is then equivalent to $M-N=A$.
+  The \emph{second normal form} of a consistent linear iteration method reads
+  $
+    x^{k+1}
+    = M^{-1} \big( (M-A) x^k + b \big)
+    = x^k - M^{-1}(Ax^k - b)
+  $.
+\end{remark}
+
+\subsection{Computation}
 
 Obviously, $\Aip\Aim = \Aim\Aip$.
 Thus, by \autoref{thm:adi:commuting-matrices} below, $\Aim\Aipinv = \Aipinv\Aim$.
 Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the final part of \eqref{eq:adi:general2step} leads to
-\begin{align*}
-  \Aiip \hat x
-  &= b - \Aim \mathop{(\Aip)^{-1}} (b - \Aiim \hat x) \\
-  &= b - \mathop{(\Aip)^{-1}} \Aim (b - \Aiim \hat x)
-  .
-\end{align*}
-Multiplying by $\Aip$ and rearranging the terms then gives
 \begin{equation*}
-  \underbrace{%
-  (\Aip \Aiip - \Aim \Aiim)
-  }_{(\alpha_k + \beta_k) (A_1+A_2)}
-  \hat x =
+  \Aiip x^{k+1}
+  = b - \underbrace{
+    \Aim\Aipinv
+  }_{\Aipinv\Aim}
+  (b - \Aiim \hat x^k)
+  .
+\end{equation*}
+Multiplying by $\Aip$ then gives
+\begin{equation*}
+  \Aip\Aiip x^{k+1} = \Aim\Aiim x^k +
   \underbrace{%
   (\Aip - \Aim)
   }_{(\alpha_k + \beta_k) I_n}
   b
   .
 \end{equation*}
-Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows $A \hat x = b$.
+Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows
+\begin{equation}
+\label{eq:adi:general1step}
+  \underbrace{
+    (\alpha_k + \beta_k)^{-1} \Aip\Aiip \\
+  }_{M_k}
+  x^{k+1} =
+  \underbrace{
+    (\alpha_k + \beta_k)^{-1} \Aim\Aiim
+  }_{N_k}
+  x^k + b
+  .
+\end{equation}
+Indeed, $M_k - N_k = A$ since
+\begin{align*}
+  \Aip\Aiip &= A_1A_2 + \alpha_k\beta_k I_n + \beta_k A_1 + \alpha_k A_2 \\
+  \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
+  .
+\end{align*}
 
 \begin{lemma}[Commuting Matrices]
 \label{thm:adi:commuting-matrices}
@@ -104,39 +147,141 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows $A \hat x = b$.
   and multiplying by $(A+\alpha M)^{-1}$.
 \end{proof}
 
-More rigorously,
-using the notation defined at the beginning of the chapter,
-as a general one-step iteration the \ac{ADI} reads
-\begin{equation*}
-\begin{aligned}
+\begin{proposition}[Independence of Order of Parameters]
+\label{thm:adi:permutation}
+  Let $A=A_1 + A_2$ be given for commuting $A_1,A_2$.
+  Further, fix $K\in\N$ and parameters $\Set{(\alpha_k, \beta_k) \given 1 \leq k \leq K} \subseteq \C^2$.
+  Define the \ac{ADI} $x^{k+1} := M_k x^k + N_k b$ according to \eqref{eq:adi:general1step}.
+  Then, the value of $x^K$ does not depend on the order of the parameters.
+\end{proposition}
+\begin{remark}
+  Any previous $x^k$, $k < K$, may take a different value depending on which parameters
+  $\Set{(\alpha_\ell,\beta_\ell) \given k < \ell \leq K}$ are yet to be chosen.
+\end{remark}
+\begin{proof}
+  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
+  Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
+  and $B_k := M_k^{-1}$ denote the matrix of the second normal form.
+  By \autoref{thm:adi:commuting-matrices}, all the matrices $A_1, A_2, G_*, B_*$ commute.
+  Therefore, any neighboring parameters $(\alpha_k,\beta_k)$ and $(\alpha_{k-1},\beta_{k-1})$ may be exchanged,
+  \begin{align*}
+    x^{k+1}
+    &= G_k x^k + B_k b \\
+    &= G_k (G_{k-1} x^{k-1} + B_{k-1} b) + B_k b \\
+    &= \underbrace{
+      (G_k G_{k-1})
+    }_{
+      G_{k-1} G_k
+    } x^{k-1} + \underbrace{
+      (G_k B_{k-1} + B_k)
+    }_{
+      G_{k-1} B_k + B_{k-1}
+    } b
+  \end{align*}
+  since $N_k = M_k - A$ implies $G_k = I_n - B_k A$ as well as
+  \begin{align*}
+    G_k B_{k-1} + B_k
+    &= (I_n - B_k A) B_{k-1} + B_k \\
+    &= B_{k-1} - B_k (A_1+A_2) B_{k-1} + B_k \\
+    &= B_{k-1} + (I_n - B_{k-1} A) B_k \\
+    &= B_{k-1} + G_{k-1} B_k
+    .
+  \end{align*}
+  As any permutation of $(\alpha_k,\beta_k)_{1\leq k \leq K}$ may be obtained by exchanging neighboring parameters,
+  $x^K$ does thus not depend on the order of the parameters.
+\end{proof}
+
+This allows a reformulation of the \ac{ADI} to simplify computations \cite{Li2002}.
+For an initial value of $x^0 = 0$,
+the ADI reads:
+\begin{align*}
   x^{k+1}
-  &= \mathop{(\Aiip)^{-1}} \big( b - \Aim \mathop{(\Aip)^{-1}} (b - \Aiim x^k) \big) \\
-  &= \mathop{(\Aiip)^{-1}} \underbrace{
-    \Aim \mathop{(\Aip)^{-1}}
-  }_{
-    \mathop{(\Aip)^{-1}} \Aim
-  }
-  \Aiim x^k + \mathop{(\Aiip)^{-1}} \big( I_n - \underbrace{
-    \Aim \mathop{(\Aip)^{-1}}
-  }_{
-    \mathop{(\Aip)^{-1}} \Aim
-  }
-  \big) b
-  .
-\end{aligned}
-\end{equation*}
-By \autoref{thm:adi:commuting-matrices},
-$\Aipinv\Aim = I_n - (\alpha_k + \beta_k)\Aipinv$,
-such that the iteration matrices for $x^{k+1} = M_k x^k + N_k b$ are given by:
+  &= G_k x^k + B_k b \\
+  &= G_k G_{k-1} x^{k-1} + (G_k B_{k-1} + B_k) b \\
+  &= G_k G_{k-1} (G_{k-2} x^{k-2} + B_{k-2}b) + (G_k B_{k-1} + B_k) b \\
+  &= G_k \cdots G_{k-2} x^{k-2} + (G_k G_{k-1} B_{k-2} + G_k B_{k-1} + B_k) b \\
+  &\vdotswithin{=} \\
+  &= \underbrace{G_k \cdots G_0 x^0}_0 + (G_k \cdots G_1 B_0 + \ldots + G_k B_{k-1} + B_k) b \\
+\intertext{%
+  By \autoref{thm:adi:permutation} we may introduce a permutation $\sigma$ of $\Set{0,\ldots,k}$.
+  Thus:
+}
+  &= (G_{\sigma(k)} \cdots G_{\sigma(1)} B_{\sigma(0)} + \ldots + G_{\sigma(k)} B_{\sigma(k-1)} + B_{\sigma(k)}) b \\
+\intertext{%
+  Choosing $\sigma = \sigma_k : i \mapsto k-i$,
+  and exploiting that $G_* B_* = B_* G_*$ commute,
+  yields:
+}
+  &= (G_0 \cdots G_{k-1} B_k + \ldots + G_0 B_1 + B_0) b \\
+  &= (B_k G_{k-1} \cdots G_0 + \ldots + B_1 G_0 + B_0) b \\
+\intertext{%
+  Further utilizing $G_k := M_k^{-1} N_k = N_k M_k^{-1}$ and $B_k := M_k^{-1}$ leads to:
+}
+  &= \big( M_k^{-1} (N_{k-1} M_{k-1}^{-1}) \cdots (N_0 M_0^{-1}) + \ldots + M_1^{-1} (N_0 M_0^{-1}) + M_0^{-1} \big) b \\
+  &= \big( (M_k^{-1} N_{k-1}) \cdots (M_1^{-1} N_0) M_0^{-1} + \ldots + (M_1^{-1} N_0) M_0^{-1} + M_0^{-1} \big) b
+\end{align*}
+\todo{Using $v^k$ instead of $v^{k+1}$ is unfortunate, but the other one hides too much information.}
+Regrouping reveals:
 \begin{equation}
-\label{eq:adi:general1step}
-  \begin{aligned}
-    M_k &= (\Aip\Aiip)^{-1} (\Aim\Aiim) \\
-    N_k &= (\alpha_k + \beta_k) (\Aip\Aiip)^{-1}
-  \end{aligned}
+\label{eq:adi:recursion}
+\left\{
+\begin{aligned}
+  x^{k+1} &= x^k + v^k \\
+  v^k &= (M_k^{-1} N_{k-1}) v^{k-1} \\
+  x^0 &= 0 \\
+  v^0 &= M_0^{-1} b
+\end{aligned}
+\right.
 \end{equation}
 
-\todo[inline]{Maybe I should reformulate the method as $Mx^{k+1} = Nx + b$ instead, such that $M$ and $N$ are compatible to \cite{Golub2013}.}
+\begin{remark}
+  In accordance with the second normal form,
+  $x^{k+1} = x^k - M_k^{-1} (Ax^k - b)$, it is
+  $v^k = - M_k^{-1} (Ax^k - b)$ and
+  $N_{k-1} v^{k-1} = Ax^k - b$.
+\end{remark}
+
+Nothing of the above is special to the \ac{ADI} method.
+In fact, all that was necessary in the derivation above as well as the proof of \autoref{thm:adi:permutation} was that $M_*$ and $N_*$ commute.
+
+\begin{corollary}[Recursive Structure of Residual]
+  Let $M_k x^{k+1} = N_k x^k + b$ be some parametrized linear method to solve $Ax=b$.
+  Let the method be consistent in the sense that $M_k - N_k = A$ for any $k\in\N$.
+  Let the initial value be $x^0=0$.
+  Then, the residual $r_k := Ax^k - b$ as in the method's second normal form,
+  \begin{equation*}
+    x^{k+1} = x^k - M_k^{-1} (Ax^k - b) = x^k - M_k^{-1} r^k
+  \end{equation*}
+  adheres to
+  \begin{equation*}
+  \left\{
+  \begin{aligned}
+    r^k &= N_{k-1} M_{k-1}^{-1} r^{k-1} \\
+    r^0 &= -b
+  \end{aligned}
+  \right.
+  \end{equation*}
+\end{corollary}
+\begin{proof}
+  Obviously, $r^0 = 0-b = -b$.
+  As we have already seen, $v^k = -M_k^{-1} r^k$ for any $k\in\N$,
+  and $v^k = M_k^{-1} N_{k-1} v^{k-1}$ as in \eqref{eq:adi:recursion}.
+  Hence:
+  \begin{equation*}
+    r^k
+    = -M_k v^k
+    = -N_{k-1} v^{k-1}
+    = N_{k-1} M_{k-1}^{-1} r^{k-1}
+  \end{equation*}
+\end{proof}
+
+\todo[inline]{%
+  The identity in the Corollary above should be equivalent to \eqref{eq:adi:recursion}.
+  Maybe the proof could be redone without it, leading to an overall simpler proof.
+}
+
+\subsection{Convergence}
+
 Such an iteration converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
 We restrict the analysis to commuting $A_1, A_2$.
 In this case,
@@ -168,17 +313,9 @@ superlinear convergence \cite{Beckermann2010}.
 \end{proof}
 
 \begin{lemma}
-\label{thm:adi:2nf}
   Let $\alpha_k,\beta_k\in\C$ and $A=A_1+A_2$ be given.
   Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
-  The \ac{ADI} iteration matrix $M$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
-  Furthermore,
-  \begin{equation*}
-    M_k
-    = I_n - (\alpha_k + \beta_k) (\Aip\Aiip)^{-1} A
-    = I_n - N_k A
-    .
-  \end{equation*}
+  The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
 \end{lemma}
 \begin{proof}
   For brevity, we omit the subscript $k$.
@@ -193,20 +330,17 @@ superlinear convergence \cite{Beckermann2010}.
   \end{align*}
   such that
   \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
-  $M = \Cayley(B, A_1+A_2, \alpha, \beta)$ for
-  $
+  \begin{equation*}
+    M^{-1}N
+    = (\Aip\Aiip)^{-1}(\Aim\Aiim)
+    = \Cayley(B, A_1+A_2, \alpha, \beta)
+  \end{equation*}
+  for
+  \begin{equation*}
     B := A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1
-  $.
-  The final equality follows directly from \autoref{thm:adi:commuting-matrices}.
+    .
+  \end{equation*}
 \end{proof}
-
-\begin{remark}
-  Observe that $M = I_n - NA$,
-  as to be expected for a consistent algorithm.
-  Thus, $x^{k+1} = Mx^k + Nb = x^k - N(Ax^k - b)$,
-  which is called
-  the second normal form of the \ac{ADI} as a one-step method.
-\end{remark}
 
 If $A_1, A_2$ commute,
 all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
@@ -224,82 +358,6 @@ Thus,
 \end{equation*}
 \todo{Does this help with $\rho(M)<1$?}
 \ie $M$ is even a sequence of Cayley transformations.
-
-\begin{proposition}[Independence of Order of Parameters]
-\label{thm:adi:permutation}
-  Let $A=A_1 + A_2$ be given for commuting $A_1,A_2$.
-  Further, fix $K\in\N$ and parameters $\Set{(\alpha_k, \beta_k) \given 1 \leq k \leq K} \subseteq \C^2$.
-  Define the \ac{ADI} $x^{k+1} := M_k x^k + N_k b$ according to \eqref{eq:adi:general1step}.
-  Then, the value of $x^K$ does not depend on the order of the parameters.
-\end{proposition}
-\begin{remark}
-  Any previous $x^k$, $k < K$, may take a different value depending on which parameters
-  $\Set{(\alpha_\ell,\beta_\ell) \given k < \ell \leq K}$ are yet to be chosen.
-\end{remark}
-\begin{proof}
-  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
-  By \autoref{thm:adi:commuting-matrices}, all the matrices $A_1, A_2, M_i, M_j, N_i, N_j$ commute, $\forall i,j\in\N$.
-  Therefore, any neighboring parameters $(\alpha_k,\beta_k)$ and $(\alpha_{k-1},\beta_{k-1})$ may be exchanged,
-  \begin{align*}
-    x^{k+1}
-    &= M_k x^k + N_k b \\
-    &= M_k (M_{k_1} x^{k-1} + N_{k-1} b) + N_k b \\
-    &= \underbrace{
-      (M_k M_{k-1})
-    }_{
-      M_{k-1} M_k
-    } x^{k-1} + \underbrace{
-      (M_k N_{k-1} + N_k)
-    }_{
-      M_{k-1} N_k + N_{k-1}
-    } b
-    ,
-  \end{align*}
-  since by \autoref{thm:adi:2nf}
-  \begin{align*}
-    M_k N_{k-1} + N_k
-    &= (I - N_k A)N_{k-1} + N_k \\
-    &= N_{k-1} - N_k (A_1+A_2) N_{k-1} + N_k \\
-    &= N_{k-1} + (I - N_{k-1} A) N_k \\
-    &= N_{k-1} + M_{k-1} N_k
-    .
-  \end{align*}
-  As any permutation of $(\alpha_k,\beta_k)_{1\leq k \leq K}$ may be obtained by exchanging neighboring parameters,
-  $x^K$ does thus not depend on the order of the parameters.
-\end{proof}
-
-\cite{Li2002} formulate a reordering of the parameters to simplifiy computations.
-Formulate the \ac{ADI} for $x^0 = 0$,
-\begin{align*}
-  x^{k+1}
-  &= M_k x^k + N_k b \\
-  &= M_k M_{k-1} x^{k-1} + (M_k N_{k-1} + N_k) b \\
-  &= M_k M_{k-1} (M_{k-2} x^{k-2} + N_{k-2}b) + (M_k N_{k-1} + N_k) b \\
-  &= M_k \cdots M_{k-2} x^{k-2} + (M_k M_{k-1} N_{k-2} + M_k N_{k-1} + N_k) b \\
-  &\vdotswithin{=} \\
-  &= \underbrace{M_k \cdots M_0 x^0}_0 + (M_k \cdots M_1 N_0 + \ldots + M_k N_{k-1} + N_k) b \\
-  &= (M_{\sigma(k)} \cdots M_{\sigma(1)} N_{\sigma(0)} + \ldots + M_{\sigma(k)} N_{\sigma(k-1)} + N_{\sigma(k)}) b \\
-\intertext{%
-  by \autoref{thm:adi:permutation}
-  for any permutation $\sigma$ of $\Set{0,\ldots,k}$.
-  Choosing $\sigma := \sigma_k : i \mapsto k-i$,
-  and exploiting that $M_* N_* = N_* M_*$ commute,
-  yields
-}
-  &= (M_0 \cdots M_{k-1} N_k + \ldots + M_0 N_1 + N_0) b \\
-  &= (N_k M_{k-1} \cdots M_0 + \ldots + N_1 M_0 + N_0) b \\
-  &= x^k + v^k
-\end{align*}
-\todo{A reformulation similar to \cite{Golub2013} will make the last step easier to digest.}
-for
-\begin{equation}
-\left\{
-\begin{aligned}
-  v^k &:= N_k M_{k-1} v^{k-1} (FIXME) \\
-  v^1 &:= b
-\end{aligned}
-\right.
-\end{equation}
 
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
