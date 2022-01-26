@@ -276,9 +276,59 @@ In fact, all that was necessary in the derivation above as well as the proof of 
 \end{proof}
 
 \todo[inline]{%
-  The identity in the Corollary above should be equivalent to \eqref{eq:adi:recursion}.
-  Maybe the proof could be redone without it, leading to an overall simpler proof.
+  The identity in the Corollary above is equivalent to \eqref{eq:adi:recursion}.
+  The proof can be redone without it, leading to an overall simpler proof of \eqref{eq:adi:recursion}:
 }
+
+\begin{proof}
+  Due to $N_k = M_k - A$ it is $I - AM_k^{-1} = N_k M_k^{-1}$.
+  Furthermore, as $M_k$ and $N_k$ commute,
+  \begin{align*}
+    r^{k+1}
+    &= Ax^{k+1} - b \\
+    &= A M_k^{-1} (N_k x^k + b) - b \\
+    &= M_k^{-1} N_k (\underbrace{
+      \vphantom{M_k^{-1}}
+      Ax^k - b
+    }_{
+      \vphantom{M_k^{-1}}
+      r^k
+    } + b) + \underbrace{
+      A M_k^{-1} b - b
+    }_{
+      -(I - AM_k^{-1})b
+    }\\
+    &= M_k^{-1} N_k r^k + \underbrace{
+      M_k^{-1} N_k b - N_k M_k^{-1} b
+    }_0
+    .
+  \end{align*}
+\end{proof}
+
+Above proof doesn't even require $x^0=0$,
+as the derivation of \cite{Li2002} did.%
+\footnote{%
+  This will remain handy for \ac{ALE},
+  since any factorization of $b$ is passed onto $x^1$ and thereby $x^k$.
+}
+Rather, it is the mere observation that the iteration matrices $G_k := M_k^{-1} N_k$
+not only determine the behavior of the error \cite[Equation~(11.2.7)]{Golub2013},
+but the behavior of the residual as well.\footnote{Does this even deserve a theorem of its own?}
+Hence, by the second normal form of a consistent linear method,
+\begin{equation*}
+  x^{k+1} = x^k - M_k^{-1} r^k =: x^k + v^k
+  \qquad
+  \forall k\in\N
+\end{equation*}
+we observe the recursion
+\begin{equation*}
+  v^k
+  = -M_k^{-1} r^k
+  = -M_k^{-1} N_{k-1} M_{k-1}^{-1} r^{k-1}
+  = M_k^{-1} N_{k-1} v^{k-1}
+\end{equation*}
+with $v^0 = -M_0^{-1} r^0 = M_0^{-1} (b-Ax^0)$,
+which is a generalization of \eqref{eq:adi:recursion}.
 
 \subsection{Convergence}
 
