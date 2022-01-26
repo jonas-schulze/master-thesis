@@ -192,6 +192,7 @@ Indeed, $M_k - N_k = A$ since
 \end{proof}
 
 This allows a reformulation of the \ac{ADI} to simplify computations \cite{Li2002}.
+The exact motivation will be given in the next section.
 For an initial value of $x^0 = 0$,
 the ADI reads:
 \begin{align*}
@@ -442,66 +443,90 @@ Apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
   \right.
 \end{equation}
 The one-step formulation following \eqref{eq:adi:general1step} reads:
-\begin{multline}
-  X_{k+1} =
-  (A + \alpha_k I_n)^{-1}
+\begin{equation}
+  (A + \alpha_k I_n)
+  X_{k+1}
+  (A + \conj{\beta_k} I_n)^\HT
+  =
   (A - \beta_k I_n)
   X_k
   (A - \conj{\alpha_k} I_n)^\HT
-  (A + \conj{\beta_k} I_n)^{-H}
-  \\
   - (\alpha_k + \beta_k)
-  (A + \alpha_k I_n)^{-1}
   W
-  (A + \conj{\beta_k} I_n)^{-\HT}
-\end{multline}
+\end{equation}
 Choosing $\beta_k := \conj{\alpha_k}$
 the above becomes Hermitean:
-\begin{multline}
+\begin{equation}
 \label{eq:adi:ale1step}
-  X_{k+1} =
-  (A + \alpha_k I_n)^{-1}
+  (A + \alpha_k I_n)
+  X_{k+1}
+  (A + \alpha_k I_n)^\HT
+  =
   (A - \conj{\alpha_k} I_n)
   X_k
   (A - \conj{\alpha_k} I_n)^\HT
-  (A + \alpha_k I_n)^{-H}
-  \\
   - 2\Re(\alpha_k)
-  (A + \alpha_k I_n)^{-1}
   W
-  (A + \alpha_k I_n)^{-\HT}
-\end{multline}
+\end{equation}
 Define
 $A^+_k := A + \alpha_k I_n$ and
 $A^-_k := A - \conj\alpha_k I_n$.
 For $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$,
-the \ac{ADI} can be stated in \ac{LRSIF} directly:
+$G\in\R^{n\times n_G}$,
+$S\in\R^{n_G\times n_G}$,
+the \ac{ADI} can be stated in \ac{LRSIF} directly.
+Using the update formulas of \autoref{sec:lr:update},
+the iterates are build by adding successively adding column blocks of size $n_G$:
 \begin{align*}
-  \hat L_{k+1} &= \begin{bmatrix}
+  L_{k+1} &= \begin{bmatrix}
     (A^+_k)^{-1} A^-_k L_k &
     (A^+_k)^{-1} G
   \end{bmatrix} \\
-  \hat D_{k+1} &= \begin{bmatrix}
+  D_{k+1} &= \begin{bmatrix}
     D_k \\
     & -2\Re(\alpha_k) S
   \end{bmatrix}
 \end{align*}
+Using an initial value $X^0=0$,
+the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
+As a consequence, computing the first block component $(A_k^+)^{-1} A_k^- L_k$ becomes increasingly expensive.
+This can be remedied by a reordering according to \eqref{eq:adi:recursion},
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{k+1} &= X_k + V_k
+  \\
+  \Re(\alpha_k)^{-1}
+  (A_k^+) V_k (A_k^+)^\HT
+  &=
+  \Re(\alpha_{k-1})^{-1}
+  (A_{k-1}^-) V_{k-1} (A_{k-1}^-)^\HT
+\end{aligned}
+\right.
+\end{equation}
+with the corresponding low-rank formulation
+\begin{equation*}
+\left\{
+\begin{aligned}
+  L_{k+1} &= \begin{bmatrix}
+    L_k &
+    (A_k^+)^{-1} (A_{k-1}^-) \tilde V_k
+  \end{bmatrix}
+  \\
+  D_{k+1} &= \begin{bmatrix}
+    D_k \\
+    & -2\Re(\alpha_k) S
+  \end{bmatrix}
+  \\
+  \tilde V_k &= (A_k^+)^{-1} (A_{k-1}^-) \tilde V_{k-1}
+  \\
+  \tilde V_0 &= (A_0^+)^{-1} G
+\end{aligned}
+\right.
+\end{equation*}
+where $\tilde V_k \in\R^{n\times n_G}$ has constant dimensions.
 
-\todo[inline]{%
-  Exploit commutativity of $L_L, L_R$ to reorder ADI parameters.
-  This way, $L_{k+1}$ is created from $L_k$ by augmenting a single block column
-  instead of needing to multiplying $L_k$.
-  Also, find reference to where does this idea came from?
-}
-...
-and a compression $L_{k+1} D_{k+1} L_{k+1}^\T :\approx \hat L_{k+1} \hat D_{k+1} \hat L_{k+1}^\T$
-following \autoref{sec:lr:compression}.
-Taking the initial value $X_0 = 0$, the first iterate reads
-\begin{align*}
-  L_1 &= (A+\alpha_0 I_n)^{-1} G \\
-  D_1 &= -2\Re(\alpha_0) S
-  .
-\end{align*}
+\todo[inline]{Column Compression}
 
 \begin{remark}
   Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
