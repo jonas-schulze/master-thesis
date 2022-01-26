@@ -371,10 +371,10 @@ left-multiplication $L_L : X \mapsto AX$ and
 right-multiplication $L_R : X \mapsto XA^\HT$.
 Furthermore, $L_L$ and $L_R$ commute:
 \begin{equation*}
-  L_L \circ L_R = L_R \circ L_L = X \mapsto AXA^\HT
+  L_L \circ L_R \equiv L_R \circ L_L \equiv X \mapsto AXA^\HT
 \end{equation*}
 All the operators above are linear and act on $\Rnn$.
-Apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
+Apply the \ac{ADI} in its intermediate-step formulation~\eqref{eq:adi:general2step}:
 \begin{equation}
   \left\{
   \begin{aligned}
@@ -383,7 +383,7 @@ Apply the \ac{ADI}~\eqref{eq:adi:general2step} as a two-step method:
   \end{aligned}
   \right.
 \end{equation}
-The one-step formulation following \eqref{eq:adi:general1step} reads:
+The one-step formulation in its first normal form~\eqref{eq:adi:general1step} reads:
 \begin{equation}
   (A + \alpha_k I_n)
   X_{k+1}
@@ -409,15 +409,31 @@ the above becomes Hermitean:
   - 2\Re(\alpha_k)
   W
 \end{equation}
-Define
-$A^+_k := A + \alpha_k I_n$ and
-$A^-_k := A - \conj\alpha_k I_n$.
-For $X_k = L_k D_k L_k^\T$ and $W = GSG^\T$,
-$G\in\R^{n\times n_G}$,
-$S\in\R^{n_G\times n_G}$,
+Define the short-hand notation
+\begin{equation*}
+\begin{aligned}
+  A^+_k &:= A + \alpha_k I_n \\
+  A^-_k &:= A - \conj\alpha_k I_n
+\end{aligned}
+\end{equation*}
+and let the low-rank factorizations
+\begin{equation*}
+\begin{aligned}
+  X_k &= L_k D_k L_k^\HT \\
+  W &= GSG^\HT
+\end{aligned}
+\end{equation*}
+for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
+Typically, $n_G \ll n$.
+Then, \eqref{eq:adi:ale1step} reads
+\begin{equation}
+  (A_k^+) L_{k+1} D_{k+1} L{k+1}^\HT (A_k^+)^\HT
+  = (A_k^-) L_k D_k L_k^\HT (A_k^-)^\HT - 2\Re(\alpha_k) GSG^\HT
+\end{equation}
+such that
 the \ac{ADI} can be stated in \ac{LRSIF} directly.
 Using the update formulas of \autoref{sec:lr:update},
-the iterates are build by adding successively adding column blocks of size $n_G$:
+the iterates are build by successively adding column blocks of size $n_G$:
 \begin{align*}
   L_{k+1} &= \begin{bmatrix}
     (A^+_k)^{-1} A^-_k L_k &
@@ -430,42 +446,84 @@ the iterates are build by adding successively adding column blocks of size $n_G$
 \end{align*}
 Using an initial value $X^0=0$,
 the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
-As a consequence, computing the first block component $(A_k^+)^{-1} A_k^- L_k$ becomes increasingly expensive.
-This can be remedied by a reformulation according to \eqref{thm:adi:increment-form}:
-\begin{equation}
-\left\{
-\begin{aligned}
-  X_{k+1} &= X_k + V_k
-  \\
-  \Re(\alpha_k)^{-1}
-  (A_k^+) V_k (A_k^+)^\HT
-  &=
-  \Re(\alpha_{k-1})^{-1}
-  (A_{k-1}^-) V_{k-1} (A_{k-1}^-)^\HT
-\end{aligned}
-\right.
-\end{equation}
-with the corresponding low-rank formulation
+As a consequence, computing the first block component $(A_k^+)^{-1} A_k^- L_k$
+requires $kn_G + n_G$ system solves and
+becomes increasingly expensive.
+This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}:
 \begin{equation*}
 \left\{
 \begin{aligned}
-  L_{k+1} &= \begin{bmatrix}
-    L_k &
-    (A_k^+)^{-1} (A_{k-1}^-) \tilde V_k
-  \end{bmatrix}
-  \\
-  D_{k+1} &= \begin{bmatrix}
-    D_k \\
-    & -2\Re(\alpha_k) S
-  \end{bmatrix}
-  \\
-  \tilde V_k &= (A_k^+)^{-1} (A_{k-1}^-) \tilde V_{k-1}
-  \\
-  \tilde V_0 &= (A_0^+)^{-1} G
+  X_{k+1}
+    &= X_k + \tilde V_k \\
+  \tilde V_k
+    &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})}
+      (A_k^+)^{-1} (A_{k-1}^-)
+      \tilde V_k
+      (A_{k-1}^-)^\HT (A_k^+)^{-\HT} \\
+  X_0
+    &= 0 \\
+  \tilde V_0
+    &= -2\Re(\alpha_0) (A_0^+)^{-1} W (A_0^+)^{-\HT}
 \end{aligned}
 \right.
 \end{equation*}
-where $\tilde V_k \in\R^{n\times n_G}$ has constant dimensions.
+\todo{I hate naming things. Especially if they shall be compatible to other people's notations.}
+Assume a factorization of the increment $\tilde V_k = V_k Y_k V_k^\HT$ for $k\in\N$.
+Then, for $W = GSG^\HT$,
+the low-rank version of the initial value $\tilde V_0$ reads
+\begin{align*}
+  V_0 &= (A_0^+)^{-1} G, \\
+  Y_0 &= -2\Re(\alpha_0) S.
+\end{align*}
+Thus,
+by \autoref{thm:adi:commuting-matrices},
+the iteration of the increment $\tilde V_{k} = V_k Y_k V_k^\HT$ reads
+\begin{align*}
+  V_k &= (A_k^+)^{-1} (A_{k-1}^-) V_{k-1} \\
+      &= V_{k-1} - (\alpha_k + \conj\alpha_{k-1}) (A_k^+)^{-1} V_{k-1} \\
+  Y_k &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})} Y_{k-1} \\
+      &= -2\Re(\alpha_k) S
+\end{align*}
+such that the iteration $X_{k+1} = X_k + \tilde V_k$ is given by
+\begin{align*}
+  L_{k+1} &= \begin{bmatrix}
+    L_k &
+    V_k
+  \end{bmatrix} \\
+    D_{k+1} &= \begin{bmatrix}
+      D_k \\
+      & Y_k
+    \end{bmatrix}
+    = \begin{bmatrix}
+      D_k \\
+      & -2\Re(\alpha_k) S
+    \end{bmatrix}
+\end{align*}
+Summing up,
+this leads to the low-rank procedure
+\begin{equation}
+\left\{
+\begin{aligned}
+  L_k &= \begin{bmatrix}
+    V_0 &
+    \cdots &
+    V_k
+  \end{bmatrix} \\
+  D_k &= \begin{bmatrix}
+    -2 \Re(\alpha_0) S \\
+    & \ddots \\
+    && -2 \Re(\alpha_k) S
+  \end{bmatrix} \\
+  V_k &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
+  V_0 &= (A_0^+)^{-1} G
+\end{aligned}
+\right.
+\end{equation}
+where $V_k \in\R^{n\times n_G}$ has constant dimensions.
+Therefore, only $n_G$ system solves are necessary at iteration $k$.
+This is identical to \cite[Equation~(2.30)]{Lang2017}.
+
+\todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
 
 \todo[inline]{Column Compression}
 
