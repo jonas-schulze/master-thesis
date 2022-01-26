@@ -2,6 +2,13 @@ BUILDDIR = output
 DIRS = $(BUILDDIR) $(BUILDDIR)/content
 DEPS = Makefile *.bib *.tex content/*.tex
 
+.PHONY: update
+update: | $(DIRS)
+	pdflatex -output-directory $(BUILDDIR) thesis
+
+.PHONY: all
+all: $(BUILDDIR)/thesis.pdf
+
 $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 	biber --output-directory $(BUILDDIR) thesis
@@ -11,10 +18,6 @@ $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 
 $(DIRS):
 	mkdir -p $@
-
-.PHONY: update
-update: | $(DIRS)
-	pdflatex -output-directory $(BUILDDIR) thesis
 
 .PHONY: clean
 clean:
