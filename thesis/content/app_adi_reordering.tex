@@ -1,0 +1,52 @@
+\chapter{ADI Reordering Following \citeauthor{Li2002}}
+\label{sec:li2002}
+
+\citeauthor{Li2002} \cite{Li2002} propose a reordering of the terms to simplify computations.
+The exact motivation will become apparent when applying the ADI to \ac{ALE}.
+For an initial value of $x^0 = 0$,
+the ADI reads:
+\begin{align*}
+  x^{k+1}
+  &= G_k x^k + B_k b \\
+  &= G_k G_{k-1} x^{k-1} + (G_k B_{k-1} + B_k) b \\
+  &= G_k G_{k-1} (G_{k-2} x^{k-2} + B_{k-2}b) + (G_k B_{k-1} + B_k) b \\
+  &= G_k \cdots G_{k-2} x^{k-2} + (G_k G_{k-1} B_{k-2} + G_k B_{k-1} + B_k) b \\
+  &\vdotswithin{=} \\
+  &= \underbrace{G_k \cdots G_0 x^0}_0 {} + (G_k \cdots G_1 B_0 + \ldots + G_k B_{k-1} + B_k) b \\
+\intertext{%
+  By \autoref{thm:adi:permutation} we may introduce a permutation $\sigma$ of $\Set{0,\ldots,k}$.
+  Thus:
+}
+  &= (G_{\sigma(k)} \cdots G_{\sigma(1)} B_{\sigma(0)} + \ldots + G_{\sigma(k)} B_{\sigma(k-1)} + B_{\sigma(k)}) b \\
+\intertext{%
+  Choosing $\sigma = \sigma_k : i \mapsto k-i$,
+  and exploiting that $G_* B_* = B_* G_*$ commute,
+  yields:
+}
+  &= (G_0 \cdots G_{k-1} B_k + \ldots + G_0 B_1 + B_0) b \\
+  &= (B_k G_{k-1} \cdots G_0 + \ldots + B_1 G_0 + B_0) b \\
+\intertext{%
+  Further utilizing $G_k := M_k^{-1} N_k = N_k M_k^{-1}$ and $B_k := M_k^{-1}$ leads to:
+}
+  &= \big( M_k^{-1} (N_{k-1} M_{k-1}^{-1}) \cdots (N_0 M_0^{-1}) + \ldots + M_1^{-1} (N_0 M_0^{-1}) + M_0^{-1} \big) b \\
+  &= \big( (M_k^{-1} N_{k-1}) \cdots (M_1^{-1} N_0) M_0^{-1} + \ldots + (M_1^{-1} N_0) M_0^{-1} + M_0^{-1} \big) b \\
+  &= \underbrace{
+    (M_k^{-1} N_{k-1}) \cdots (M_1^{-1} N_0) M_0^{-1} b
+  }_{v^k}
+  + \underbrace{
+    \big( \ldots + (M_1^{-1} N_0) M_0^{-1} + M_0^{-1} \big) b
+  }_{x^k}
+\end{align*}
+\todo{Using $v^k$ instead of $v^{k+1}$ is unfortunate, but the other one hides too much information.}
+Regrouping reveals:
+\begin{equation}
+\label{eq:adi:recursion}
+\left\{
+\begin{aligned}
+  x^{k+1} &= x^k + v^k \\
+  v^k &= (M_k^{-1} N_{k-1}) v^{k-1} \\
+  x^0 &= 0 \\
+  v^0 &= M_0^{-1} b
+\end{aligned}
+\right.
+\end{equation}

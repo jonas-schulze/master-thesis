@@ -5,11 +5,170 @@ It has originally been designed to solve linear systems
 $Ax=b$
 for symmetric positive-definite $A\in\Rnn$
 and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
-In this chapter, after stating the classical parametrized intermediate-/two-step formulation,
-we describe its properties as a one-step method.
-Next, we will apply the method to \ac{ALE} in \autoref{sec:adi:ale},
-and determine suitable parameters in \autoref{sec:adi:parameters}.
-Finally, we will mention some alternative solvers for \ac{ALE}.
+
+\todo[inline]{Chapter Outline}
+
+\section{Parametrized Splitting Schemes}
+
+Many iterative methods solving $Ax=b$ can be written in a one-step \emph{splitting} form
+\begin{equation*}
+  Mx^{k+1} = Nx^k + b
+\end{equation*}
+where $M-N = A$ and systems $Mx = d$ are \enquote{easy} to solve \cite[Section~11.2.3]{Golub2013}.
+These methods are \emph{consistent} by construction,
+\ie every solution to $Ax=b$ is a fixpoint of the iteration.
+Conversely, every fixpoint $x^{k+1} = x^k$ is a solution as well.
+The method converges if $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
+$G$ is called \emph{iteration matrix} of the scheme.
+
+The structure above is called \emph{first normal form} of the method.
+Consistency is equivalent to $M-N=A$.
+The \emph{second normal form} of a consistent linear iteration method reads
+\begin{equation*}
+  x^{k+1} = M^{-1} \big( (M-A) x^k + b \big) = x^k - M^{-1} (Ax^k - b)
+\end{equation*}
+and $B := M^{-1}$ is called \emph{matrix of the second normal form}.
+
+We call a splitting method \emph{parametrized} if the iteration matrix depends on the iteration,
+\ie $A = M_k - N_k$ for $k\in\N$.
+The normal forms are thus given by
+\begin{equation}
+\label{eq:adi:normalform}
+\begin{aligned}
+  M_k x^{k+1} &= N_k x^k + b
+  ,
+  \\
+  x^{k+1} &= x^k - M_k^{-1} (Ax^k - b)
+  .
+\end{aligned}
+\end{equation}
+We further call these methods \emph{commuting} if $M_*, N_*$ commute, \ie
+\begin{equation*}
+  M_i N_j = N_j M_i
+  \qquad
+  \forall i,j \in\N
+  .
+\end{equation*}
+In this case,
+the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied does not matter:
+
+\begin{proposition}[Permutation Invariance]
+\label{thm:adi:permutation}
+  Let $A = M_k - N_k$ be a commuting operator split,
+  Then, the value of $x^{k+1}$ given by the parametrized splitting method~\eqref{eq:adi:normalform}
+  does not depend on the order of the steps.
+\end{proposition}
+\begin{proof}
+  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
+  Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
+  and $B_k := M_k^{-1}$ denote the matrix of the second normal form.
+  Observe that the matrices $G_i, G_j$ as well as $A, B_i, B_j$ commute for $i,j\in\N$,
+  since $ab=ba \implies a^{-1}b = ba^{-1}$ for any $a,b$ in a multiplicative group.
+  Therefore, any neighboring steps may be exchanged,
+  \begin{align*}
+    x^{k+1}
+    &= G_k x^k + B_k b \\
+    &= G_k (G_{k-1} x^{k-1} + B_{k-1} b) + B_k b \\
+    &= \underbrace{
+      (G_k G_{k-1})
+    }_{
+      G_{k-1} G_k
+    } x^{k-1} + \underbrace{
+      (G_k B_{k-1} + B_k)
+    }_{
+      G_{k-1} B_k + B_{k-1}
+    } b
+  \end{align*}
+  since $N_k = M_k - A$ implies $G_k = I_n - B_k A$ as well as
+  \begin{align*}
+    G_k B_{k-1} + B_k
+    &= (I_n - B_k A) B_{k-1} + B_k \\
+    &= B_{k-1} - B_k (A_1+A_2) B_{k-1} + B_k \\
+    &= B_{k-1} + (I_n - B_{k-1} A) B_k \\
+    &= B_{k-1} + G_{k-1} B_k
+    .
+  \end{align*}
+  As any permutation may be obtained by exchanging neighboring configurations,
+  $x^k$ does thus not depend on the order of the steps.
+\end{proof}
+
+Another interesting observation is a reformulation of the second normal form:
+
+\begin{proposition}[Recursive Residuals]
+\label{thm:xxx:residual}
+  Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
+  Then, the \emph{residual} $r^k := Ax^k - b$ adheres to
+  \begin{equation*}
+    r^{k+1} = G_k r^k
+  \end{equation*}
+  where $G_k := M_k^{-1} N_k$ denotes the iteration matrix.
+\end{proposition}
+\begin{proof}
+  Due to $A = M_k - N_k$ it is $AM_k^{-1} = I - N_k M_k^{-1}$.
+  Therefore,
+  \begin{align*}
+    r^{k+1}
+    &= Ax^{k+1} - b \\
+    &= A \big( M_k^{-1} (N_k x^k + b) \big) - b \\
+    &= M_k^{-1} N_k \underbrace{
+      \vphantom{M_k^{-1}}
+      Ax^k
+    }_{
+      \vphantom{M_k^{-1}}
+      r^k + b
+    }
+    + \underbrace{
+      A M_k^{-1}
+    }_{
+      I\mathrlap{{} - N_k M_k^{-1}}
+    } b - b \\
+    &= M_k^{-1} N_k r^k + \underbrace{
+      (M_k^{-1} N_k - N_k M_k^{-1})
+    }_0 b
+    .
+  \end{align*}
+\end{proof}
+
+\begin{corollary}[Recursive Increment Form]
+\label{thm:adi:increment-form}
+  Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
+  Then, the \emph{increment} $v^k := - M_k^{-1} r^k$ defining the second normal form
+  \begin{equation*}
+    x^{k+1} := x^k + v^k
+  \end{equation*}
+  adheres to
+  \begin{equation*}
+    M_{k+1} v^{k+1} = N_k v^k
+  \end{equation*}
+  where $r^k := Ax^k - b$ denotes the residual.
+\end{corollary}
+
+\begin{remark}
+  The above is a generalization of the \ac{ADI} reordering presented in \cite{Li2002}.
+  Their argument,
+  which relies on \autoref{thm:adi:permutation},
+  is outlined in \autoref{sec:li2002}.
+\end{remark}
+
+\begin{proof}
+  By \autoref{thm:xxx:residual} and $M_* N_* = N_* M_*$ it is
+  \begin{equation*}
+    v^{k+1}
+    = - M_{k+1}^{-1} r^{k+1}
+    = -M_{k+1}^{-1} (M_k^{-1} N_k r^k)
+    = M_{k+1}^{-1} N_k (- M_k^{-1} r^k)
+    = M_{k+1}^{-1} N_k v^k
+    .
+  \end{equation*}
+\end{proof}
+
+\todo[inline]{%
+  Prove convergence as a generalization of \cite[Theorem~11.2.1]{Golub2013},
+  maybe only for commuting operator splits.
+}
+
+\section{ADI as a Parametrized Splitting Scheme}
+\label{sec:adi:1step}
 
 Suppose $A=A_1+A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
@@ -41,44 +200,9 @@ and convert the above into an iteration scheme
 \end{equation}
 where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
 
-\section{ADI as a Linear Splitting Scheme}
-\label{sec:adi:1step}
-
-Many iterative methods solving $Ax=b$ can be written in a one-step \emph{splitting} form
-\begin{equation}
-\label{eq:adi:1nf}
-  Mx^{k+1} = Nx^k + b
-\end{equation}
-where $M-N = A$ and $M$ is \enquote{easy} to invert \cite[Section~11.2.3]{Golub2013}.
-These methods are \emph{consistent} by construction,
-\ie every solution $\hat x$ to $Ax=b$ is a fixpoint of the iteration.
-Conversely, every fixpoint $x^{k+1} = x^k$ is a solution as well.
-\todo{The proof may need to be adjusted for variable $G_k$.}
-The method converges if $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
-$G$ is called \emph{iteration matrix} of the scheme.
-
-Obviously, every sub-step of the \ac{ADI}~\eqref{eq:adi:general2step} is a splitting scheme.
-First, we will show how this property is passed onto its one-step formulation.
-Then, we will provide an alternative formulation of the ADI following \cite{Li2002} that simplifies computations.
-Finally, we will analyse the convergence.
-
-\begin{remark}
-  \eqref{eq:adi:1nf} is often called \emph{first normal form} of a linear one-step method.
-  \todo{Find reference. Until then, see Warnecke lecture notes, Lemma~3.5.}
-  Consistency is then equivalent to $M-N=A$.
-  The \emph{second normal form} of a consistent linear iteration method reads
-  $
-    x^{k+1}
-    = M^{-1} \big( (M-A) x^k + b \big)
-    = x^k - M^{-1}(Ax^k - b)
-  $.
-\end{remark}
-
-\subsection{Computation}
-
-Obviously, $\Aip\Aim = \Aim\Aip$.
-Thus, by \autoref{thm:adi:commuting-matrices} below, $\Aim\Aipinv = \Aipinv\Aim$.
-Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the final part of \eqref{eq:adi:general2step} leads to
+Obviously, every sub-step is a splitting scheme.
+In fact, the ADI as a whole can be seen as a parametrized splitting scheme.
+Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the full step $x^{k+1}$ leads to
 \begin{equation*}
   \Aiip x^{k+1}
   = b - \underbrace{
@@ -96,7 +220,7 @@ Multiplying by $\Aip$ then gives
   b
   .
 \end{equation*}
-Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ shows
+Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formulation in its first normal form
 \begin{equation}
 \label{eq:adi:general1step}
   \underbrace{
@@ -115,6 +239,9 @@ Indeed, $M_k - N_k = A$ since
   \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
   .
 \end{align*}
+The ADI is a commuting parametrized splitting scheme if $A_1, A_2$ commute.
+
+\section{Old Stuff}
 
 \begin{lemma}[Commuting Matrices]
 \label{thm:adi:commuting-matrices}
@@ -147,193 +274,7 @@ Indeed, $M_k - N_k = A$ since
   and multiplying by $(A+\alpha M)^{-1}$.
 \end{proof}
 
-\begin{proposition}[Independence of Order of Parameters]
-\label{thm:adi:permutation}
-  Let $A=A_1 + A_2$ be given for commuting $A_1,A_2$.
-  Further, fix $K\in\N$ and parameters $\Set{(\alpha_k, \beta_k) \given 1 \leq k \leq K} \subseteq \C^2$.
-  Define the \ac{ADI} $x^{k+1} := M_k x^k + N_k b$ according to \eqref{eq:adi:general1step}.
-  Then, the value of $x^K$ does not depend on the order of the parameters.
-\end{proposition}
-\begin{remark}
-  Any previous $x^k$, $k < K$, may take a different value depending on which parameters
-  $\Set{(\alpha_\ell,\beta_\ell) \given k < \ell \leq K}$ are yet to be chosen.
-\end{remark}
-\begin{proof}
-  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
-  Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
-  and $B_k := M_k^{-1}$ denote the matrix of the second normal form.
-  By \autoref{thm:adi:commuting-matrices}, all the matrices $A_1, A_2, G_*, B_*$ commute.
-  Therefore, any neighboring parameters $(\alpha_k,\beta_k)$ and $(\alpha_{k-1},\beta_{k-1})$ may be exchanged,
-  \begin{align*}
-    x^{k+1}
-    &= G_k x^k + B_k b \\
-    &= G_k (G_{k-1} x^{k-1} + B_{k-1} b) + B_k b \\
-    &= \underbrace{
-      (G_k G_{k-1})
-    }_{
-      G_{k-1} G_k
-    } x^{k-1} + \underbrace{
-      (G_k B_{k-1} + B_k)
-    }_{
-      G_{k-1} B_k + B_{k-1}
-    } b
-  \end{align*}
-  since $N_k = M_k - A$ implies $G_k = I_n - B_k A$ as well as
-  \begin{align*}
-    G_k B_{k-1} + B_k
-    &= (I_n - B_k A) B_{k-1} + B_k \\
-    &= B_{k-1} - B_k (A_1+A_2) B_{k-1} + B_k \\
-    &= B_{k-1} + (I_n - B_{k-1} A) B_k \\
-    &= B_{k-1} + G_{k-1} B_k
-    .
-  \end{align*}
-  As any permutation of $(\alpha_k,\beta_k)_{1\leq k \leq K}$ may be obtained by exchanging neighboring parameters,
-  $x^K$ does thus not depend on the order of the parameters.
-\end{proof}
-
-This allows a reformulation of the \ac{ADI} to simplify computations \cite{Li2002}.
-The exact motivation will be given in the next section.
-For an initial value of $x^0 = 0$,
-the ADI reads:
-\begin{align*}
-  x^{k+1}
-  &= G_k x^k + B_k b \\
-  &= G_k G_{k-1} x^{k-1} + (G_k B_{k-1} + B_k) b \\
-  &= G_k G_{k-1} (G_{k-2} x^{k-2} + B_{k-2}b) + (G_k B_{k-1} + B_k) b \\
-  &= G_k \cdots G_{k-2} x^{k-2} + (G_k G_{k-1} B_{k-2} + G_k B_{k-1} + B_k) b \\
-  &\vdotswithin{=} \\
-  &= \underbrace{G_k \cdots G_0 x^0}_0 {} + (G_k \cdots G_1 B_0 + \ldots + G_k B_{k-1} + B_k) b \\
-\intertext{%
-  By \autoref{thm:adi:permutation} we may introduce a permutation $\sigma$ of $\Set{0,\ldots,k}$.
-  Thus:
-}
-  &= (G_{\sigma(k)} \cdots G_{\sigma(1)} B_{\sigma(0)} + \ldots + G_{\sigma(k)} B_{\sigma(k-1)} + B_{\sigma(k)}) b \\
-\intertext{%
-  Choosing $\sigma = \sigma_k : i \mapsto k-i$,
-  and exploiting that $G_* B_* = B_* G_*$ commute,
-  yields:
-}
-  &= (G_0 \cdots G_{k-1} B_k + \ldots + G_0 B_1 + B_0) b \\
-  &= (B_k G_{k-1} \cdots G_0 + \ldots + B_1 G_0 + B_0) b \\
-\intertext{%
-  Further utilizing $G_k := M_k^{-1} N_k = N_k M_k^{-1}$ and $B_k := M_k^{-1}$ leads to:
-}
-  &= \big( M_k^{-1} (N_{k-1} M_{k-1}^{-1}) \cdots (N_0 M_0^{-1}) + \ldots + M_1^{-1} (N_0 M_0^{-1}) + M_0^{-1} \big) b \\
-  &= \big( (M_k^{-1} N_{k-1}) \cdots (M_1^{-1} N_0) M_0^{-1} + \ldots + (M_1^{-1} N_0) M_0^{-1} + M_0^{-1} \big) b
-\end{align*}
-\todo{Using $v^k$ instead of $v^{k+1}$ is unfortunate, but the other one hides too much information.}
-Regrouping reveals:
-\begin{equation}
-\label{eq:adi:recursion}
-\left\{
-\begin{aligned}
-  x^{k+1} &= x^k + v^k \\
-  v^k &= (M_k^{-1} N_{k-1}) v^{k-1} \\
-  x^0 &= 0 \\
-  v^0 &= M_0^{-1} b
-\end{aligned}
-\right.
-\end{equation}
-
-\begin{remark}
-  In accordance with the second normal form,
-  $x^{k+1} = x^k - M_k^{-1} (Ax^k - b)$, it is
-  $v^k = - M_k^{-1} (Ax^k - b)$ and
-  $N_{k-1} v^{k-1} = Ax^k - b$.
-\end{remark}
-
-Nothing of the above is special to the \ac{ADI} method.
-In fact, all that was necessary in the derivation above as well as the proof of \autoref{thm:adi:permutation} was that $M_*$ and $N_*$ commute.
-
-\begin{corollary}[Recursive Structure of Residual]
-  Let $M_k x^{k+1} = N_k x^k + b$ be some parametrized linear method to solve $Ax=b$.
-  Let the method be consistent in the sense that $M_k - N_k = A$ for any $k\in\N$.
-  Let the initial value be $x^0=0$.
-  Then, the residual $r_k := Ax^k - b$ as in the method's second normal form,
-  \begin{equation*}
-    x^{k+1} = x^k - M_k^{-1} (Ax^k - b) = x^k - M_k^{-1} r^k
-  \end{equation*}
-  adheres to
-  \begin{equation*}
-  \left\{
-  \begin{aligned}
-    r^k &= N_{k-1} M_{k-1}^{-1} r^{k-1} \\
-    r^0 &= -b
-  \end{aligned}
-  \right.
-  \end{equation*}
-\end{corollary}
-\begin{proof}
-  Obviously, $r^0 = 0-b = -b$.
-  As we have already seen, $v^k = -M_k^{-1} r^k$ for any $k\in\N$,
-  and $v^k = M_k^{-1} N_{k-1} v^{k-1}$ as in \eqref{eq:adi:recursion}.
-  Hence:
-  \begin{equation*}
-    r^k
-    = -M_k v^k
-    = -N_{k-1} v^{k-1}
-    = N_{k-1} M_{k-1}^{-1} r^{k-1}
-  \end{equation*}
-\end{proof}
-
-\todo[inline]{%
-  The identity in the Corollary above is equivalent to \eqref{eq:adi:recursion}.
-  The proof can be redone without it, leading to an overall simpler proof of \eqref{eq:adi:recursion}:
-}
-
-\begin{proof}
-  Due to $N_k = M_k - A$ it is $I - AM_k^{-1} = N_k M_k^{-1}$.
-  Furthermore, as $M_k$ and $N_k$ commute,
-  \begin{align*}
-    r^{k+1}
-    &= Ax^{k+1} - b \\
-    &= A M_k^{-1} (N_k x^k + b) - b \\
-    &= M_k^{-1} N_k (\underbrace{
-      \vphantom{M_k^{-1}}
-      Ax^k - b
-    }_{
-      \vphantom{M_k^{-1}}
-      r^k
-    } + b) + \underbrace{
-      A M_k^{-1} b - b
-    }_{
-      -(I - AM_k^{-1})b
-    }\\
-    &= M_k^{-1} N_k r^k + \underbrace{
-      M_k^{-1} N_k b - N_k M_k^{-1} b
-    }_0
-    .
-  \end{align*}
-\end{proof}
-
-Above proof doesn't even require $x^0=0$,
-as the derivation of \cite{Li2002} did.%
-\footnote{%
-  This will remain handy for \ac{ALE},
-  since any factorization of $b$ is passed onto $x^1$ and thereby $x^k$.
-}
-Rather, it is the mere observation that the iteration matrices $G_k := M_k^{-1} N_k$
-not only determine the behavior of the error \cite[Equation~(11.2.7)]{Golub2013},
-but the behavior of the residual as well.\footnote{Does this even deserve a theorem of its own?}
-Hence, by the second normal form of a consistent linear method,
-\begin{equation*}
-  x^{k+1} = x^k - M_k^{-1} r^k =: x^k + v^k
-  \qquad
-  \forall k\in\N
-\end{equation*}
-we observe the recursion
-\begin{equation*}
-  v^k
-  = -M_k^{-1} r^k
-  = -M_k^{-1} N_{k-1} M_{k-1}^{-1} r^{k-1}
-  = M_k^{-1} N_{k-1} v^{k-1}
-\end{equation*}
-with $v^0 = -M_0^{-1} r^0 = M_0^{-1} (b-Ax^0)$,
-which is a generalization of \eqref{eq:adi:recursion}.
-
-\subsection{Convergence}
-
-Such an iteration converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
+The \ac{ADI} converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
 We restrict the analysis to commuting $A_1, A_2$.
 In this case,
 there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
@@ -490,7 +431,7 @@ the iterates are build by adding successively adding column blocks of size $n_G$
 Using an initial value $X^0=0$,
 the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
 As a consequence, computing the first block component $(A_k^+)^{-1} A_k^- L_k$ becomes increasingly expensive.
-This can be remedied by a reordering according to \eqref{eq:adi:recursion},
+This can be remedied by a reformulation according to \eqref{thm:adi:increment-form}:
 \begin{equation}
 \left\{
 \begin{aligned}
