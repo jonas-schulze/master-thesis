@@ -42,19 +42,29 @@ The normal forms are thus given by
   .
 \end{aligned}
 \end{equation}
-We further call these methods \emph{commuting} if $M_*, N_*$ commute, \ie
+We further call an operator split and a method \emph{commuting} if $M_k, N_k$ commute, \ie
+\begin{equation*}
+  M_k N_k = N_k M_k
+  \qquad
+  \forall k \in\N,
+\end{equation*}
+and \emph{fully commuting} if $M_*, N_*$ commute, \ie
 \begin{equation*}
   M_i N_j = N_j M_i
+  \qquad
+  M_i M_j = M_j M_i
+  \qquad
+  N_i N_j = N_j N_i
   \qquad
   \forall i,j \in\N
   .
 \end{equation*}
-In this case,
+In the latter case,
 the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied does not matter:
 
 \begin{proposition}[Permutation Invariance]
 \label{thm:adi:permutation}
-  Let $A = M_k - N_k$ be a commuting operator split,
+  Let $A = M_k - N_k$ be a fully permuting operator split.
   Then, the value of $x^{k+1}$ given by the parametrized splitting method~\eqref{eq:adi:normalform}
   does not depend on the order of the steps.
 \end{proposition}
@@ -151,7 +161,7 @@ Another interesting observation is a reformulation of the second normal form:
 \end{remark}
 
 \begin{proof}
-  By \autoref{thm:xxx:residual} and $M_* N_* = N_* M_*$ it is
+  By \autoref{thm:xxx:residual} and $M_k N_k = N_k M_k$ it is
   \begin{equation*}
     v^{k+1}
     = - M_{k+1}^{-1} r^{k+1}
@@ -239,7 +249,7 @@ Indeed, $M_k - N_k = A$ since
   \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
   .
 \end{align*}
-The ADI is a commuting parametrized splitting scheme if $A_1, A_2$ commute.
+The ADI is a fully commuting parametrized splitting scheme if $A_1, A_2$ commute.
 
 \section{Old Stuff}
 
