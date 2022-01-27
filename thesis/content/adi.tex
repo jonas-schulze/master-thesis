@@ -456,7 +456,7 @@ the iterates are build by successively adding column blocks of size $n_G$:
 \end{align*}
 Using an initial value $X^0=0$,
 the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
-As a consequence, computing the first block component $(A_k^+)^{-1} A_k^- L_k$
+As a consequence, computing $L_{k+1}$
 requires $kn_G + n_G$ system solves and
 becomes increasingly expensive.
 This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}:
@@ -490,7 +490,7 @@ by \autoref{thm:adi:commuting-matrices},
 the iteration of the increment $\tilde V_{k} = V_k Y_k V_k^\HT$ reads
 \begin{align*}
   V_k &= (A_k^+)^{-1} (A_{k-1}^-) V_{k-1} \\
-      &= V_{k-1} - (\alpha_k + \conj\alpha_{k-1}) (A_k^+)^{-1} V_{k-1} \\
+      &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
   Y_k &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})} Y_{k-1} \\
       &= -2\Re(\alpha_k) S
 \end{align*}
@@ -517,12 +517,12 @@ this leads to the low-rank procedure
   L_k &= \begin{bmatrix}
     V_0 &
     \cdots &
-    V_k
+    V_{k-1}
   \end{bmatrix} \\
   D_k &= \begin{bmatrix}
     -2 \Re(\alpha_0) S \\
     & \ddots \\
-    && -2 \Re(\alpha_k) S
+    && -2 \Re(\alpha_{k-1}) S
   \end{bmatrix} \\
   V_k &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
   V_0 &= (A_0^+)^{-1} G
@@ -530,8 +530,8 @@ this leads to the low-rank procedure
 \right.
 \end{equation}
 where $V_k \in\R^{n\times n_G}$ has constant dimensions.
-Therefore, only $n_G$ system solves are necessary at iteration $k$.
-This is identical to \cite[Equation~(2.30)]{Lang2017}.
+Therefore, only $n_G$ system solves are necessary at any iteration $k$.
+This method first appeared in \cite[Section~5]{Benner2009}.
 
 \todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
 
@@ -556,7 +556,7 @@ This is identical to \cite[Equation~(2.30)]{Lang2017}.
   The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
   This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
   instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
-  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is identical to \eqref{eq:adi:ale1step}.
+  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
 \end{remark}
 
 \todo[inline]{%
