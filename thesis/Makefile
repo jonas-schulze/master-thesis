@@ -1,5 +1,5 @@
 BUILDDIR = output
-DIRS = $(BUILDDIR) $(BUILDDIR)/content
+DIRS = $(BUILDDIR) $(BUILDDIR)/content $(BUILDDIR)/appendix
 DEPS = Makefile *.bib *.tex content/*.tex
 
 .PHONY: update
