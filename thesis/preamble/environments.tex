@@ -1,2 +1,16 @@
+% Remember: use \label{thm:...} for theorems, propositions, lemmata, etc.
+% This way the type of an environment can easily be changed.
+
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{corollary}[lemma]{Corollary}
+\newtheorem{proposition}[lemma]{Proposition}
+\newtheorem{theorem}[lemma]{Theorem}
+\newtheorem{hypothesis}[lemma]{Hypothesis (PROVEME)}
+
+\theoremstyle{definition}
+\newtheorem{definition}[lemma]{Definition}
+\newtheorem{example}[lemma]{Example}
+
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}

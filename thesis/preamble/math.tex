@@ -3,11 +3,34 @@
 \newcommand{\Q}{\mathbb{Q}} % Rational numbers
 \newcommand{\R}{\mathbb{R}} % Real numbers
 \newcommand{\C}{\mathbb{C}} % Complex numbers
-\newcommand{\K}{\mathbb{K}} % Arbitrary Field
+\newcommand{\F}{\mathbb{F}} % Arbitrary Field
+
+\newcommand{\im}{i} % imaginary unit
+
+% matrices
+\newcommand\Cnn{\C^{n\times n}}
+\newcommand\Rnn{\R^{n\times n}}
+\newcommand\Rnr{\R^{n\times r}}
+\newcommand\Rnk{\R^{n\times k}}
+\newcommand\Rkk{\R^{k\times k}}
+\newcommand\nnz{\operatorname{nnz}}
+\renewcommand\vec{\operatorname{vec}}
 
 % transpose and conjugate/Hermitian transpose:
+\newcommand\conj[1]{\overline{\optional{#1}}}
 \newcommand\T{T}
 \newcommand\HT{H}
+
+ % ADI
+\newcommand\Aip{\mathop{A_1^+}}
+\newcommand\Aim{\mathop{A_1^-}}
+\newcommand\Aipm{\mathop{A_1^\pm}}
+\newcommand\Aiip{\mathop{A_2^+}}
+\newcommand\Aiim{\mathop{A_2^-}}
+\newcommand\Aiipm{\mathop{A_2^\pm}}
+\newcommand\Cayley{\mathcal{C}}
+\newcommand\Aipinv{\mathop{(\Aip)^{-1}}}
+\newcommand\Aiipinv{\mathop{(\Aiip)^{-1}}}
 
 % usage: \{2x\given x\in\N}
 \newcommand{\given}{\mid}
@@ -28,6 +51,8 @@
 \renewcommand{\to}{\longrightarrow}
 \renewcommand{\mapsto}{\longmapsto}
 \renewcommand{\gets}{\longleftarrow}
+\renewcommand{\Re}{\operatorname{Re}} % real part of a complex number
+\renewcommand{\Im}{\operatorname{Im}} % imaginary part
 
 % some more delimiters:
 \NewDocumentCommand{\optional}{m}{\ifblank{#1}{\,\cdot\,}{#1}}
@@ -39,3 +64,6 @@
 % integration:
 \NewDocumentCommand{\intd}{m}{\,\textup{d}#1}
 \newcommand\dt{\intd{t}}
+
+% differentiation:
+\NewDocumentCommand{\pdiff}{mm}{\frac{\partial #2}{\partial #1}}

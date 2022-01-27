@@ -18,3 +18,7 @@ test-julia:
       - .julia/packages
       - .julia/compiled
       - .julia/registries
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^thesis.*/
+      when: manual
+    - when: always

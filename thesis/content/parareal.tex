@@ -1,0 +1,315 @@
+\chapter{Parareal Method}
+
+The parareal method is a parallel-in-time integration scheme to solve \acp{ODE}.
+It goes back to \cite{Lions2001},
+though the most common form also used in this thesis first appeared in \cite{Baffico2002}.
+In this chapter we'll first describe the general properties of the parareal method,
+and derive it as a Newton method following \cite{Gander2007}.
+Then, in \autoref{sec:pr:DRE} we'll adapt the method for \acp{DRE}.
+Lastly, in \autoref{sec:pr:alternatives} we'll briefly discuss alternative methods to parallelize matrix equations.
+
+\section{General Properties}
+\label{sec:pr:properties}
+
+Consider the autonomous \ac{IVP}
+\begin{equation}
+  \label{eq:IVP}
+  \left\{
+  \begin{aligned}
+    \dot u &= f \circ u \\
+    u(t_0) &= u_0
+  \end{aligned}
+  \right.
+\end{equation}
+over the time span $[t_0, t_f]$.
+Fix a discretization $t_0 < t_1 < \ldots < t_N = t_f$,
+let $F$ denote a fine/high-precision solver of the \ac{IVP} above,
+$F(t, t_0, u_0) \approx u(t)$,
+and $G$ a coarse/lower-precision one.
+Then the parareal method to compute $U_n \approx u(t_n)$ reads
+\begin{equation}
+  \label{eq:pr:method}
+  \left\{
+  \begin{aligned}
+    U^0_{n+1} &:= G(U^0_n) \\
+    U^{k+1}_{n+1} &:= G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)
+  \end{aligned}
+  \right.
+\end{equation}
+where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$
+integrates from $t_n$ to $t_{n+1}$,
+and similarly does $F$.
+
+\begin{proposition}[Diagonal Convergence]
+\label{thm:pr:conv}
+  Stage $n$ of the parareal method converges after at most $n$ iterations:
+  \begin{equation*}
+    U^k_n = U^n_n = F(U^{n-1}_{n-1})
+    \quad
+    \forall k \geq n
+  \end{equation*}
+\end{proposition}
+\begin{proof}
+  Due to $U^k_0 = u_0$ for all $k$,
+  it follows by induction $\forall k \geq n$:
+  \begin{equation*}
+    \begin{array}{r@{}l@{}l@{}l}
+      U^{k+1}_{n+1}
+      :={} & F(U^k_n) &{}+ G(U^{k+1}_n) &{}- G(U^k_n) \\
+      ={}  & F(U^n_n) &{}+ G(U^n_n)     &{}- G(U^n_n)
+      = F(U^n_n)
+    \end{array}
+  \end{equation*}
+\end{proof}
+
+This will become handy for the implementation.
+In particular, note that if stage $n$ of the parareal method converged,
+\ie $U^{k+1}_n \approx U^k_n$,
+stage $n+1$ will converge after the same iteration:
+\begin{equation*}
+  \begin{array}{r@{}l@{}l@{}l}
+    U^{k+1}_{n+1}
+    :={}      & F(U^k_n) &{}+ G(U^{k+1}_n) &{}- G(U^k_n) \\
+    \approx{} & F(U^k_n) &{}+ G(U^k_n)     &{}- G(U^k_n)
+    = F(U^k_n)
+  \end{array}
+\end{equation*}
+Therefore,
+assuming $G$ is well conditioned,
+there is no need to compute $G(U^{k+1}_n)$.
+
+\begin{figure}[htb]
+  \missingfigure{DAG of parareal dependencies between $U^k_n$}
+  \caption{Dependencies between approximations $U^k_n$ within parareal scheme}
+\end{figure}
+
+\begin{example}[Linear \acs*{ODE}]
+  Consider the \ac{IVP}
+  \todo{Use a different random numbers}
+  \begin{equation}
+    \label{eq:pr:linear}
+    \left\{
+    \begin{aligned}
+      \dot x &= \begin{bmatrix}
+        -0.02 & 0.2 \\
+        -0.2  & -0.02
+      \end{bmatrix} x \\
+      x(0) &= \begin{bmatrix}
+        1 \\ 0
+      \end{bmatrix}
+    \end{aligned}
+    \right.
+  \end{equation}
+  for $t\in[0,100]$.
+  Let $N := 10$, $h := 100/N$, and $t_n := nh$ for $n\in\Set{0,\ldots,N}$.
+  Further, let $F$ and $G$ be implicit Euler schemes using step sizes $h/10$ and $h$, respectively.
+  If the fine solver internally uses a finer mesh,
+  by \autoref{thm:pr:conv},
+  the global solution $x$ may be retrieved at that fine resolution $h/10$.
+
+  \autoref{fig:pr:linear} shows the first couple of iterations of the parareal method applied the problem above.
+  The solutions at the grid points, $x^k_n \approx x(t_n)$, are marked as dots
+  while the lines in between them are the internal solutions produced by $F$.
+  Therefore, before convergence is reached,
+  the high-resolution values are discontinues at $t_n$.
+  \begin{figure}[htb]
+    \missingfigure{some iterations for linear problem of Bargo2009}
+    \caption{Parareal method applied to the linear problem \eqref{eq:pr:linear}}
+    \label{fig:pr:linear}
+  \end{figure}
+\end{example}
+
+The parareal method may be seen \eg as a deferred correction method,
+a special case of multiple shooting, or a Newton method.
+
+\section{Parareal as a Special Case of Multiple Shooting}
+\label{sec:pr:newton}
+
+Consider the autonomous \ac{IVP}
+\begin{equation}
+  \label{eq:IVP}
+  \left\{
+  \begin{aligned}
+    \dot u &= f \circ u \\
+    u(t_0) &= u_0
+  \end{aligned}
+  \right.
+\end{equation}
+Note that the solution $u : [t_0,t_N] \to V $ depends on the initial value $U_0$.
+For a discretization $t_0 < t_1 < \ldots < t_N$
+define the local problems
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    \dot u_i &= f \circ u_i \\
+    u_i(t_i) &= U_i
+  \end{aligned}
+  \right.
+\end{equation}
+for $i \in \Set{0,\ldots,N-1}$
+and determine suitable initial values $U_i$.
+Watch the slight abuse of notation for the initial value $u_0 \in V$ and the solution to the local problem $u_0 : [t_0,t_1] \to V$.
+The local solutions $u_i : [t_i,t_{i+1}] \to V$ represent a global solution to \eqref{eq:IVP} if
+\begin{equation}
+  F(U_0, \ldots, U_{N-1}) :=
+  \left(
+  \begin{aligned}
+    U_0 &- u_0 \\
+    U_1 &- u_0(t_1) \\
+    &\vdotswithin{-} \\
+    U_{N-1} &- u_{N-2}(t_{N-1})
+  \end{aligned}
+  \right)
+  \overset{!}{=} 0.
+\end{equation}
+Let $U := (U_0, \ldots, U_{N-1})$ and $\mathcal J_F(U)$ denote the Jacobian of $F$ at $U$.
+Then, Newton's method reads
+\begin{equation}
+  U^{k+1} = U^k - \mathop{\mathcal J_F(U^k)^{-1}} F(U^k)
+\end{equation}
+or, equivalently, avoiding the inversion of the Jacobian,
+\begin{equation}
+  \begin{pmatrix}
+    I \\
+    -\pdiff{U_0}{u_0}(t_1, U_0) & I \\
+    & \ddots & \ddots \\
+    && -\pdiff{U_{N-2}}{u_{N-2}}(t_{N-1}, U_{N-2}) & I
+  \end{pmatrix}
+  (U^{k+1} - U^k) = -F(U^k)
+\end{equation}
+Writing the above in separate equations yields
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    U^{k+1}_0 &= u_0 \\
+    U^{k+1}_i &= u_i(t_{i+1}, U^k_n) + \pdiff{U^k_i}{u_i}(t_{i+1}, U^k_i) (U^{k+1}_i - U^k_i).
+  \end{aligned}
+  \right.
+\end{equation}
+Lastly, choosing a fine propagator $F(U^k_i) := F(t_{i+1}; t_i, U^k_i) \approx u_i(t_{i+1}, U^k_i)$,
+a coarse propagator $G$ according to
+\begin{equation}
+  \label{eq:pr:G}
+  G(U^{k+1}_i) - G(U^k_i)
+  \approx
+  \pdiff{U^k_i}{u_i}(t_{i+1}, U^k_i) (U^{k+1}_i - U^k_i)
+\end{equation}
+as well as initial values $ U^0_{i+1} = G(U^0_i) $
+reveals the parareal method of \cite{Baffico2002}:
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    U^0_{i+1} &= G(U^0_i),
+    \quad
+    U^0_0 = u_0 \\
+    U^{k+1}_{i+1} &= F(U^k_i) + G(U^{k+1}_i) - G(U^k_i)
+  \end{aligned}
+  \right.
+\end{equation}
+A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U^k_i)$ justifies \eqref{eq:pr:G}.
+
+\section{Application to \act{DRE}s}
+\label{sec:pr:DRE}
+
+\todo[inline]{Formulate parareal update \wrt low-rank factorization $LDL^\T$}
+
+Let the \acp{LRSIF}
+\begin{align}
+  G(X^{k+1}_i) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
+  F(X^k_i)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
+  G(X^k_i)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
+\end{align}
+be given.
+Using the low-rank update formulas described in \autoref{sec:lr:update},
+the parareal update of \eqref{eq:pr:method} reads
+\begin{equation}
+  \hat L \hat D \hat L^\T :=
+  \begin{pmatrix}
+    L_{G,k+1} &
+    L_{F,k} &
+    L_{G,k}
+  \end{pmatrix}
+  \begin{pmatrix}
+    D_{G,k+1} \\
+    & D_{F,k} \\
+    && -D_{G,k}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{G,k+1}^\T \\
+    L_{F,k}^\T \\
+    L_{G,k}^\T
+  \end{pmatrix}
+  .
+\end{equation}
+Note the downdate in the last block component.
+The actual low-rank representation of $X^{k+1}_{i+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
+using any of the techniques described in \autoref{sec:lr:compression},
+\begin{equation}
+  X^{k+1}_{i+1}
+  := LDL^\T
+  :\approx \hat L \hat D \hat L^\T
+  .
+\end{equation}
+
+\section{Parallel Scheduling and Implementation Details}
+
+In the context of \acp{DRE},
+we are not only interested in fast convergence but also in a high-resolution trajectory.
+Therefore, we will use a finer mesh for fine solver $F$ and store its trajectories of $K$ and (optionally) $X$ of the last parareal iteration $k$.
+
+\todo[inline]{Timeline plots of \ac{DRE}}
+
+Discuss ramp-up difficulties:
+\begin{itemize}
+  \item
+    Julia RemoteChannels not thread-safe, that is they must be used from thread 1 only.
+    Therefore, one either cannot use background transmission of interface values,
+    or one has to move the heavy computation into the \enquote{background}.
+    The latter requires a custom channel type.
+
+    \todo[inline]{Implement \julia{SafeRemoteChannel} that funnels communication from thread-safe sender/receiver \julia{Channel}s to a \julia{RemoteChannel} via thread 1.}
+  \item
+    If communication happens synchronously (not in the background),
+    and Julia runs single-threaded,%
+    \footnote{%
+      For highly local scheduling, this might actually be wanted,
+      as to not oversaturate the machine if the BLAS library starts its own threads.
+    }
+    as the channels reside on the executor of the next pipeline stage $n$,
+    even though the channels are buffered,
+    one has to wait for the receiver to not-be-busy.
+    This sometimes causes a delay for iterations $k \geq 1$.
+
+    Observation: only from the last stage $n=N$ downwards there is no such delay, $k \geq N-n+1$, \cf any timeline plot.
+    \todo[inline]{Check estimate on $k$ and put this in a remark.}
+  \item
+    JIT warm-up of $F$, $G$ and transmission code.
+    Warming up $G$ has a great benefit.
+    Additionally warming up $F$ has a very high overhead and only a very minor benefit,
+    as \eg the \ac{ALE} solvers are mostly common to $G$.
+
+    \todo[inline]{Warm-up transmission code on workers}
+
+    Maybe, this could be combined with a different initial value for the Newton / multiple shooting scheme.
+    Instead of using $U^0_n = G(U^0_{n-1})$, try $U^0_n = u_0$.
+\end{itemize}
+
+General scheduling comments:
+\begin{itemize}
+  \item
+    Early stages $n=0,1,2$ become idle even before later stages receive their first $U^0_n$.
+    Maybe they could be reused: measure runtime of $F$ and $G$ to compute optimum number $N$ for given number of processors.
+    Alternatively, one could adjust the local time slices, \cf \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/2}
+  \item
+    If $X$ trajectories shall not be saved, solving the \ac{DRE} isn't that memory heavy.
+    Creating a connection between workers in a cluster shouldn't be that expensive (they are initialized lazily, but cost should pay off).
+    It might be worth it to send $U^{k+1}_n$ as well as $G(U^k_n)$ and $F(U^k_n)$ over the network in order to recycle processors.
+    However, this requires a lazy DAG scheduling like \texttt{DAGGER.jl}.
+  \item
+    \cite[493]{Nielsen2018} relevant?
+  \item
+    Distributed processes vs local threads vs GPU?
+\end{itemize}
+
+\section{Alternative Parallel-in-Time Solvers}
+\label{sec:pr:alternatives}

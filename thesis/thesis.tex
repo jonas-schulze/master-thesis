@@ -1,21 +1,78 @@
-\documentclass[bibliography=totoc]{scrreprt}
+\documentclass[
+  bibliography=totoc,
+  listof=totoc,
+  oneside,
+]{scrbook}
 
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
 \usepackage[ngerman,american]{babel} % Language settings
 
-\usepackage[style=alphabetic]{biblatex}
+\usepackage[
+  style=numeric-comp,
+  backref=true,
+]{biblatex}
 \addbibresource{stuff.bib}
+
+\usepackage{todonotes}
 
 \input{preamble/packages}
 \input{preamble/math}
 \input{preamble/abbreviations}
+\input{preamble/hyphenation}
 \input{preamble/environments}
+\input{preamble/other}
+
+\makeglossaries
 
 \begin{document}
 
-\include{content/ros2}
+% -----------------------------------------------------------------------------
+\frontmatter
+
+\include{content/abstract}
+
+\cleardoublepage
+\pdfbookmark{\contentsname}{toc}
+\tableofcontents
+\listoffigures
+
+\cleardoublepage
+\pdfbookmark{\listtheoremname}{loe}
+\listoftheorems[ignore=remark]
+
+\listoftodos
+\todototoc
+
+% -----------------------------------------------------------------------------
+\mainmatter
+\include{content/intro}
+
+\chapter{Mathematical Basics}
+\section{Linear Systems and Related Matrix Equations}
+\section{Hamilton-Jacobi Theory}
+
+\include{content/matrixeq}
+\include{content/rosenbrock}
+\include{content/adi}
+\include{content/parareal}
+
+\chapter{Implementation and Experimental Results}
+\chapter{Conclusion}
+
+% -----------------------------------------------------------------------------
+\appendix
 \include{content/notes}
+\include{content/app_adi_reordering}
+\include{content/ros2}
+
+\include{content/control}
+\include{content/vectorization}
+
+% -----------------------------------------------------------------------------
+\backmatter
+\glsaddallunused
+\printglossaries
 \printbibliography
 
 \end{document}

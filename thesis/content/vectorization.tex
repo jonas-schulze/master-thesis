@@ -1,0 +1,49 @@
+\chapter{Kronecker Product and Vectorization}
+\label{sec:vectorization}
+
+In this chapter we'll give some more details on how to apply the concept's presented in \autoref{sec:adi:1step} to \ac{ALE},
+in particular how right-multiplication $X \mapsto XA^\HT$ can be described as a left-multiplication.
+The key ingredients for this are \emph{vectorization} $\vec : \R^{m\times n} \to \R^{mn}$,
+\eg for $X=(x_1,\ldots, x_n)$ with $x_i\in\R^m$
+\begin{equation}
+  \vec(X) := \begin{pmatrix}
+    x_1 \\
+    \vdots \\
+    x_n
+  \end{pmatrix}
+\end{equation}
+and the \emph{Kronecker product} $\otimes : \R^{m\times n} \times \R^{p\times q} \to \R^{mp \times nq}$,
+\begin{equation}
+  A \otimes B := \begin{pmatrix}
+    a_{11} B & \cdots & a_{1n} B \\
+    \vdots   & \ddots & \vdots \\
+    a_{m1} B & \cdots & a_{mn} B
+  \end{pmatrix}
+  .
+\end{equation}
+Then, without a proof, the following holds:
+
+\begin{proposition}[Kronecker Product]
+  Let $A, B, C$ be complex-valued matrices of compatible size. Then
+  \begin{equation*}
+    \vec(ABC) = (C^\T \otimes A) \vec(B)
+    .
+  \end{equation*}
+\end{proposition}
+
+In particular, in the context of \autoref{sec:adi:ale},
+$AX + XA^\HT = -W$:
+\begin{gather}
+  L_L : \vec(X) \mapsto \vec(AX) = (I \otimes A) \vec(X) \\
+  L_R : \vec(X) \mapsto \vec(XA^\HT) = (\conj A \otimes I) \vec(X)
+\end{gather}
+
+The following justifies the application of \autoref{thm:adi:convergence} to $L_R$:
+
+\begin{proposition}[Stability of Kronecker Product]
+  \todo{Rephrase in terms of eigenvalues}
+  Let $A\in\Rnn$ be c-stable. Then $A \otimes I$ is c-stable as well.
+\end{proposition}
+\begin{remark}
+  In the context of control theory, above proposition claims that $A \otimes I$ is c-stable whenever $A$ is c-stable.
+\end{remark}

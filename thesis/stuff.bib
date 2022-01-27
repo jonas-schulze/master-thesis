@@ -1,5 +1,3 @@
-% Encoding: UTF-8
-
 @Article{Verwer1999,
   author    = {Verwer, Jan G. and Spee, Edwin J. and Blom, Joke G. and Hundsdorfer, Willem},
   journal   = {SIAM journal on scientific computing},
@@ -42,16 +40,18 @@
   pages     = {44--71},
   volume    = {480},
   doi       = {10.1016/j.laa.2015.04.006},
+  groups    = {LDLt},
   publisher = {Elsevier},
 }
 
 
-@Book{Lang2018,
-  author    = {Lang, Norman},
-  publisher = {Logos Verlag Berlin GmbH},
-  title     = {Numerical methods for large-scale linear time-varying control systems and related differential matrix equations},
-  year      = {2018},
-  isbn      = {978-3-8325-4700-4},
+@PhdThesis{Lang2017,
+  author  = {Lang, Norman},
+  school  = {Technische Universität Chemnitz},
+  title   = {Numerical methods for large-scale linear time-varying control systems and related differential matrix equations},
+  year    = {2017},
+  comment = {Logos Verlag Berlin GmbH},
+  groups  = {LDLt, ADI},
 }
 
 @Article{DrWatson,
@@ -82,4 +82,163 @@
   volume    = {375},
 }
 
+@Article{Peaceman1955,
+  author    = {Peaceman, Donald W. and Rachford, Jr, Henry H.},
+  journal   = {Journal of the Society for industrial and Applied Mathematics},
+  title     = {The numerical solution of parabolic and elliptic differential equations},
+  year      = {1955},
+  number    = {1},
+  pages     = {28--41},
+  volume    = {3},
+  doi       = {10.1137/0103003},
+  groups    = {ADI},
+  publisher = {SIAM},
+}
+
+@PhdThesis{Kuerschner2016,
+  author  = {Kürschner, Patrick},
+  school  = {Otto-von-Guericke-Universität Magdeburg},
+  title   = {Efficient low-rank solution of large-scale matrix equations},
+  year    = {2016},
+  comment = {Shaker Verlag Aachen},
+  groups  = {ADI, LDLt},
+  url     = {https://pure.mpg.de/rest/items/item_2246796/component/file_2296741/content},
+}
+
+@Article{Lions2001,
+  author    = {Lions, Jacques-Louis and Maday, Yvon and Turinici, Gabriel},
+  journal   = {Comptes Rendus de l'Acad{\'e}mie des Sciences},
+  title     = {A \enquote{parareal} in time discretization of {PDE}'s},
+  year      = {2001},
+  number    = {7},
+  pages     = {661--668},
+  volume    = {332},
+  doi       = {10.1016/S0764-4442(00)01793-6},
+  groups    = {Parareal},
+  publisher = {Elsevier},
+}
+
+@Article{Baffico2002,
+  author    = {Baffico, Leonardo and Bernard, Stephane and Maday, Yvon and Turinici, Gabriel and Z{\'e}rah, Gilles},
+  journal   = {Physical Review E},
+  title     = {Parallel-in-time molecular-dynamics simulations},
+  year      = {2002},
+  number    = {5},
+  pages     = {057701},
+  volume    = {66},
+  doi       = {10.1103/PhysRevE.66.057701},
+  groups    = {Parareal},
+  publisher = {APS},
+}
+
+@Article{Gander2007,
+  author    = {Gander, Martin J. and Vandewalle, Stefan},
+  journal   = {SIAM Journal on Scientific Computing},
+  title     = {Analysis of the parareal time-parallel time-integration method},
+  year      = {2007},
+  number    = {2},
+  pages     = {556--578},
+  volume    = {29},
+  doi       = {10.1137/05064607X},
+  groups    = {Parareal},
+  publisher = {SIAM},
+}
+
+@Book{Locatelli2011,
+  author    = {Locatelli, Arturo},
+  publisher = {Birkhäuser},
+  title     = {{O}ptimal {C}ontrol: {A}n {I}ntroduction},
+  year      = {2001},
+  isbn      = {3-7643-6408-4},
+  ean       = {9783764364083},
+}
+
+@Article{Benner2009,
+  author    = {Benner, Peter and Li, Ren-Cang and Truhar, Ninoslav},
+  journal   = {Journal of Computational and Applied Mathematics},
+  title     = {On the {ADI} method for {S}ylvester equations},
+  year      = {2009},
+  number    = {4},
+  pages     = {1035--1045},
+  volume    = {233},
+  doi       = {10.1016/j.cam.2009.08.108},
+  groups    = {ADI, LDLt},
+  publisher = {Elsevier},
+}
+
+@Article{Penzl1999,
+  author    = {Penzl, Thilo},
+  journal   = {SIAM Journal on Scientific Computing},
+  title     = {A cyclic low-rank {S}mith method for large sparse {L}yapunov equations},
+  year      = {1999},
+  number    = {4},
+  pages     = {1401--1418},
+  volume    = {21},
+  doi       = {10.1137/S1064827598347666},
+  groups    = {ADI},
+  publisher = {SIAM},
+}
+
+@Book{Wachspress2013,
+  author    = {Wachspress, Eugene L.},
+  publisher = {Springer},
+  title     = {The {ADI} model problem},
+  year      = {2013},
+  doi       = {10.1007/978-1-4614-5122-8},
+  groups    = {ADI},
+}
+
+@Article{Wachspress1992,
+  author  = {Wachspress, Eugene L.},
+  journal = {Annals of Nuclear Energy (Oxford)},
+  title   = {Optimum parameters for two-variable {ADI} iteration},
+  year    = {1992},
+  number  = {10-12},
+  pages   = {765--778},
+  volume  = {19},
+  groups  = {ADI},
+  url     = {https://inis.iaea.org/search/search.aspx?orig_q=RN:24033997},
+}
+
+@Article{Beckermann2010,
+  author    = {Beckermann, Bernhard and Gryson, Alexis},
+  journal   = {Constructive Approximation},
+  title     = {Extremal rational functions on symmetric discrete sets and superlinear convergence of the {ADI} method},
+  year      = {2010},
+  number    = {3},
+  pages     = {393--428},
+  volume    = {32},
+  doi       = {10.1007/s00365-010-9087-6},
+  groups    = {ADI},
+  publisher = {Springer},
+}
+
+@Book{Golub2013,
+  author    = {Golub, Gene H. and van Loan, Charles F.},
+  publisher = {Johns Hopkins University Press},
+  title     = {Matrix Computations},
+  year      = {2013},
+  edition   = {4},
+}
+
+@Article{Li2002,
+  author    = {Li, Jing-Rebecca and White, Jacob},
+  journal   = {SIAM Journal on Matrix Analysis and Applications},
+  title     = {Low rank solution of {L}yapunov equations},
+  year      = {2002},
+  number    = {1},
+  pages     = {260--280},
+  volume    = {24},
+  doi       = {10.1137/S0895479801384937},
+  groups    = {ADI},
+  publisher = {SIAM},
+}
+
 @Comment{jabref-meta: databaseType:bibtex;}
+
+@Comment{jabref-meta: grouping:
+0 AllEntriesGroup:;
+1 StaticGroup:ADI\;0\;1\;0x00ffffff\;\;\;;
+1 StaticGroup:Parareal\;0\;1\;0xff0000ff\;\;\;;
+1 StaticGroup:LDLt\;0\;1\;0x008080ff\;\;\;;
+}

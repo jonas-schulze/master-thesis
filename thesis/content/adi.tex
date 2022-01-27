@@ -1,0 +1,584 @@
+\chapter{Alternating-Directions Implicit Method}
+
+The \ac{ADI} method goes back to \cite{Peaceman1955}.
+It has originally been designed to solve linear systems
+$Ax=b$
+for symmetric positive-definite $A\in\Rnn$
+and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
+
+\todo[inline]{Chapter Outline}
+
+\section{Parametrized Splitting Schemes}
+
+Many iterative methods solving $Ax=b$ can be written in a one-step \emph{splitting} form
+\begin{equation*}
+  Mx^{k+1} = Nx^k + b
+\end{equation*}
+where $M-N = A$ and systems $Mx = d$ are \enquote{easy} to solve \cite[Section~11.2.3]{Golub2013}.
+These methods are \emph{consistent} by construction,
+\ie every solution to $Ax=b$ is a fixpoint of the iteration.
+Conversely, every fixpoint $x^{k+1} = x^k$ is a solution as well.
+The method converges if $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
+$G$ is called \emph{iteration matrix} of the scheme.
+
+The structure above is called \emph{first normal form} of the method.
+Consistency is equivalent to $M-N=A$.
+The \emph{second normal form} of a consistent linear iteration method reads
+\begin{equation*}
+  x^{k+1} = M^{-1} \big( (M-A) x^k + b \big) = x^k - M^{-1} (Ax^k - b)
+\end{equation*}
+and $B := M^{-1}$ is called \emph{matrix of the second normal form}.
+
+We call a splitting method \emph{parametrized} if the iteration matrix depends on the iteration,
+\ie $A = M_k - N_k$ for $k\in\N$.
+The normal forms are thus given by
+\begin{equation}
+\label{eq:adi:normalform}
+\begin{aligned}
+  M_k x^{k+1} &= N_k x^k + b
+  ,
+  \\
+  x^{k+1} &= x^k - M_k^{-1} (Ax^k - b)
+  .
+\end{aligned}
+\end{equation}
+We further call an operator split and a method \emph{commuting} if $M_k, N_k$ commute, \ie
+\begin{equation*}
+  M_k N_k = N_k M_k
+  \qquad
+  \forall k \in\N,
+\end{equation*}
+and \emph{fully commuting} if $M_*, N_*$ commute, \ie
+\begin{equation*}
+  M_i N_j = N_j M_i
+  \qquad
+  M_i M_j = M_j M_i
+  \qquad
+  N_i N_j = N_j N_i
+  \qquad
+  \forall i,j \in\N
+  .
+\end{equation*}
+In the latter case,
+the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied does not matter:
+
+\begin{proposition}[Permutation Invariance]
+\label{thm:adi:permutation}
+  Let $A = M_k - N_k$ be a fully permuting operator split.
+  Then, the value of $x^{k+1}$ given by the parametrized splitting method~\eqref{eq:adi:normalform}
+  does not depend on the order of the steps.
+\end{proposition}
+\begin{proof}
+  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
+  Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
+  and $B_k := M_k^{-1}$ denote the matrix of the second normal form.
+  Observe that the matrices $G_i, G_j$ as well as $A, B_i, B_j$ commute for $i,j\in\N$,
+  since $ab=ba \implies a^{-1}b = ba^{-1}$ for any $a,b$ in a multiplicative group.
+  Therefore, any neighboring steps may be exchanged,
+  \begin{align*}
+    x^{k+1}
+    &= G_k x^k + B_k b \\
+    &= G_k (G_{k-1} x^{k-1} + B_{k-1} b) + B_k b \\
+    &= \underbrace{
+      (G_k G_{k-1})
+    }_{
+      G_{k-1} G_k
+    } x^{k-1} + \underbrace{
+      (G_k B_{k-1} + B_k)
+    }_{
+      G_{k-1} B_k + B_{k-1}
+    } b
+  \end{align*}
+  since $N_k = M_k - A$ implies $G_k = I_n - B_k A$ as well as
+  \begin{align*}
+    G_k B_{k-1} + B_k
+    &= (I_n - B_k A) B_{k-1} + B_k \\
+    &= B_{k-1} - B_k (A_1+A_2) B_{k-1} + B_k \\
+    &= B_{k-1} + (I_n - B_{k-1} A) B_k \\
+    &= B_{k-1} + G_{k-1} B_k
+    .
+  \end{align*}
+  As any permutation may be obtained by exchanging neighboring configurations,
+  $x^k$ does thus not depend on the order of the steps.
+\end{proof}
+
+Another interesting observation is a reformulation of the second normal form:
+
+\begin{proposition}[Recursive Residuals]
+\label{thm:adi:residual}
+  Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
+  Then, the \emph{residual} $r^k := Ax^k - b$ adheres to
+  \begin{equation*}
+    r^{k+1} = G_k r^k
+  \end{equation*}
+  where $G_k := M_k^{-1} N_k$ denotes the iteration matrix.
+\end{proposition}
+\begin{proof}
+  Due to $A = M_k - N_k$ it is $AM_k^{-1} = I - N_k M_k^{-1}$.
+  Therefore,
+  \begin{align*}
+    r^{k+1}
+    &= Ax^{k+1} - b \\
+    &= A \big( M_k^{-1} (N_k x^k + b) \big) - b \\
+    &= M_k^{-1} N_k \underbrace{
+      \vphantom{M_k^{-1}}
+      Ax^k
+    }_{
+      \vphantom{M_k^{-1}}
+      r^k + b
+    }
+    + \underbrace{
+      A M_k^{-1}
+    }_{
+      I\mathrlap{{} - N_k M_k^{-1}}
+    } b - b \\
+    &= M_k^{-1} N_k r^k + \underbrace{
+      (M_k^{-1} N_k - N_k M_k^{-1})
+    }_0 b
+    .
+  \end{align*}
+\end{proof}
+
+\begin{corollary}[Recursive Increment Form]
+\label{thm:adi:increment-form}
+  Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
+  Then, the \emph{increment} $v^k := - M_k^{-1} r^k$ defining the second normal form
+  \begin{equation*}
+    x^{k+1} := x^k + v^k
+  \end{equation*}
+  adheres to
+  \begin{equation*}
+    M_{k+1} v^{k+1} = N_k v^k
+  \end{equation*}
+  where $r^k := Ax^k - b$ denotes the residual.
+\end{corollary}
+
+\begin{remark}
+  The above is a generalization of the \ac{ADI} reordering presented in \cite{Li2002}.
+  Their argument,
+  which relies on \autoref{thm:adi:permutation},
+  is outlined in \autoref{sec:li2002}.
+\end{remark}
+
+\begin{proof}
+  By \autoref{thm:adi:residual} and $M_k N_k = N_k M_k$ it is
+  \begin{equation*}
+    M_{k+1} v^{k+1}
+    = - r^{k+1}
+    = - M_k^{-1} N_k r^k
+    = N_k (- M_k^{-1} r^k)
+    = N_k v^k
+    .
+  \end{equation*}
+\end{proof}
+
+\todo[inline]{%
+  Prove convergence as a generalization of \cite[Theorem~11.2.1]{Golub2013},
+  maybe only for commuting operator splits.
+}
+
+\section{ADI as a Parametrized Splitting Scheme}
+\label{sec:adi:1step}
+
+Suppose $A=A_1+A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
+Then it is easy to see that
+\begin{align*}
+  (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
+  (A_2 + \beta I_n)x &= b - (A_1 - \beta I_n) x
+\end{align*}
+for any $\alpha, \beta \in\C$.
+Define the short-hand notation
+\begin{equation}
+\label{eq:adi:shorthand}
+\begin{aligned}
+  \Aip  &:= A_1 + \alpha_k I_n &
+  \qquad\qquad\qquad %FIXME
+  \Aiip &:= A_2 + \beta_k  I_n \\
+  \Aim  &:= A_1 - \beta_k  I_n &
+  \Aiim &:= A_2 - \alpha_k I_n
+\end{aligned}
+\end{equation}
+and convert the above into an iteration scheme
+\begin{equation}
+  \label{eq:adi:general2step}
+  \left\{
+  \begin{aligned}
+    \Aip  x^{k+\frac{1}{2}} &= b - \Aiim x^k \\
+    \Aiip x^{k+1}           &= b - \Aim x^{k+\frac{1}{2}}
+  \end{aligned}
+  \right.
+\end{equation}
+where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
+
+Obviously, every sub-step is a splitting scheme.
+In fact, the ADI as a whole can be seen as a parametrized splitting scheme.
+Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the full step $x^{k+1}$ leads to
+\begin{equation*}
+  \Aiip x^{k+1}
+  = b - \underbrace{
+    \Aim\Aipinv
+  }_{\Aipinv\Aim}
+  (b - \Aiim \hat x^k)
+  .
+\end{equation*}
+Multiplying by $\Aip$ then gives
+\begin{equation*}
+  \Aip\Aiip x^{k+1} = \Aim\Aiim x^k +
+  \underbrace{%
+  (\Aip - \Aim)
+  }_{(\alpha_k + \beta_k) I_n}
+  b
+  .
+\end{equation*}
+Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formulation in its first normal form
+\begin{equation}
+\label{eq:adi:general1step}
+  \underbrace{
+    (\alpha_k + \beta_k)^{-1} \Aip\Aiip \\
+  }_{M_k}
+  x^{k+1} =
+  \underbrace{
+    (\alpha_k + \beta_k)^{-1} \Aim\Aiim
+  }_{N_k}
+  x^k + b
+  .
+\end{equation}
+Indeed, $M_k - N_k = A$ since
+\begin{align*}
+  \Aip\Aiip &= A_1A_2 + \alpha_k\beta_k I_n + \beta_k A_1 + \alpha_k A_2 \\
+  \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
+  .
+\end{align*}
+The ADI is a fully commuting parametrized splitting scheme if $A_1, A_2$ commute.
+
+\section{Old Stuff}
+
+\begin{lemma}[Commuting Matrices]
+\label{thm:adi:commuting-matrices}
+  Let $\alpha, \beta\in\C$ and let $A, B \in\Cnn$ commute.
+  If $A$ is invertible, then $A^{-1}B = BA^{-1}$.
+  If $(A+\alpha I_n)$ is invertible, then
+  \begin{equation*}
+    (A+\alpha I_n)^{-1} (B-\beta I_n)
+    = (B-\beta I_n) (A+\alpha I_n)^{-1}
+    .
+  \end{equation*}
+  Furthermore, for $M\in\Cnn$ it holds
+  \begin{equation*}
+    (A+\alpha M)^{-1} (A-\beta M)
+    = I_n - (\alpha+\beta) (A+\alpha M)^{-1} M
+    .
+  \end{equation*}
+\end{lemma}
+\begin{proof}
+  Multiplying $AB=BA$ with $A^{-1}$ from either side yields $A^{-1}B=BA^{-1}$.
+  Furthermore, $AB=BA$ implies
+  $
+    (A+\alpha I_n) (B-\beta I_n)
+    =
+    (B-\beta I_n) (A+\alpha I_n)
+  $.
+  Applying the first claim yields the desired equality.
+  The last claim follows from noting
+  $A-\beta M = (A+\alpha M) - (\alpha+\beta)M$
+  and multiplying by $(A+\alpha M)^{-1}$.
+\end{proof}
+
+The \ac{ADI} converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
+We restrict the analysis to commuting $A_1, A_2$.
+In this case,
+there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
+such that the \ac{ADI} shows
+\todo{Can I show this?}
+superlinear convergence \cite{Beckermann2010}.
+
+\begin{lemma}[Cayley Transformation]
+\label{thm:adi:cayley}
+  Let $A, M\in\Cnn$ and $\alpha, \beta \in\C$ with $-\alpha\notin\Lambda(A, M)$.
+  The \emph{generalized Cayley transformation} of a matrix pair $(A,M)$ is defined by
+  the rational matrix function
+  \begin{equation*}
+    \Cayley(A, M, \alpha, \beta) := (A+\alpha M)^{-1} (A-\beta M).
+  \end{equation*}
+  \todo[inline]{
+    Furthermore, $\Lambda(A,M) \subset\C_- \implies \rho(\Cayley(A,M,\alpha,\conj\alpha)) < 1$,
+    \cf \cite[Proposition~2.16]{Kuerschner2016}.
+  }
+\end{lemma}
+\begin{remark}
+  In the context of control theory,
+  the last claim states that
+  $\Cayley(A, M, \alpha, \conj\alpha)$ is d-stable if
+  $(A, M)$ is c-stable.
+\end{remark}
+\begin{proof}
+\end{proof}
+
+\begin{lemma}
+  Let $\alpha_k,\beta_k\in\C$ and $A=A_1+A_2$ be given.
+  Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
+  The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
+\end{lemma}
+\begin{proof}
+  For brevity, we omit the subscript $k$.
+  Observe
+  \begin{align*}
+    \Aip\Aiip
+    &= A_1A_2 + \alpha\beta I_n + \beta A_1 + \alpha A_2 \\
+    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 + \alpha(A_1 + A_2) \\
+    \Aim\Aiim
+    &= A_1A_2 + \alpha\beta I_n - \alpha A_1 - \beta A_2 \\
+    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 - \beta(A_1 + A_2)
+  \end{align*}
+  such that
+  \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
+  \begin{equation*}
+    M^{-1}N
+    = (\Aip\Aiip)^{-1}(\Aim\Aiim)
+    = \Cayley(B, A_1+A_2, \alpha, \beta)
+  \end{equation*}
+  for
+  \begin{equation*}
+    B := A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1
+    .
+  \end{equation*}
+\end{proof}
+
+If $A_1, A_2$ commute,
+all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
+By \autoref{thm:adi:commuting-matrices} this extends to their inverses.
+Thus,
+\begin{equation*}
+  M =
+  \Aipinv\Aim
+  \Aiipinv\Aiim
+  =:
+  \Cayley(A_1, I_n, \alpha, \beta)
+  \cdot
+  \Cayley(A_2, I_n, \beta, \alpha)
+  ,
+\end{equation*}
+\todo{Does this help with $\rho(M)<1$?}
+\ie $M$ is even a sequence of Cayley transformations.
+
+\begin{hypothesis}[Convergence of ADI]
+\label{thm:adi:convergence}
+\todo{Rephrase in terms of eigenvalues}
+  If $A_1$ and $A_2$ are stable, then $\rho(M) < 1$.
+\end{hypothesis}
+
+\section{Application to \act{ALE}s}
+\label{sec:adi:ale}
+
+Consider the \ac{ALE}
+\begin{equation*}
+\label{eq:adi:ale}
+  L(X) := AX + XA^\HT = -W
+\end{equation*}
+where $W = W^\T$.
+The \Lyapunov operator $L = L_L + L_R$ naturally decomposes into
+left-multiplication $L_L : X \mapsto AX$ and
+right-multiplication $L_R : X \mapsto XA^\HT$.
+Furthermore, $L_L$ and $L_R$ commute:
+\begin{equation*}
+  L_L \circ L_R \equiv L_R \circ L_L \equiv X \mapsto AXA^\HT
+\end{equation*}
+All the operators above are linear and act on $\Rnn$.
+Apply the \ac{ADI} in its intermediate-step formulation~\eqref{eq:adi:general2step}:
+\begin{equation}
+  \left\{
+  \begin{aligned}
+    (A + \alpha_k I_n) X_{k+\frac{1}{2}} &= -W - X_k (A^\HT - \alpha_k I_n) \\
+    X_{k+\frac{1}{2}} (A^\HT + \beta I_n) &= -W - (A - \beta I_n) X_k
+  \end{aligned}
+  \right.
+\end{equation}
+The one-step formulation in its first normal form~\eqref{eq:adi:general1step} reads:
+\begin{equation}
+  (A + \alpha_k I_n)
+  X_{k+1}
+  (A + \conj{\beta_k} I_n)^\HT
+  =
+  (A - \beta_k I_n)
+  X_k
+  (A - \conj{\alpha_k} I_n)^\HT
+  - (\alpha_k + \beta_k)
+  W
+\end{equation}
+Choosing $\beta_k := \conj{\alpha_k}$
+the above becomes Hermitean:
+\begin{equation}
+\label{eq:adi:ale1step}
+  (A + \alpha_k I_n)
+  X_{k+1}
+  (A + \alpha_k I_n)^\HT
+  =
+  (A - \conj{\alpha_k} I_n)
+  X_k
+  (A - \conj{\alpha_k} I_n)^\HT
+  - 2\Re(\alpha_k)
+  W
+\end{equation}
+Define the short-hand notation
+\begin{equation*}
+\begin{aligned}
+  A^+_k &:= A + \alpha_k I_n \\
+  A^-_k &:= A - \conj\alpha_k I_n
+\end{aligned}
+\end{equation*}
+and let the low-rank factorizations
+\begin{equation*}
+\begin{aligned}
+  X_k &= L_k D_k L_k^\HT \\
+  W &= GSG^\HT
+\end{aligned}
+\end{equation*}
+for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
+Typically, $n_G \ll n$.
+Then, \eqref{eq:adi:ale1step} reads
+\begin{equation}
+  (A_k^+) L_{k+1} D_{k+1} L{k+1}^\HT (A_k^+)^\HT
+  = (A_k^-) L_k D_k L_k^\HT (A_k^-)^\HT - 2\Re(\alpha_k) GSG^\HT
+\end{equation}
+such that
+the \ac{ADI} can be stated in \ac{LRSIF} directly.
+Using the update formulas of \autoref{sec:lr:update},
+the iterates are build by successively adding column blocks of size $n_G$:
+\begin{align*}
+  L_{k+1} &= \begin{bmatrix}
+    (A^+_k)^{-1} A^-_k L_k &
+    (A^+_k)^{-1} G
+  \end{bmatrix} \\
+  D_{k+1} &= \begin{bmatrix}
+    D_k \\
+    & -2\Re(\alpha_k) S
+  \end{bmatrix}
+\end{align*}
+Using an initial value $X^0=0$,
+the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
+As a consequence, computing $L_{k+1}$
+requires $kn_G + n_G$ system solves and
+becomes increasingly expensive.
+This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}:
+\begin{equation*}
+\left\{
+\begin{aligned}
+  X_{k+1}
+    &= X_k + \tilde V_k \\
+  \tilde V_k
+    &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})}
+      (A_k^+)^{-1} (A_{k-1}^-)
+      \tilde V_k
+      (A_{k-1}^-)^\HT (A_k^+)^{-\HT} \\
+  X_0
+    &= 0 \\
+  \tilde V_0
+    &= -2\Re(\alpha_0) (A_0^+)^{-1} W (A_0^+)^{-\HT}
+\end{aligned}
+\right.
+\end{equation*}
+\todo{I hate naming things. Especially if they shall be compatible to other people's notations.}
+Assume a factorization of the increment $\tilde V_k = V_k Y_k V_k^\HT$ for $k\in\N$.
+Then, for $W = GSG^\HT$,
+the low-rank version of the initial value $\tilde V_0$ reads
+\begin{align*}
+  V_0 &= (A_0^+)^{-1} G, \\
+  Y_0 &= -2\Re(\alpha_0) S.
+\end{align*}
+Thus,
+by \autoref{thm:adi:commuting-matrices},
+the iteration of the increment $\tilde V_{k} = V_k Y_k V_k^\HT$ reads
+\begin{align*}
+  V_k &= (A_k^+)^{-1} (A_{k-1}^-) V_{k-1} \\
+      &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
+  Y_k &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})} Y_{k-1} \\
+      &= -2\Re(\alpha_k) S
+\end{align*}
+such that the iteration $X_{k+1} = X_k + \tilde V_k$ is given by
+\begin{align*}
+  L_{k+1} &= \begin{bmatrix}
+    L_k &
+    V_k
+  \end{bmatrix} \\
+    D_{k+1} &= \begin{bmatrix}
+      D_k \\
+      & Y_k
+    \end{bmatrix}
+    = \begin{bmatrix}
+      D_k \\
+      & -2\Re(\alpha_k) S
+    \end{bmatrix}
+\end{align*}
+Summing up,
+this leads to the low-rank procedure
+\begin{equation}
+\left\{
+\begin{aligned}
+  L_k &= \begin{bmatrix}
+    V_0 &
+    \cdots &
+    V_{k-1}
+  \end{bmatrix} \\
+  D_k &= \begin{bmatrix}
+    -2 \Re(\alpha_0) S \\
+    & \ddots \\
+    && -2 \Re(\alpha_{k-1}) S
+  \end{bmatrix} \\
+  V_k &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
+  V_0 &= (A_0^+)^{-1} G
+\end{aligned}
+\right.
+\end{equation}
+where $V_k \in\R^{n\times n_G}$ has constant dimensions.
+Therefore, only $n_G$ system solves are necessary at any iteration $k$.
+This method first appeared in \cite[Section~5]{Benner2009}.
+
+\todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
+
+\todo[inline]{Column Compression}
+
+\begin{remark}
+  Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
+  As a mapping of matrices,
+  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
+  $
+    U A^\HT + \alpha U =
+    U(A+\conj{\alpha} I_n)^\HT \neq
+    U A_+^\HT
+  $.
+  Therefore, the notation is slightly more involved than in the previous section.
+  For more details, refer to \autoref{sec:vectorization}.
+\end{remark}
+
+\begin{remark}
+  \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
+  right-multiplication $\tilde L_R :X \mapsto XA^\T$, $\tilde L_R \neq L_R$.
+  The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
+  This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
+  instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
+  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
+\end{remark}
+
+\todo[inline]{%
+Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
+\ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
+As we are dealing with low-rank formulations of known rank $r$,
+given that we ensure full rank of the factors,
+we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A}_2$.
+}
+
+\section{Parameter Selection}
+\label{sec:adi:parameters}
+
+After deriving the structure of the algorithm for \ac{ALE},
+and the need of $\beta_k := \conj{\alpha_k}$ for a low-rank formulation,
+we have to determine suitable parameters $\Set{\alpha_k : k\in\N}$.
+Classical choices of pre-computed values include
+optimal Wachspress shifts \cite{Wachspress1992,Wachspress2013} and
+heuristic Penzl shifts \cite{Penzl1999}.
+We resort to self-generating shifts described in \cite[Section~5.3]{Kuerschner2016}.
+
+\section{Alternative Lyapunov Solvers}
+Krylov subspace,
+projection-based,
+hybrid
