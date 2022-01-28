@@ -1,12 +1,26 @@
 \documentclass[
+  12pt,
+  a4paper,
+  twoside,
+  BCOR=8mm,
+  numbers=noenddot,
+  chapterprefix=true,
+  headings=small,
+  headsepline,
   bibliography=totoc,
   listof=totoc,
-  oneside,
+  markcase=upper, % make listof headings uppercase
 ]{scrbook}
+
+\usepackage{scrlayer-scrpage}
 
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
 \usepackage[ngerman,american]{babel} % Language settings
+
+\usepackage[defaultsans,scale=0.9]{lato} % Use Lato as sans-serif font
+\usepackage{fourier} % Use Adobe Utopia as standard font
+%\usepackage[scaled=0.83]{beramono} % Use Bera Mono as monospace font
 
 \usepackage[
   style=numeric-comp,
@@ -22,6 +36,7 @@
 \input{preamble/hyphenation}
 \input{preamble/environments}
 \input{preamble/other}
+\input{preamble/typography}
 
 \makeglossaries
 
@@ -42,6 +57,7 @@
 \listoftheorems[ignore=remark]
 
 \listoftodos
+\markboth{TODO LIST}{TODO LIST}
 \todototoc
 
 % -----------------------------------------------------------------------------

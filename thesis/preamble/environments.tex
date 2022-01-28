@@ -1,16 +1,34 @@
 % Remember: use \label{thm:...} for theorems, propositions, lemmata, etc.
 % This way the type of an environment can easily be changed.
 
-\theoremstyle{plain}
-\newtheorem{lemma}{Lemma}[chapter]
-\newtheorem{corollary}[lemma]{Corollary}
-\newtheorem{proposition}[lemma]{Proposition}
-\newtheorem{theorem}[lemma]{Theorem}
-\newtheorem{hypothesis}[lemma]{Hypothesis (PROVEME)}
+\declaretheoremstyle[
+  spaceabove = \topsep,
+  spacebelow = \topsep,
+  postheadspace = 0.5em, % matches proof
+  headfont = \usekomafont{captionlabel},
+  notefont = \normalfont\sffamily,
+  bodyfont = \normalfont,
+  qed = \ensuremath{\triangle\hspace*{-.1ex}}, % bring it a little bit closer to the edge
+]{myplain}
 
-\theoremstyle{definition}
-\newtheorem{definition}[lemma]{Definition}
-\newtheorem{example}[lemma]{Example}
+\declaretheoremstyle[
+  spaceabove = \topsep,
+  spacebelow = \topsep,
+  postheadspace = 0.5em, % matches proof
+  headfont = \itshape,
+  numbered = no,
+  qed = \ensuremath{\triangle\hspace*{-.1ex}}, % bring it a little bit closer to the edge
+]{myremark}
 
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
+\renewcommand{\qedsymbol}{\ensuremath{\square}} %TODO: still not bold enough compared to \triangle
+
+\declaretheorem[style=myplain, numberwithin=chapter]{lemma}
+\declaretheorem[style=myplain, numberlike=lemma]{corollary}
+\declaretheorem[style=myplain, numberlike=lemma]{proposition}
+\declaretheorem[style=myplain, numberlike=lemma]{theorem}
+\declaretheorem[style=myplain, numberlike=lemma]{hypothesis}
+
+\declaretheorem[style=myplain, numberlike=lemma]{definition}
+\declaretheorem[style=myplain, numberlike=lemma]{example}
+
+\declaretheorem[style=myremark]{remark}

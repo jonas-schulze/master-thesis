@@ -1,0 +1,18 @@
+\renewcommand{\bfdefault}{eb}
+
+% Use Lato Extra Bold
+\setkomafont{disposition}{\sffamily\bfseries}
+
+% Header and footer font
+\setkomafont{pageheadfoot}{\footnotesize\sffamily\bfseries}
+\setkomafont{pagenumber}{\footnotesize\sffamily\bfseries}
+
+% Captions of tables, figures etc.
+\setkomafont{captionlabel}{\sffamily\bfseries}
+\setkomafont{chapterprefix}{\normalfont\normalsize\sffamily\MakeUppercase}
+
+% Header and footer content
+\automark[chapter]{chapter}
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\bfseries\MakeUppercase{\chapappifchapterprefix{~}}\thechapter\mdseries\quad\MakeUppercase{#1}}%
+           {\mdseries\MakeUppercase{#1}\quad\bfseries\MakeUppercase{\chapappifchapterprefix{~}}\thechapter}}
