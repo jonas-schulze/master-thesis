@@ -13,6 +13,7 @@
 ]{scrbook}
 
 \usepackage{scrlayer-scrpage}
+\usepackage{scrtime} % \thistime on title page
 
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
@@ -45,6 +46,7 @@
 % -----------------------------------------------------------------------------
 \frontmatter
 
+\input{titlepage.tex}
 \include{content/abstract}
 
 \cleardoublepage
