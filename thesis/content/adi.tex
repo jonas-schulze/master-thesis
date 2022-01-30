@@ -102,7 +102,17 @@ the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied d
   $x^k$ does thus not depend on the order of the steps.
 \end{proof}
 
-Another interesting observation is a reformulation of the second normal form:
+A well known fact is that the iteration matrix $G_k$ determines
+the behavior of the \emph{error} $e^k := x^k - x^*$, where $Ax^* = b$.
+Due to the consistency, $M_k x^* = N_k x^* + b$.
+Subtract this from the first normalform~\eqref{eq:adi:normalform} to obtain
+$M_k e^{k+1} = N_k e^k$ or, equivalently:
+\begin{equation}
+  e^{k+1} = G_k e^k
+\end{equation}
+An interesting observation is that for commuting operator splits,
+the same holds for the residual.
+This leads to an alternative formulation of the second normal form.
 
 \begin{proposition}[Recursive Residuals]
 \label{thm:adi:residual}
@@ -144,7 +154,7 @@ Another interesting observation is a reformulation of the second normal form:
   Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
   Then, the \emph{increment} $v^k := - M_k^{-1} r^k$ defining the second normal form
   \begin{equation*}
-    x^{k+1} := x^k + v^k
+    x^{k+1} = x^k + v^k
   \end{equation*}
   adheres to
   \begin{equation*}
@@ -159,7 +169,7 @@ Another interesting observation is a reformulation of the second normal form:
   which relies on \autoref{thm:adi:permutation},
   is outlined in \autoref{sec:li2002}.
   Note that the proof below does not require a fully commuting splitting method,
-  and works for arbitrary initial values $x^0$.
+  and does not restrict the initial value $x^0$.
 \end{remark}
 
 \begin{proof}
@@ -251,7 +261,18 @@ Indeed, $M_k - N_k = A$ since
   \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
   .
 \end{align*}
-The ADI is a fully commuting parametrized splitting scheme if $A_1, A_2$ commute.
+
+\begin{corollary}[Fully Commuting Splitting Scheme]
+  The ADI is a fully commuting parametrized splitting scheme if $A_1, A_2$ commute.
+\end{corollary}
+\begin{proof}
+  Obvious.
+\end{proof}
+
+\todo[inline]{%
+Double-step for complex $\alpha_k\in\C\setminus\R$, $\alpha_{k+1} = \conj{\alpha_k}$, to maintain real arithmetic.
+Where did this idea appear first?
+}
 
 \section{Old Stuff}
 
@@ -538,6 +559,8 @@ This method first appeared in \cite[Section~5]{Benner2009}.
 \todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
 
 \todo[inline]{Column Compression}
+
+\todo[inline]{Apply double-step presented in previous section.}
 
 \begin{remark}
   Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
