@@ -586,7 +586,67 @@ where $V_k \in\R^{n\times n_G}$ has constant dimensions.
 Therefore, only $n_G$ system solves are necessary at any iteration $k$.
 This method first appeared in \cite[Section~5]{Benner2009}.
 
-\todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
+This raises the question for a suitable stopping criterion.
+A traditional criterion is to stop when the residual reaches a certain threshold.
+This requires an efficient description of the residual:
+
+\begin{theorem}[Low-Rank Lyapunov Residual]
+  The residual of the \ac{ADI},
+  with $\beta_k := \conj{\alpha_k}$ and $X_0=0$ applied to the \ac{ALE}~\eqref{eq:adi:ale},
+  has a well-defined low-rank factorization compatible to $W = GSG^\HT$,
+  $G\in\C^{n\times n_G}$, $S\in\C^{n_G\times n_G}$, namely
+  \begin{equation*}
+    L(X_k) + G S G^\HT = R_k S R_k^\HT
+  \end{equation*}
+  for $R_k \in\C^{n\times n_G}$ and $R_0 = G$.
+  Furthermore, it holds
+  \begin{align*}
+    R_{k+1} &= R_k - 2\Re(\alpha_k) V_k \\
+    V_k &= (A_k^+)^{-1} R_k
+  \end{align*}
+  where $V_k \in\C^{n\times n_G}$ denotes the low-rank increment of \eqref{eq:adi:si-lr-adi}.
+\end{theorem}
+\begin{proof}
+  In the notation of the previous section,
+  let $r^k$ and $v^k$ denote residual and increment, respectively.
+  Obviously, $r^0 := L(0) + W = W = GSG^\HT$, hence $R_0 = G$.
+  Due to \autoref{thm:adi:residual},
+  \begin{equation*}
+    r^{k+1}
+    = G_k r^k
+    = \big( (A_k^+)^{-1} A_k^- \big)
+    R_k S R_k^\HT
+    \big( (A_k^+)^{-1} A_k^- \big)^\HT
+  \end{equation*}
+  using the short-hand notation~\eqref{eq:adi:ale:shorthand},
+  and the iteration mapping $G_k : \Cnn\to\Cnn$ as defined by~\eqref{eq:adi:ale:MN}.
+  This implies
+  \begin{equation*}
+  \tag{$\ast$}
+    R_{k+1}
+    = \big( (A_k^+)^{-1} A_k^- \big) R_k
+    = R_k - 2\Re(\alpha_k) (A_k^+)^{-1} R_k
+    ,
+  \end{equation*}
+  \ie $R_k$ is well-defined $\forall k$.
+
+  By definition of the increment,
+  \cf \autoref{thm:adi:increment-form},
+  $v^k := -M_k^{-1} r^k$.
+  Therefore,
+  \begin{equation*}
+    V_k Y_k V_k^\HT
+    = (A_k^+)^{-1} R_k
+    \underbrace{
+      \big( -2 \Re(\alpha_k) S_k \big)
+    }_{Y_k}
+    R_k^\HT (A_k^+)^{-\HT}
+    ,
+  \end{equation*}
+  \ie $V_k = (A_k^+)^{-1} R_k$.
+  \todo{@Martin: is this $(\ast)$ ok?}
+  Applying this to $(\ast)$ yields the remaining equality.
+\end{proof}
 
 \todo[inline]{Column Compression}
 
