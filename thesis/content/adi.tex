@@ -325,7 +325,6 @@ superlinear convergence \cite{Beckermann2010}.
   \end{equation*}
   \todo[inline]{
     Furthermore, $\Lambda(A,M) \subset\C_- \implies \rho(\Cayley(A,M,\alpha,\conj\alpha)) < 1$,
-    \cf \cite[Proposition~2.16]{Kuerschner2016}.
   }
 \end{lemma}
 \begin{remark}
@@ -394,10 +393,10 @@ Thus,
 \label{sec:adi:ale}
 
 Consider the \ac{ALE}
-\begin{equation*}
+\begin{equation}
 \label{eq:adi:ale}
   L(X) := AX + XA^\HT = -W
-\end{equation*}
+\end{equation}
 where $W = W^\T$.
 The \Lyapunov operator $L = L_L + L_R$ naturally decomposes into
 left-multiplication $L_L : X \mapsto AX$ and
@@ -466,12 +465,13 @@ the above becomes Hermitean:
 \end{remark}
 
 Define the short-hand notation
-\begin{equation*}
+\begin{equation}
+\label{eq:adi:ale:shorthand}
 \begin{aligned}
   A^+_k &:= A + \alpha_k I_n \\
   A^-_k &:= A - \conj\alpha_k I_n
 \end{aligned}
-\end{equation*}
+\end{equation}
 and let the low-rank factorizations
 \begin{equation*}
 \begin{aligned}
@@ -483,17 +483,17 @@ for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
 Typically, $n_G \ll n$.
 Then, \eqref{eq:adi:ale1step} reads
 \begin{equation}
-  (A_k^+) L_{k+1} D_{k+1} L{k+1}^\HT (A_k^+)^\HT
-  = (A_k^-) L_k D_k L_k^\HT (A_k^-)^\HT - 2\Re(\alpha_k) GSG^\HT
+  (A_k^+ L_{k+1}) D_{k+1} (A_k^+ L_{k+1})^\HT
+  = (A_k^- L_k) D_k (A_k^- L_k)^\HT - 2\Re(\alpha_k) GSG^\HT
 \end{equation}
 such that
 the \ac{ADI} can be stated in \ac{LRSIF} directly.
 Using the update formulas of \autoref{sec:lr:update},
 the iterates are build by successively adding column blocks of size $n_G$:
 \begin{align*}
-  L_{k+1} &= \begin{bmatrix}
-    (A^+_k)^{-1} A^-_k L_k &
-    (A^+_k)^{-1} G
+  A_k^+ L_{k+1} &= \begin{bmatrix}
+    A^-_k L_k &
+    G
   \end{bmatrix} \\
   D_{k+1} &= \begin{bmatrix}
     D_k \\
@@ -505,42 +505,48 @@ the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R
 As a consequence, computing $L_{k+1}$
 requires $kn_G + n_G$ system solves and
 becomes increasingly expensive.
-This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}:
-\begin{equation*}
+This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}.
+
+In the notation of the previous section,
+\begin{equation}
+\label{eq:adi:ale:MN}
+\begin{aligned}
+  M_k &: U \mapsto \big( 2\Re(\alpha_k) \big)^{-1} (A_k^+) U (A_k^+)^\HT \\
+  N_k &: U \mapsto \big( 2\Re(\alpha_k) \big)^{-1} (A_k^-) U (A_k^-)^\HT
+\end{aligned}
+\end{equation}
+such that \autoref{thm:adi:increment-form} yields the following equivalent formulation of \eqref{eq:adi:ale1step}:
+\begin{equation}
 \left\{
 \begin{aligned}
   X_{k+1}
-    &= X_k + \tilde V_k \\
-  \tilde V_k
-    &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})}
-      (A_k^+)^{-1} (A_{k-1}^-)
-      \tilde V_k
-      (A_{k-1}^-)^\HT (A_k^+)^{-\HT} \\
+    &= X_k + \tilde V_k, &
+  \quad %FIXME
+  A_k^+ \tilde V_k (A_k^+)^\HT
+    &= \frac{2\Re(\alpha_k)}{2\Re(\alpha_{k-1})}
+      (A_{k-1}^-) \tilde V_{k-1} (A_{k-1}^-)^\HT \\
   X_0
-    &= 0 \\
-  \tilde V_0
-    &= -2\Re(\alpha_0) (A_0^+)^{-1} W (A_0^+)^{-\HT}
+    &= 0, &
+  A_0^+ \tilde V_0 (A_0^+)^\HT
+    &= -2\Re(\alpha_0) W
 \end{aligned}
 \right.
-\end{equation*}
-\todo{I hate naming things. Especially if they shall be compatible to other people's notations.}
+\end{equation}
 Assume a factorization of the increment $\tilde V_k = V_k Y_k V_k^\HT$ for $k\in\N$.
 Then, for $W = GSG^\HT$,
 the low-rank version of the initial value $\tilde V_0$ reads
 \begin{align*}
-  V_0 &= (A_0^+)^{-1} G, \\
+  A_0^+ V_0 &= G, \\
   Y_0 &= -2\Re(\alpha_0) S.
 \end{align*}
 Thus,
-by \autoref{thm:adi:commuting-matrices},
 the iteration of the increment $\tilde V_{k} = V_k Y_k V_k^\HT$ reads
 \begin{align*}
-  V_k &= (A_k^+)^{-1} (A_{k-1}^-) V_{k-1} \\
-      &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
-  Y_k &= \frac{\Re(\alpha_k)}{\Re(\alpha_{k-1})} Y_{k-1} \\
-      &= -2\Re(\alpha_k) S
+  A_k^+ V_k &= A_{k-1}^- V_{k-1} \\
+  Y_k &= \frac{2\Re(\alpha_k)}{2\Re(\alpha_{k-1})} Y_{k-1}
+  = -2\Re(\alpha_k) S
 \end{align*}
-such that the iteration $X_{k+1} = X_k + \tilde V_k$ is given by
+such that the overall iteration $X_{k+1} = X_k + \tilde V_k$ is given by
 \begin{align*}
   L_{k+1} &= \begin{bmatrix}
     L_k &
@@ -558,6 +564,7 @@ such that the iteration $X_{k+1} = X_k + \tilde V_k$ is given by
 Summing up,
 this leads to the low-rank procedure
 \begin{equation}
+\label{eq:adi:si-lr-adi}
 \left\{
 \begin{aligned}
   L_k &= \begin{bmatrix}
@@ -570,8 +577,8 @@ this leads to the low-rank procedure
     & \ddots \\
     && -2 \Re(\alpha_{k-1}) S
   \end{bmatrix} \\
-  V_k &= V_{k-1} - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} V_{k-1} \\
-  V_0 &= (A_0^+)^{-1} G
+  A_k^+ V_k &= A_{k-1}^- V_{k-1} \\
+  A_0^+ V_0 &= G
 \end{aligned}
 \right.
 \end{equation}
