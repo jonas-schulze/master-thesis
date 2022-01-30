@@ -83,3 +83,34 @@ ordinary differential equations in $w$ and $v$.
   \ell(t, x, u) &= x^\T C^\T Q C x - 2x^\T C^\T Q \hat y + \hat y^\T Q \hat y + u^\T R u
 \end{align}
 \cite[(3.12)]{Lang2017}
+
+\section{ADI}
+
+Observe how the operator split of the \ac{ADI} defines a fully commuting splitting scheme for $V_k$,
+\cf \eqref{eq:adi:si-lr-adi}
+\begin{equation}
+\left\{
+\begin{aligned}
+  (\alpha_k + \conj{\alpha_{k-1}})^{-1} A_k^+ V_k &= (\alpha_k + \conj{\alpha_{k-1}})^{-1} A_{k-1}^- V_{k-1} + 0 \\
+  V_0 &= (A_0^+)^{-1} G
+\end{aligned}
+\right.
+\end{equation}
+which looks for the kernel of
+\begin{align*}
+  (\alpha_k + \conj{\alpha_{k-1}})^{-1} (A_k^+ - A_{k-1}^-)
+  &= (\alpha_k + \conj{\alpha_{k-1}})^{-1} \big( (A + \alpha_k I_n) - (A - \conj{\alpha_{k-1}} I_n) \big) \\
+  &= (\alpha_k + \conj{\alpha_{k-1}})^{-1} (\alpha_k + \conj{\alpha_{k-1}}) I_n
+  = I_n
+  ,
+\end{align*}
+\ie $V_k$ converges to $0$.
+By \autoref{thm:adi:residual},
+the residual is given by
+\begin{align*}
+  \hat R_{k+1}
+  &= (A_k^+)^{-1} A_{k-1}^- \hat R_k \\
+  &= (I_n - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} \hat R_k \\
+  &= \hat R_k - (\alpha_k + \conj{\alpha_{k-1}}) (A_k^+)^{-1} \hat R_k \\
+  &= \hat R_k + (\alpha_k + \conj{\alpha_{k-1}}) \hat V_k
+\end{align*}
