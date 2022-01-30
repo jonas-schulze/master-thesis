@@ -442,6 +442,29 @@ the above becomes Hermitean:
   - 2\Re(\alpha_k)
   W
 \end{equation}
+
+\begin{remark}
+  Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
+  As a mapping of matrices,
+  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
+  $
+    U A^\HT + \alpha U =
+    U(A+\conj{\alpha} I_n)^\HT \neq
+    U A_+^\HT
+  $.
+  Therefore, the notation is slightly more involved than in the previous section.
+  For more details, refer to \autoref{sec:vectorization}.
+\end{remark}
+
+\begin{remark}
+  \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
+  right-multiplication $\tilde L_R :X \mapsto XA^\T$, $\tilde L_R \neq L_R$.
+  The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
+  This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
+  instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
+  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
+\end{remark}
+
 Define the short-hand notation
 \begin{equation*}
 \begin{aligned}
@@ -559,30 +582,6 @@ This method first appeared in \cite[Section~5]{Benner2009}.
 \todo[inline]{Shift index of $\tilde V_*$ according to $X_{k+1} = X_k + \tilde V_{k+1}$ instead of $\tilde V_k$.}
 
 \todo[inline]{Column Compression}
-
-\todo[inline]{Apply double-step presented in previous section.}
-
-\begin{remark}
-  Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
-  As a mapping of matrices,
-  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
-  $
-    U A^\HT + \alpha U =
-    U(A+\conj{\alpha} I_n)^\HT \neq
-    U A_+^\HT
-  $.
-  Therefore, the notation is slightly more involved than in the previous section.
-  For more details, refer to \autoref{sec:vectorization}.
-\end{remark}
-
-\begin{remark}
-  \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
-  right-multiplication $\tilde L_R :X \mapsto XA^\T$, $\tilde L_R \neq L_R$.
-  The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
-  This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
-  instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
-  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
-\end{remark}
 
 \todo[inline]{%
 Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
