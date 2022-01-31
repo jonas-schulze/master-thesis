@@ -269,11 +269,6 @@ Indeed, $M_k - N_k = A$ since
   Obvious.
 \end{proof}
 
-\todo[inline]{%
-Double-step for complex $\alpha_k\in\C\setminus\R$, $\alpha_{k+1} = \conj{\alpha_k}$, to maintain real arithmetic.
-Where did this idea appear first?
-}
-
 \section{Old Stuff}
 
 \begin{lemma}[Commuting Matrices]
@@ -646,6 +641,102 @@ This requires an efficient description of the residual:
   \ie $V_k = (A_k^+)^{-1} R_k$.
   \todo{@Martin: is this $(\ast)$ ok?}
   Applying this to $(\ast)$ yields the remaining equality.
+\end{proof}
+
+\begin{proposition}[Complex Conjugated Parameters]
+\label{thm:adi:ale:complex-pair}
+  Suppose $A, W, X_k\in\Rnn$ for a fixed $k\in\N$,
+  \ie $G, R_k \in \R^{n\times n_G}$ and $S\in\R^{n_G\times n_G}$.
+  If the next parameters form a complex conjugated pair,
+  $\alpha_{k+1} = \conj{\alpha_k}$,
+  then the iterate after that, $X_{k+2}$ is again real.
+  More specifically,
+  \begin{align*}
+    R_{k+2} &= R_k - 4\Re(\alpha_k) \big(
+      \Re(V_k) + \delta_k \Im(V_k)
+    \big) \\
+    V_{k+1} &= \conj{V_k} + 2\delta_k \Im(V_k)
+  \end{align*}
+  for $\delta_k := \Re(\alpha_k) / \Im(\alpha_k)$.
+\end{proposition}
+\begin{proof}
+  \todo{Finish me}
+  The following is based on the proof of \cite[Theorem~4.2]{Kuerschner2016}.
+\end{proof}
+
+\begin{corollary}[Low-Rank Double-Step]
+  Suppose that $L_k, D_k$ are real-valued for a fixed $k\in\N$.
+  If the next parameters form a complex conjugated pair,
+  $\alpha_{k+1} = \conj{\alpha_k}$,
+  an equivalent low-rank update is given by
+  \begin{equation*}
+    L_{k+2} = \begin{bmatrix}
+      L_k &
+      \hat V_k &
+      \hat V_{k+1}
+    \end{bmatrix}
+  \end{equation*}
+  where
+  \begin{align*}
+    \hat V_k &= \sqrt{2} \big( \Re(V_k) + \delta_k \Im(V_k) \big) \\
+    \hat V_{k+1} &= \sqrt{\smash[b]{2(\delta_k^2 + 1)}} \Im(V_k)
+  \end{align*}
+  and $D_{k+2}$ remains as in \eqref{eq:adi:si-lr-adi}.
+\end{corollary}
+\todo[inline]{Either my coefficient for $\hat V_{k+1}$ is wrong or Normans, \cf \cite[Algorithm~2.2]{Lang2017}.}
+\begin{proof}
+  The double-step reads
+  \begin{equation*}
+    X_{k+2} = X_k
+    + V_k Y_k V_k^\HT
+    + V_{k+1} Y_{k+1} V_{k+1}^\HT
+  \end{equation*}
+  where $Y_k = -2 \Re(\alpha_k) S = Y_{k+1}$,
+  since $\Re(\alpha_k) = \Re(\alpha_{k+1})$.
+  By \autoref{thm:adi:ale:complex-pair},
+  the combined increment is given by
+  \begin{align*}
+    \MoveEqLeft
+    V_k Y_k V_k^\HT + V_{k+1} Y_{k+1} V_{k+1}^\HT
+    \\
+    &= V_k Y_k V_k^\HT +
+    \big( \conj{V_k} + 2\delta_k \Im(V_k) \big)
+    Y_k
+    \big( \conj{V_k} + 2\delta_k \Im(V_k) \big)^\HT
+    \\
+    &= \begin{multlined}[t]
+      V_k Y_k V_k^\HT
+      + \big( \conj{V_k} \big) Y_k \big( \conj{V_k} \big)^\HT
+      \\
+      + 2\delta_k \big( \conj{V_k} \big) Y_k \Im(V_k)^\HT
+      \\
+      + 2\delta_k \Im(V_k) Y_k \big( \conj{V_k} \big)^\HT
+      \\
+      + 4\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
+    \end{multlined}
+    \\
+    &= \begin{multlined}[t]
+      2\Re(V_k) Y_k \Re(V_k)^\HT
+      - 2 \Im(V_k) Y_k \Im(V_k)^\HT
+      \\
+      + 2\delta_k \Re(V_k) Y_k \Im(V_k)^\HT
+      - 2\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      \\
+      + 2\delta_k \Im(V_k) Y_k \Re(V_k)^\HT
+      - 2\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      \\
+      + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
+      + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
+    \end{multlined}
+    \\
+    &= \begin{multlined}[t]
+      2 \big( \Re(V_k) + \delta_k \Im(V_k) \big)
+      Y_k \big( \Re(V_k) + \delta_k \Im(V_k) \big)^\HT
+      \\
+      + 2(\delta_k^2 - 2\delta_k - 1) \Im(V_k) Y_k \Im(V_k)^\HT
+    \end{multlined}
+  \end{align*}
+  ... which is not what we want. :-(
 \end{proof}
 
 \todo[inline]{Column Compression}
