@@ -703,30 +703,26 @@ This requires an efficient description of the residual:
     Y_k
     \big( \conj{V_k} + 2\delta_k \Im(V_k) \big)^\HT
     \\
-    &= \begin{multlined}[t]
-      V_k Y_k V_k^\HT
-      + \big( \conj{V_k} \big) Y_k \big( \conj{V_k} \big)^\HT
-      \\
-      + 2\delta_k \big( \conj{V_k} \big) Y_k \Im(V_k)^\HT
-      \\
-      + 2\delta_k \Im(V_k) Y_k \big( \conj{V_k} \big)^\HT
-      \\
-      + 4\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
-    \end{multlined}
+    &= \begin{aligned}[t]
+      & V_k Y_k V_k^\HT + \big( \conj{V_k} \big) Y_k \big( \conj{V_k} \big)^\HT \\
+      & + 2\delta_k \big( \conj{V_k} \big) Y_k \Im(V_k)^\HT \\
+      & + 2\delta_k \Im(V_k) Y_k \big( \conj{V_k} \big)^\HT \\
+      & + 4\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
+    \end{aligned}
     \\
-    &= \begin{multlined}[t]
-      2\Re(V_k) Y_k \Re(V_k)^\HT
-      + 2 \Im(V_k) Y_k \Im(V_k)^\HT
+    &= \begin{alignedat}[t]{4}
+      &&                 2 \Re(V_k) & Y_k \Re(V_k)^\HT &
+      &{}+{}&            2 \Im(V_k) & Y_k \Im(V_k)^\HT
       \\
-      + 2\delta_k \Re(V_k) Y_k \Im(V_k)^\HT
-      - 2\im\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      &{}+{}&    2\delta_k \Re(V_k) & Y_k \Im(V_k)^\HT &
+      &{}-{}& 2\im\delta_k \Im(V_k) & Y_k \Im(V_k)^\HT
       \\
-      + 2\delta_k \Im(V_k) Y_k \Re(V_k)^\HT
-      + 2\im\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      &{}+{}&    2\delta_k \Im(V_k) & Y_k \Re(V_k)^\HT &
+      &{}+{}& 2\im\delta_k \Im(V_k) & Y_k \Im(V_k)^\HT
       \\
-      + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
-      + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
-    \end{multlined}
+      &{}+{}&  2\delta_k^2 \Im(V_k) & Y_k \Im(V_k)^\HT &
+      &{}+{}&  2\delta_k^2 \Im(V_k) & Y_k \Im(V_k)^\HT
+    \end{alignedat}
     \\
     &= \begin{multlined}[t]
       2 \big( \Re(V_k) + \delta_k \Im(V_k) \big)
