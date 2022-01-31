@@ -683,7 +683,6 @@ This requires an efficient description of the residual:
   \end{align*}
   and $D_{k+2}$ remains as in \eqref{eq:adi:si-lr-adi}.
 \end{corollary}
-\todo[inline]{Either my coefficient for $\hat V_{k+1}$ is wrong or Normans, \cf \cite[Algorithm~2.2]{Lang2017}.}
 \begin{proof}
   The double-step reads
   \begin{equation*}
@@ -717,13 +716,13 @@ This requires an efficient description of the residual:
     \\
     &= \begin{multlined}[t]
       2\Re(V_k) Y_k \Re(V_k)^\HT
-      - 2 \Im(V_k) Y_k \Im(V_k)^\HT
+      + 2 \Im(V_k) Y_k \Im(V_k)^\HT
       \\
       + 2\delta_k \Re(V_k) Y_k \Im(V_k)^\HT
-      - 2\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      - 2\im\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
       \\
       + 2\delta_k \Im(V_k) Y_k \Re(V_k)^\HT
-      - 2\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
+      + 2\im\delta_k \Im(V_k) Y_k \Im(V_k)^\HT
       \\
       + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
       + 2\delta_k^2 \Im(V_k) Y_k \Im(V_k)^\HT
@@ -733,10 +732,12 @@ This requires an efficient description of the residual:
       2 \big( \Re(V_k) + \delta_k \Im(V_k) \big)
       Y_k \big( \Re(V_k) + \delta_k \Im(V_k) \big)^\HT
       \\
-      + 2(\delta_k^2 - 2\delta_k - 1) \Im(V_k) Y_k \Im(V_k)^\HT
+      + 2(\delta_k^2 + 1) \Im(V_k) Y_k \Im(V_k)^\HT
     \end{multlined}
+    \\
+    &= \hat V_k Y_k \hat V_k^\HT
+    + \hat V_{k+1} Y_{k+1} \hat V_{k+1}^\HT
   \end{align*}
-  ... which is not what we want. :-(
 \end{proof}
 
 \todo[inline]{Column Compression}
