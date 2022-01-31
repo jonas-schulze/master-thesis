@@ -459,6 +459,8 @@ the above becomes Hermitean:
   The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
 \end{remark}
 
+\subsection{Low-Rank Formulation}
+
 Define the short-hand notation
 \begin{equation}
 \label{eq:adi:ale:shorthand}
@@ -581,9 +583,28 @@ where $V_k \in\R^{n\times n_G}$ has constant dimensions.
 Therefore, only $n_G$ system solves are necessary at any iteration $k$.
 This method first appeared in \cite[Section~5]{Benner2009}.
 
-This raises the question for a suitable stopping criterion.
-A traditional criterion is to stop when the residual reaches a certain threshold.
-This requires an efficient description of the residual:
+This raises a couple of questions,
+that we aim to answer in the following sections:
+\begin{enumerate}
+  \item
+    How to deal with the growing storage demand of the low-rank factors $L_k$ and $D_k$?
+
+    We may perform a column compression after any iteration using the technique described in \autoref{sec:lr:compression}.
+  \item
+    When should the iteration stop?
+
+    A traditional criterion is to stop when the residual reaches a certain threshold.
+    This requires an efficient description of the residual.
+  \item
+    What happens if $\alpha_k\in\C\setminus\R$?
+
+    Complex arithmetic is more expensive than real arithmetic.
+    As we will discover later, complex parameters occur in conjugated pairs.
+    This allows a reformulation of the combined step,
+    that only requires real arithmetic.
+\end{enumerate}
+
+\subsection{Low-Rank Stopping Criterion}
 
 \begin{theorem}[Low-Rank Lyapunov Residual]
   The residual of the \ac{ADI},
@@ -642,6 +663,16 @@ This requires an efficient description of the residual:
   \todo{@Martin: is this $(\ast)$ ok?}
   Applying this to $(\ast)$ yields the remaining equality.
 \end{proof}
+
+\todo[inline]{%
+Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
+\ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
+As we are dealing with low-rank formulations of known rank $r$,
+given that we ensure full rank of the factors,
+we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A}_2$.
+}
+
+\subsection{Low-Rank Double-Step}
 
 \begin{proposition}[Complex Conjugated Parameters]
 \label{thm:adi:ale:complex-pair}
@@ -724,6 +755,7 @@ This requires an efficient description of the residual:
       &{}+{}&  2\delta_k^2 \Im(V_k) & Y_k \Im(V_k)^\HT
     \end{alignedat}
     \\
+\intertext{which by grouping the terms in each column yields}
     &= \begin{multlined}[t]
       2 \big( \Re(V_k) + \delta_k \Im(V_k) \big)
       Y_k \big( \Re(V_k) + \delta_k \Im(V_k) \big)^\HT
@@ -733,18 +765,11 @@ This requires an efficient description of the residual:
     \\
     &= \hat V_k Y_k \hat V_k^\HT
     + \hat V_{k+1} Y_{k+1} \hat V_{k+1}^\HT
+    .
   \end{align*}
+  This last formula requires only real arithmetic,
+  in nice analogy to the real-valued residual of \autoref{thm:adi:ale:complex-pair}.
 \end{proof}
-
-\todo[inline]{Column Compression}
-
-\todo[inline]{%
-Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
-\ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
-As we are dealing with low-rank formulations of known rank $r$,
-given that we ensure full rank of the factors,
-we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A}_2$.
-}
 
 \section{Parameter Selection}
 \label{sec:adi:parameters}
