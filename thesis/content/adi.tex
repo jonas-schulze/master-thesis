@@ -192,22 +192,22 @@ This leads to an alternative formulation of the second normal form.
 \section{ADI as a Parametrized Splitting Scheme}
 \label{sec:adi:1step}
 
-Suppose $A=A_1+A_2$ and $x\in\R^n$ is a solution to $Ax=b$.
+Suppose $A=H+V$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
 \begin{align*}
-  (A_1 + \alpha I_n)x &= b - (A_2 - \alpha I_n) x \\
-  (A_2 + \beta I_n)x &= b - (A_1 - \beta I_n) x
+  (H + \alpha I_n)x &= b - (V - \alpha I_n) x \\
+  (V + \beta I_n)x &= b - (H - \beta I_n) x
 \end{align*}
 for any $\alpha, \beta \in\C$.
 Define the short-hand notation
 \begin{equation}
 \label{eq:adi:shorthand}
 \begin{aligned}
-  \Aip  &:= A_1 + \alpha_k I_n &
+  \Aip  &:= H + \alpha_k I_n &
   \qquad\qquad\qquad %FIXME
-  \Aiip &:= A_2 + \beta_k  I_n \\
-  \Aim  &:= A_1 - \beta_k  I_n &
-  \Aiim &:= A_2 - \alpha_k I_n
+  \Aiip &:= V + \beta_k  I_n \\
+  \Aim  &:= H - \beta_k  I_n &
+  \Aiim &:= V - \alpha_k I_n
 \end{aligned}
 \end{equation}
 and convert the above into an iteration scheme
@@ -257,13 +257,13 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formul
 \end{equation}
 Indeed, $M_k - N_k = A$ since
 \begin{align*}
-  \Aip\Aiip &= A_1A_2 + \alpha_k\beta_k I_n + \beta_k A_1 + \alpha_k A_2 \\
-  \Aim\Aiim &= A_1A_2 + \beta_k\alpha_k I_n - \alpha_k A_1 - \beta_k A_2
+  \Aip\Aiip &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
+  \Aim\Aiim &= HV + \beta_k\alpha_k I_n - \alpha_k H - \beta_k V
   .
 \end{align*}
 
 \begin{corollary}[Fully Commuting Splitting Scheme]
-  The ADI is a fully commuting parametrized splitting scheme if $A_1, A_2$ commute.
+  The ADI is a fully commuting parametrized splitting scheme if $H,V$ commute.
 \end{corollary}
 \begin{proof}
   Obvious.
@@ -332,7 +332,7 @@ superlinear convergence \cite{Beckermann2010}.
 \end{proof}
 
 \begin{lemma}
-  Let $\alpha_k,\beta_k\in\C$ and $A=A_1+A_2$ be given.
+  Let $\alpha_k,\beta_k\in\C$ and $A=H+V$ be given.
   Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
   The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
 \end{lemma}
@@ -341,47 +341,47 @@ superlinear convergence \cite{Beckermann2010}.
   Observe
   \begin{align*}
     \Aip\Aiip
-    &= A_1A_2 + \alpha\beta I_n + \beta A_1 + \alpha A_2 \\
-    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 + \alpha(A_1 + A_2) \\
+    &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H + \alpha_k(H+V) \\
     \Aim\Aiim
-    &= A_1A_2 + \alpha\beta I_n - \alpha A_1 - \beta A_2 \\
-    &= A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1 - \beta(A_1 + A_2)
+    &= HV + \alpha_k\beta_k I_n - \alpha_k H - \beta_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H - \beta_k(H+V)
   \end{align*}
   such that
   \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
   \begin{equation*}
-    M^{-1}N
+    M_k^{-1} N_k
     = (\Aip\Aiip)^{-1}(\Aim\Aiim)
-    = \Cayley(B, A_1+A_2, \alpha, \beta)
+    = \Cayley(B_k, A, \alpha_k, \beta_k)
   \end{equation*}
   for
   \begin{equation*}
-    B := A_1A_2 + \alpha\beta I_n - (\alpha-\beta)A_1
+    B_k := HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H
     .
   \end{equation*}
 \end{proof}
 
-If $A_1, A_2$ commute,
+If $H,V$ commute,
 all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
 By \autoref{thm:adi:commuting-matrices} this extends to their inverses.
 Thus,
 \begin{equation*}
-  M =
+  G_k =
   \Aipinv\Aim
   \Aiipinv\Aiim
   =:
-  \Cayley(A_1, I_n, \alpha, \beta)
+  \Cayley(H, I_n, \alpha, \beta)
   \cdot
-  \Cayley(A_2, I_n, \beta, \alpha)
+  \Cayley(V, I_n, \beta, \alpha)
   ,
 \end{equation*}
-\todo{Does this help with $\rho(M)<1$?}
-\ie $M$ is even a sequence of Cayley transformations.
+\todo{Does this help with $\rho(G)<1$?}
+\ie $G_k$ is even a sequence of Cayley transformations.
 
 \begin{hypothesis}[Convergence of ADI]
 \label{thm:adi:convergence}
 \todo{Rephrase in terms of eigenvalues}
-  If $A_1$ and $A_2$ are stable, then $\rho(M) < 1$.
+  If $H$ and $V$ are stable, then $\rho(M) < 1$.
 \end{hypothesis}
 
 \section{Application to \act{ALE}s}
