@@ -774,13 +774,125 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
 \section{Parameter Selection}
 \label{sec:adi:parameters}
 
-After deriving the structure of the algorithm for \ac{ALE},
-and the need of $\beta_k := \conj{\alpha_k}$ for a low-rank formulation,
-we have to determine suitable parameters $\Set{\alpha_k : k\in\N}$.
-Classical choices of pre-computed values include
+After deriving a suitable structure of the \ac{ADI} for \ac{ALE},
+we have to determine shift parameters $\Set{\alpha_k : k\in\N}$.
+Classical choices of \emph{pre-computed values} values include
 optimal Wachspress shifts \cite{Wachspress1992,Wachspress2013} and
 heuristic Penzl shifts \cite{Penzl1999}.
-We resort to self-generating shifts described in \cite[Section~5.3]{Kuerschner2016}.
+These try to globally minimize $\rho(G_K \cdots G_0)$ for a fixed number of \ac{ADI} steps $K\in\N$,
+and estimates for the spectra $\Lambda(H)$ and $\Lambda(V)$.
+We resort to $V(u)$-shifts, the first ansatz of \emph{self-generating shifts} described in \cite[Section~5.3]{Kuerschner2016},
+which aims at minimizing
+\todo{Does it, though? Highlight the correspondence of $V_k$ to $R_k$ and therefore Krylov methods.}
+$\rho(G_k |_{\colspan V_k})$
+separately for each iteration $k$,
+which does not require any information on the spectra of $H$ or $V$.
+
+\todo[inline]{%
+Maybe formulate this \wrt $\colspan\Set{v^{k-1}, \ldots, v^{k-u}}$ and see what happens.
+Hopefully, this naturally translates to the \ac{LRSIF} factors $V_*$.
+}
+
+\begin{equation*}
+  \Lambda(Q^\HT A Q) \cap \C_-
+\end{equation*}
+
+The general idea is to restrict $A$ onto
+$\mathcal Q := \colspan N \subseteq \C^n$
+for some matrix $N$ and take its eigen-values.
+These so-called \emph{Ritz values} are defined as $\Lambda(Q^\HT A Q)$,
+where $Q\in\C^{n\times r}$ is an orthonormal basis of $\mathcal Q$, $d := \dim\mathcal Q$.
+In the context of $V(u)$-shifts:
+\begin{equation}
+  N := \begin{bmatrix}
+    V_{j-1} &
+    \cdots &
+    V_{j-u}
+  \end{bmatrix}
+  \in \R^{n\times u n_G}
+\end{equation}
+
+To obtain an orthonormal basis,
+recall that $\R^n$ decomposes into
+\begin{equation}
+\label{eq:adi:param:ker+colspan}
+  \R^n
+  = \ker N \oplus \colspan N^\T
+  = \ker N^\T \oplus \colspan N
+\end{equation}
+and that $NN^\MP = N (N^\T N)^\MP N^\T$ is the projection onto $\colspan N$,
+where $(\optional{})^\MP$ denotes the Moore-Penrose pseudo-inverse \cite{Strang2016}.
+This leads to an implicit orthogonalization procedure.
+Note that $N^\T N$ is symmetric positive semi-definite.
+Hence, it permits a real eigen-decomposition
+\begin{align*}
+  N^\T N &= \hat N \hat D \hat N^\T, &
+  \hat N^\T \hat N &= I_r, &
+  \hat D &= \diag(\lambda_1, \ldots, \lambda_r), &
+  \lambda_1 \geq \ldots \geq \lambda_r > 0,
+\end{align*}
+where $r = \rank N = \rank N^\T N \leq u n_G$.
+The pseudo-inverse is then given by $ (N^\T N)^\MP := \hat N \hat D^{-1} \hat N^\T $.
+Finally,
+\begin{equation}
+\label{eq:adi:param:Q}
+  Q := N \hat N \hat D^{-\frac{1}{2}}
+  \in\R^{n\times r}
+\end{equation}
+is an orthonormal basis of $\mathcal Q$.
+First, $Q$ is orthonormal:
+\begin{equation*}
+  Q^\T Q
+  = \hat D^{-\frac{1}{2}} \hat N^\T (N^\T N) \hat N \hat D^{-\frac{1}{2}}
+  = \hat D^{-\frac{1}{2}} (\hat N^\T \hat N) \hat D (\hat N^\T \hat N) \hat D^{-\frac{1}{2}}
+  = \hat D^{-\frac{1}{2}} \hat D \hat D^{-\frac{1}{2}}
+  = I_r
+\end{equation*}
+Second, $\colspan N = \colspan Q$.
+By \eqref{eq:adi:param:ker+colspan},
+for any $x\in\R^{un_G}$ it is
+\begin{align*}
+  Nx
+  &= NN^\T y + 0 &&\text{for some $y\in\R^n$} \\
+  &= N(N^\T N \hat x + 0) && \text{for some $\hat x \in\R^{un_G}$} \\
+  &= N (\hat N \hat D \hat N^\T) \hat x \\
+  &= N \hat N \hat D^{-\frac{1}{2}} \hat y && \text{for $\hat y := \hat D^{\frac{3}{2}} \hat N^\T \hat x \in \R^r$}
+\end{align*}
+\ie $\colspan N \subseteq \colspan Q$.
+This implies equality,
+since $\colspan Q \subseteq \colspan N$ (trivial).
+
+The derivation above neglected zero eigen-values of $N^\T N$,
+whose eigen-vectors are syzygies of $\colspan N$.
+Indeed, let $(\epsilon,s)\in\R\times\R^{un_G}$ be an eigen-pair of $N^\T N$ with $\norm{s}_2 = 1$.
+Then,
+\begin{equation*}
+  \norm{Ns}_2^2
+  = s^\T (N^\T N s)
+  = \epsilon\norm{s}_2^2
+  = \epsilon
+\end{equation*}
+which for $\epsilon=0$ reveals linearly dependent columns of $N$.
+In that sense, small eigen-values $\lambda_*$ correspond to nearly linearly dependent columns.
+It is therefore advised to only consider the first $d \leq r$ eigen-values
+\begin{equation}
+  \lambda_* \geq \epsilon \lambda_1
+\end{equation}
+\todo{Why should $\epsilon$ depend on $r$ or $un_G$, as it does in \cite{Kuerschner2016}?}
+for some $0 < \epsilon \ll 1$.
+This corresponds to replacing
+$\hat N$ by its first $d$ columns,
+$\hat D$ by its leading diagonal block of size $d$,
+and $\colspan N$ by $\colspan(\hat N \diag(\lambda_1, \ldots, \lambda_d, 0, \ldots) \hat N^\T)$,
+while the overall formula \eqref{eq:adi:param:Q} remains unchanged.
+Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
+
+\citeauthor{Kuerschner2016}~\cite{Kuerschner2016} recommends to perform this orthogonalization twice
+to account for numerical instabilities caused by very small $\lambda_*$.
+
+\todo[inline]{Describe cost}
+
+\todo[inline]{Summarize as algorithm}
 
 \section{Alternative Lyapunov Solvers}
 Krylov subspace,
