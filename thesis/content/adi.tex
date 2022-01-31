@@ -390,15 +390,15 @@ Thus,
 Consider the \ac{ALE}
 \begin{equation}
 \label{eq:adi:ale}
-  L(X) := AX + XA^\HT = -W
+  \Lyap(X) := AX + XA^\HT = -W
 \end{equation}
 where $W = W^\T$.
-The \Lyapunov operator $L = L_L + L_R$ naturally decomposes into
-left-multiplication $L_L : X \mapsto AX$ and
-right-multiplication $L_R : X \mapsto XA^\HT$.
-Furthermore, $L_L$ and $L_R$ commute:
+The \Lyapunov operator $\Lyap = \Lyap_L + \Lyap_R$ naturally decomposes into
+left-multiplication $\Lyap_L : X \mapsto AX$ and
+right-multiplication $\Lyap_R : X \mapsto XA^\HT$.
+Furthermore, $\Lyap_L$ and $\Lyap_R$ commute:
 \begin{equation*}
-  L_L \circ L_R \equiv L_R \circ L_L \equiv X \mapsto AXA^\HT
+  \Lyap_L \circ \Lyap_R \equiv \Lyap_R \circ \Lyap_L \equiv X \mapsto AXA^\HT
 \end{equation*}
 All the operators above are linear and act on $\Rnn$.
 Apply the \ac{ADI} in its intermediate-step formulation~\eqref{eq:adi:general2step}:
@@ -440,7 +440,7 @@ the above becomes Hermitean:
 \begin{remark}
   Let $\alpha\in\C\setminus\R$ and $A_+ := A+\alpha I_n \in\Cnn$.
   As a mapping of matrices,
-  $L_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
+  $\Lyap_R + \alpha I_{n^2} : \Cnn \to \Cnn$ maps $U$ onto
   $
     U A^\HT + \alpha U =
     U(A+\conj{\alpha} I_n)^\HT \neq
@@ -452,7 +452,7 @@ the above becomes Hermitean:
 
 \begin{remark}
   \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
-  right-multiplication $\tilde L_R :X \mapsto XA^\T$, $\tilde L_R \neq L_R$.
+  right-multiplication $\tilde \Lyap_R :X \mapsto XA^\T$, $\tilde \Lyap_R \neq \Lyap_R$.
   The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
   This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
   instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
@@ -591,7 +591,7 @@ This requires an efficient description of the residual:
   has a well-defined low-rank factorization compatible to $W = GSG^\HT$,
   $G\in\C^{n\times n_G}$, $S\in\C^{n_G\times n_G}$, namely
   \begin{equation*}
-    L(X_k) + G S G^\HT = R_k S R_k^\HT
+    \Lyap(X_k) + G S G^\HT = R_k S R_k^\HT
   \end{equation*}
   for $R_k \in\C^{n\times n_G}$ and $R_0 = G$.
   Furthermore, it holds
@@ -604,7 +604,7 @@ This requires an efficient description of the residual:
 \begin{proof}
   In the notation of the previous section,
   let $r^k$ and $v^k$ denote residual and increment, respectively.
-  Obviously, $r^0 := L(0) + W = W = GSG^\HT$, hence $R_0 = G$.
+  Obviously, $r^0 := \Lyap(0) + W = W = GSG^\HT$, hence $R_0 = G$.
   Due to \autoref{thm:adi:residual},
   \begin{equation*}
     r^{k+1}
