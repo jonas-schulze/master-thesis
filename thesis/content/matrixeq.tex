@@ -89,10 +89,16 @@ though there exist equivalent triangular decompositions.
     .
   \end{equation}
 
-  Note that $H_1 = I_1$ and
-  that every factor in the product above is itself a \Householder transformation acting on $\R^r$.
-  The corresponding vector has its first components filled with zeros.
+  Note that $H_1 = I_1$ or $H_1 = -I_1$,
+  which therefore isn't needed for the transformation into a triangular matrix.
+  Further, note that every factor in the product above is itself a \Householder transformation acting on $\R^r$,
+  whose corresponding vector has its leading components filled with zeros.
 \end{proof}
+
+\todo[inline]{%
+  The theorem above doesn't help / is misleading.
+  It's better to defer the reader to the compression section.
+}
 
 \subsection{Low-Rank Update Formula}
 \label{sec:lr:update}

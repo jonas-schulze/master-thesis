@@ -393,7 +393,7 @@ Consider the \ac{ALE}
   \Lyap(X) := AX + XA^\HT = -W
 \end{equation}
 where $W = W^\T$.
-The \Lyapunov operator $\Lyap = \Lyap_L + \Lyap_R$ naturally decomposes into
+The \Lyapunov operator $\Lyap \equiv \Lyap_L + \Lyap_R$ naturally decomposes into
 left-multiplication $\Lyap_L : X \mapsto AX$ and
 right-multiplication $\Lyap_R : X \mapsto XA^\HT$.
 Furthermore, $\Lyap_L$ and $\Lyap_R$ commute:
@@ -802,7 +802,7 @@ $\mathcal Q := \colspan N \subseteq \C^n$
 for some matrix $N$ and take its eigen-values.
 These so-called \emph{Ritz values} are defined as $\Lambda(Q^\HT A Q)$,
 where $Q\in\C^{n\times r}$ is an orthonormal basis of $\mathcal Q$, $d := \dim\mathcal Q$.
-In the context of $V(u)$-shifts:
+In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}:
 \begin{equation}
   N := \begin{bmatrix}
     V_{j-1} &
@@ -879,8 +879,7 @@ It is therefore advised to only consider the first $d \leq r$ eigen-values
 \begin{equation}
   \lambda_* \geq \epsilon \lambda_1
 \end{equation}
-\todo{Why should $\epsilon$ depend on $r$ or $un_G$, as it does in \cite{Kuerschner2016}?}
-for some $0 < \epsilon \ll 1$.
+for some $0 < \epsilon \ll 1$, \eg $r$ times the machine precision.
 This corresponds to replacing
 $\hat N$ by its first $d$ columns,
 $\hat D$ by its leading diagonal block of size $d$,
