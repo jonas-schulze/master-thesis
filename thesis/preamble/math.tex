@@ -15,6 +15,10 @@
 \newcommand\Rkk{\R^{k\times k}}
 \newcommand\nnz{\operatorname{nnz}}
 \renewcommand\vec{\operatorname{vec}}
+\DeclareMathOperator{\colspan}{span}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\diag}{diag}
+\newcommand\MP{\dagger} % Moore Penrose pseudo-inverse
 
 % transpose and conjugate/Hermitian transpose:
 \newcommand\conj[1]{\overline{\optional{#1}}}
@@ -22,15 +26,16 @@
 \newcommand\HT{H}
 
  % ADI
-\newcommand\Aip{\mathop{A_1^+}}
-\newcommand\Aim{\mathop{A_1^-}}
-\newcommand\Aipm{\mathop{A_1^\pm}}
-\newcommand\Aiip{\mathop{A_2^+}}
-\newcommand\Aiim{\mathop{A_2^-}}
-\newcommand\Aiipm{\mathop{A_2^\pm}}
+\newcommand\Aip{\mathop{H_k^+}}
+\newcommand\Aim{\mathop{H_k^-}}
+\newcommand\Aipm{\mathop{H_k^\pm}}
+\newcommand\Aiip{\mathop{V_k^+}}
+\newcommand\Aiim{\mathop{V_k^-}}
+\newcommand\Aiipm{\mathop{V_k^\pm}}
 \newcommand\Cayley{\mathcal{C}}
 \newcommand\Aipinv{\mathop{(\Aip)^{-1}}}
 \newcommand\Aiipinv{\mathop{(\Aiip)^{-1}}}
+\newcommand\Lyap{\operatorname{\mathcal L}}
 
 % usage: \{2x\given x\in\N}
 \newcommand{\given}{\mid}

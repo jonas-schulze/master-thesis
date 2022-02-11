@@ -1,12 +1,28 @@
 \documentclass[
+  overfullrule,
+  12pt,
+  a4paper,
+  twoside,
+  BCOR=8mm,
+  numbers=noenddot,
+  chapterprefix=true,
+  headings=small,
+  headsepline,
   bibliography=totoc,
   listof=totoc,
-  oneside,
+  markcase=upper, % make listof headings uppercase
 ]{scrbook}
+
+\usepackage{scrlayer-scrpage}
+\usepackage{scrtime} % \thistime on title page
 
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
 \usepackage[ngerman,american]{babel} % Language settings
+
+\usepackage[defaultsans,scale=0.9]{lato} % Use Lato as sans-serif font
+\usepackage{fourier} % Use Adobe Utopia as standard font
+%\usepackage[scaled=0.83]{beramono} % Use Bera Mono as monospace font
 
 \usepackage[
   style=numeric-comp,
@@ -22,6 +38,7 @@
 \input{preamble/hyphenation}
 \input{preamble/environments}
 \input{preamble/other}
+\input{preamble/typography}
 
 \makeglossaries
 
@@ -30,6 +47,7 @@
 % -----------------------------------------------------------------------------
 \frontmatter
 
+\input{titlepage.tex}
 \include{content/abstract}
 
 \cleardoublepage
@@ -42,16 +60,13 @@
 \listoftheorems[ignore=remark]
 
 \listoftodos
+\markboth{TODO LIST}{TODO LIST}
 \todototoc
 
 % -----------------------------------------------------------------------------
 \mainmatter
 \include{content/intro}
-
-\chapter{Mathematical Basics}
-\section{Linear Systems and Related Matrix Equations}
-\section{Hamilton-Jacobi Theory}
-
+\include{content/basics}
 \include{content/matrixeq}
 \include{content/rosenbrock}
 \include{content/adi}
@@ -62,12 +77,12 @@
 
 % -----------------------------------------------------------------------------
 \appendix
-\include{content/notes}
-\include{content/app_adi_reordering}
-\include{content/ros2}
+\include{appendix/notes}
+\include{appendix/adi_reordering}
+\include{appendix/ros2}
 
-\include{content/control}
-\include{content/vectorization}
+\include{appendix/control}
+\include{appendix/vectorization}
 
 % -----------------------------------------------------------------------------
 \backmatter
