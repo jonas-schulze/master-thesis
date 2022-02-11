@@ -53,6 +53,19 @@ function DrWatson._wsave(dir, sol::ParaReal.Solution)
     end
 end
 
+function _save(h5, key, X)
+    h5[key] = X
+    nothing
+end
+
+function _save(h5, key, X::LDLᵀ)
+    haskey(h5, key) || create_group(h5, key)
+    h6 = h5[key]
+    L, D::Matrix = X
+    _save(h6, "L", L)
+    _save(h6, "D", D)
+end
+
 function DrWatson._wsave(dir, sol::DRESolution)
     @unpack t, K, X = sol
     tmin, tmax = extrema(sol.t)
@@ -68,13 +81,13 @@ function DrWatson._wsave(dir, sol::DRESolution)
         if length(X) == 2
             t0 = first(t)
             X0 = first(X)
-            h5["t=$t0"] = X0
+            _save(h5, "t=$t0", X0)
             tf = last(t)
             Xf = last(X)
-            h5["t=$tf"] = Xf
+            _save(h5, "t=$tf", Xf)
         else
             for (t, X) in zip(t, X)
-                h5["t=$t"] = X
+                _save(h5, "t=$t", X)
             end
         end
     end

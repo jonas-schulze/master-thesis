@@ -1,6 +1,10 @@
 insideslurm() = haskey(ENV, "SLURM_JOBID") || haskey(ENV, "SLURM_JOB_ID")
 
-function addworkers()
+function addworkers(::SequentialConfig)
+    @warn "Did not spawn worker processes."
+end
+
+function addworkers(c::ParallelConfig)
     if nprocs() != 1
         @warn "Workers already present; won't spawn any new ones."
         return workers()
@@ -9,7 +13,7 @@ function addworkers()
         return addprocs(SlurmManager())
     else
         @info "Adding workers locally"
-        return addprocs()
+        return addprocs(c.nstages)
     end
 end
 
