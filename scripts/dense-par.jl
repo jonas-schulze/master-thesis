@@ -1,5 +1,5 @@
 using Stuff
 
-kind = :lowrank
+kind = :dense
 
 include(srcdir("tasks", "compute_par.jl"))
