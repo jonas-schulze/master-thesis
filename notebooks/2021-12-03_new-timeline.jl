@@ -51,6 +51,9 @@ md"All the log entries parsed and concatenated then look like this:"
 # ╔═╡ c787987e-9241-423e-bb90-5e04f724dd30
 long = load_eventlog(LogFmt(), logdir(ldir))
 
+# ╔═╡ 52871948-356f-449f-b5a3-fb479945cfdd
+min_k = minimum(skipmissing(long.k))
+
 # ╔═╡ 45c6302c-afda-4f2f-a93e-a5761658fe7c
 md"""
 Transforming to wide format and discarding
@@ -66,7 +69,7 @@ begin
 	wide = unstack(long, :type, :time)
 	dropmissing!(wide, [:start, :stop])
 	if drop_first_waiting
-		filter!([:tag, :k] => (tag, k) -> tag != :Waiting || k > 1, wide)
+		filter!([:tag, :k] => (tag, k) -> tag != :Waiting || k > min_k, wide)
 	end
 	wide[!, :duration] = wide.stop - wide.start
 	wide
@@ -127,10 +130,11 @@ md"## Internal Stuff"
 
 # ╔═╡ Cell order:
 # ╟─ea4dbc42-51f2-11ec-3feb-e7e6d7aeea38
-# ╟─3b496553-814f-4577-8dd6-6776af0afddb
+# ╠═3b496553-814f-4577-8dd6-6776af0afddb
 # ╠═03411522-4c84-4e82-81b8-f54e45988fa9
 # ╟─38c28b69-59a8-46b3-b08e-c527e91a29ef
 # ╠═c787987e-9241-423e-bb90-5e04f724dd30
+# ╠═52871948-356f-449f-b5a3-fb479945cfdd
 # ╟─45c6302c-afda-4f2f-a93e-a5761658fe7c
 # ╠═3c813346-a80a-4f8c-9c1c-d8c8ef4152ea
 # ╠═2ac964d3-cc44-4754-9416-afd8c689fc64
