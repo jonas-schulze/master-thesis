@@ -85,7 +85,7 @@ struct ParallelConfig{X} <: Config{X}
     end
 end
 
-DrWatson.default_prefix(c::Config) = "rail371"
+DrWatson.default_prefix(c::Config{X}) where {X} = "rail371-$X"
 
 include("addworkers.jl")
 include("compare.jl")
