@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J dense-par
+#SBATCH -J lowrank-par
 #SBATCH -o %x-%j.out
 #SBATCH -e %x-%j.err
 #
