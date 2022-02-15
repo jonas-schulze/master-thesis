@@ -52,7 +52,8 @@ struct SequentialConfig{X} <: Config{X}
 end
 struct ParallelConfig{X} <: Config{X}
     # number of parareal steps:
-    nstages::Int
+    nstages::Int # parareal N, slurm n
+    ncpus::Int # slurm c
     # number of steps within stage:
     nc::Int
     nf::Int
@@ -73,6 +74,11 @@ struct ParallelConfig{X} <: Config{X}
             readenv("SLURM_NTASKS"),
             Sys.CPU_THREADS ÷ 2,
         )
+        ncpus = something(
+            readenv("SLURM_CPUS_PER_TASK"),
+            readenv("OMP_NUM_THREADS"),
+            1,
+        ) # must match Stuff.set_num_threads
         nc = something(readenv("MY_NC"), 1)
         nf = something(readenv("MY_NF"), 1)
         oc = something(readenv("MY_OC"), 1)
@@ -81,7 +87,7 @@ struct ParallelConfig{X} <: Config{X}
         wf = something(readenv("MY_WF"), false)
         jobid = get(ENV, "SLURM_JOBID", "0")
 
-        new{X}(nstages, nc, nf, oc, of, wc, wf, jobid)
+        new{X}(nstages, ncpus, nc, nf, oc, of, wc, wf, jobid)
     end
 end
 
