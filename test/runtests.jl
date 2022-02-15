@@ -2,6 +2,7 @@ using Stuff, Test
 using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
 using MAT
+using ParaReal: fetch_from_owner
 
 P = matread(datadir("Rail371.mat"))
 @unpack E, A, B, C, X0 = P
@@ -83,14 +84,27 @@ Ed = collect(E) # d=dense
                 csolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 1))
                 fsolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 3))
             end
-            alg = ParaReal.algorithm(csolve, fsolve)
-            sol = solve(ParaReal.problem(prob), alg; workers=ws)
+            alg = ParaReal.Algorithm(csolve, fsolve)
+
+            # Thanks to the authors of DeferredFutures.jl for this test strategy:
+            GC.gc()
+            size_before_solve = Base.summarysize(Distributed)
+
+            sol = solve(ParaReal.Problem(prob), alg; schedule=ProcessesSchedule(ws))
+
+            size_of_sol = Base.summarysize(sol)
+            size_of_stages = sum(sol.stages) do sr
+                fetch_from_owner(sr) do s::ParaReal.Stage
+                    Base.summarysize(s)
+                end
+            end
+            @test size_of_sol < size_of_stages
 
             # Individual solutions should not be fetched locally:
             @testset "no local data before save" begin
-                sols = sol.sols
-                @test all(isready, sols)
-                @test all(rr -> rr.v === nothing, sols)
+                GC.gc()
+                size_after_solve = Base.summarysize(Distributed)
+                @test size_after_solve < size_before_solve + size_of_stages
             end
 
             tspans = [(0., 1500.), (1500., 3000.), (3000., 4500.)]
@@ -106,9 +120,9 @@ Ed = collect(E) # d=dense
                 wsave(dir, sol)
                 # Individual solutions should still not be fetched locally:
                 @testset "no local data after save" begin
-                    sols = sol.sols
-                    @test all(isready, sols)
-                    @test all(rr -> rr.v === nothing, sols)
+                    GC.gc()
+                    size_after_wsave = Base.summarysize(Distributed)
+                    @test size_after_wsave < size_before_solve + size_of_stages
                 end
                 @testset "local solutions" begin
                     # All local solutions should be stored:
@@ -131,7 +145,7 @@ Ed = collect(E) # d=dense
                         end
                     end
                     @testset "read data (n=$n)" for n in 1:3
-                        s::DRESolution = fetch(sol.sols[n]).sol
+                        s::DRESolution = sol.stages[n].Fᵏ⁻¹
                         ts = tstops[n]
                         t0, tf = tspans[n]
                         X0, Xf = s.X
@@ -154,7 +168,7 @@ Ed = collect(E) # d=dense
                     end
                     # Read data:
                     @testset "read data (n=$n)" for n in 1:3
-                        s::DRESolution = fetch(sol.sols[n]).sol
+                        s::DRESolution = sol.stages[n].Fᵏ⁻¹
                         ts = tstops[n]
                         t0, tf = tspans[n]
                         X0, Xf = s.X

@@ -45,11 +45,10 @@ function storemeta(dir, data::Dict{String})
     end
 end
 
-function DrWatson._wsave(dir, sol::ParaReal.GlobalSolution)
-    @sync for rr in sol.sols
-        @async remotecall_wait(rr.where) do
-            s = fetch(rr)
-            DrWatson._wsave(dir, s.sol)
+function DrWatson._wsave(dir, sol::ParaReal.Solution)
+    @sync for rr in sol.stages
+        @async fetch_from_owner(rr) do s::ParaReal.Stage
+            DrWatson._wsave(dir, s.Fᵏ⁻¹)
         end
     end
 end

@@ -20,7 +20,11 @@ end
 
 csolve(prob) = solve(prob, Ros1(); dt=-1500)
 fsolve(prob) = solve(prob, Ros1(); dt=-500)
-psol = solve(ParaReal.problem(prob), ParaReal.algorithm(csolve, fsolve); workers=ones(Int, 3))
+psol = solve(
+    ParaReal.Problem(prob),
+    ParaReal.Algorithm(csolve, fsolve);
+    schedule=ProcessesSchedule([1, 1, 1]),
+)
 
 @testset "accuracy of parareal" begin
     mktempdir() do dir

@@ -8,6 +8,7 @@ using Reexport
 @reexport using DifferentialRiccatiEquations, ParaReal
 
 using DifferentialRiccatiEquations: DRESolution
+using ParaReal: fetch_from_owner
 using SlurmClusterManager
 
 """
