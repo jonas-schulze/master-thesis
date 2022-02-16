@@ -10,11 +10,14 @@ sol = solve(prob, Ros1(); dt=-500, save_state=false)
 
 @testset "comparison to self" begin
     mktempdir() do dir
-        wsave(dir, sol)
-        K = only(readdir(joinpath(dir, "K"); join=true))
-        X = only(readdir(joinpath(dir, "X"); join=true))
-        @test all(==(0), δ(K, K))
-        @test all(==(0), δ(X, X))
+        out = joinpath(dir, "dre.h5")
+        wsave(out, sol)
+        h5open(out) do h5
+            K = h5["K"]
+            X = h5["X"]
+            @test all(==(0), δ(K, K))
+            @test all(==(0), δ(X, X))
+        end
     end
 end
 
@@ -28,14 +31,12 @@ psol = solve(
 
 @testset "accuracy of parareal" begin
     mktempdir() do dir
-        sdir = joinpath(dir, "seq")
+        sfile = joinpath(dir, "seq.h5")
         pdir = joinpath(dir, "par")
-        wsave(sdir, sol)
+        wsave(sfile, sol)
         wsave(pdir, psol)
 
         pfile = "$pdir.h5"
-        sfile = "$sdir.h5"
-        mergedata(sdir, sfile)
         mergedata(pdir, pfile)
 
         errX = δ(sfile, pfile, "X")

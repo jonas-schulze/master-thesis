@@ -31,36 +31,31 @@ Ed = collect(E) # d=dense
             dt = forward ? 1500.0 : -1500.0
             sol = solve(prob, Ros1(); dt=dt, save_state=save_state)
             mktempdir() do dir
-                wsave(dir, sol)
-                # Don't create spurious files:
-                @test readdir(dir) == ["K", "X"]
-                datafile = "t=0.0:4500.0.h5"
-                @test readdir(joinpath(dir, "K")) == [datafile]
-                @test readdir(joinpath(dir, "X")) == [datafile]
+                out = joinpath(dir, "test.h5")
+                wsave(out, sol)
+                @test isfile(out)
                 # Data integrity of K:
                 K = sol.K
-                Kmat = joinpath(dir, "K", datafile)
-                @test isfile(Kmat)
                 tstops = ["t=$t" for t in 0.0:1500:4500.0]
                 forward || reverse!(tstops)
-                h5open(Kmat) do f
+                h5open(out) do h5
+                    f = h5["K"]
                     @test sort(keys(f)) == sort(tstops)
                     @test [read(f, key) for key in tstops] == K
                 end
                 # Data integrity of X:
                 X = sol.X
-                Xmat = joinpath(dir, "X", datafile)
-                @test isfile(Xmat)
                 if !save_state
                     tstops = ["t=0.0", "t=4500.0"]
                     forward || reverse!(tstops)
                 end
-                h5open(Xmat) do f
+                h5open(out) do h5
+                    f = h5["X"]
                     @test sort(keys(f)) == sort(tstops)
                     @test [read(f, key) for key in tstops] == X
                 end
                 # Read data:
-                K′ = readdata.(dir, "K", 0.0:1500.0:4500.0)
+                K′ = readdata.(out, "K", 0.0:1500.0:4500.0)
                 forward || reverse!(K′)
                 @test K′ == K
             end
@@ -130,18 +125,13 @@ Ed = collect(E) # d=dense
                         tmin, tmax = extrema(tspan)
                         "t=$tmin:$tmax.h5"
                     end
-                    @test readdir(dir) == ["K", "X"]
-                    @test readdir(joinpath(dir, "K")) == sort(files)
-                    @test readdir(joinpath(dir, "X")) == sort(files)
+                    @test readdir(dir) == sort(files)
                     # Read data:
                     @testset "$file" for (file, tspan, ts) in zip(files, tspans, tstops)
-                        k = joinpath(dir, "K", file)
-                        x = joinpath(dir, "X", file)
-                        h5open(k) do k5
-                            @test sort(keys(k5)) == sort(["t=$t" for t in ts])
-                        end
-                        h5open(x) do x5
-                            @test sort(keys(x5)) == sort(["t=$t" for t in tspan])
+                        f = joinpath(dir, file)
+                        h5open(f) do h5
+                            @test sort(keys(h5["K"])) == sort(["t=$t" for t in ts])
+                            @test sort(keys(h5["X"])) == sort(["t=$t" for t in tspan])
                         end
                     end
                     @testset "read data (n=$n)" for n in 1:3
