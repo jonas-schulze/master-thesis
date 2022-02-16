@@ -2,4 +2,4 @@ using Stuff
 
 kind = :dense
 
-include(srcdir("tasks", "compute_par.jl"))
+include(scriptsdir("compute_par.jl"))

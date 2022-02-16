@@ -7,7 +7,7 @@ conf = ParallelConfig(kind)
 @info "Read configuration $(savename(conf))"
 algc, algf = algorithms(conf)
 
-include(srcdir("tasks", "add_workers.jl"))
+include(scriptsdir("add_workers.jl"))
 
 @info "Loading data"
 rail = load_rail(conf)
@@ -29,4 +29,4 @@ runtime = @elapsed begin
     )
 end
 
-include(srcdir("tasks", "save_results.jl"))
+include(scriptsdir("save_results.jl"))
