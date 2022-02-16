@@ -59,18 +59,30 @@ md"""
 Transforming to wide format and discarding
 
 * all singleton events
-* the first occurence of `:Waiting` per stage $(@bind drop_first_waiting CheckBox(default=true))
+* the first occurence of `:Waiting[Recv]` per stage $(@bind drop_first_waiting CheckBox(default=true))
+* all occurences of `:Waiting*` $(@bind drop_all_waiting CheckBox(default=false))
+* all occurences of `:CheckConv` $(@bind drop_all_checkconv CheckBox(default=false))
+* all occurences of `:ComputingU` $(@bind drop_all_computingu CheckBox(default=false))
 
 yields:
 """
 
+# ╔═╡ 33159e26-d481-4f9e-9a0a-f615259165cb
+is_waiting_recv(tag::Symbol) = tag == :Waiting || tag == :WaitingRecv
+
+# ╔═╡ 1115cd97-ed84-4793-b97c-598dcd5b600a
+is_waiting(tag::Symbol) = startswith(string(tag), "Waiting")
+
 # ╔═╡ 3c813346-a80a-4f8c-9c1c-d8c8ef4152ea
 begin
-	wide = unstack(long, :type, :time)
+	wide = unstack(long, :type, :time; allowduplicates=true)
 	dropmissing!(wide, [:start, :stop])
 	if drop_first_waiting
-		filter!([:tag, :k] => (tag, k) -> tag != :Waiting || k > min_k, wide)
+		filter!([:tag, :k] => (tag, k) -> !is_waiting_recv(tag) || k > min_k, wide)
 	end
+	drop_all_waiting && filter!(:tag => !is_waiting, wide)
+	drop_all_checkconv && filter!(:tag => !=(:CheckConv), wide)
+	drop_all_computingu && filter!(:tag => !=(:ComputingU), wide)
 	wide[!, :duration] = wide.stop - wide.start
 	wide
 end
@@ -117,7 +129,7 @@ This is the target for potential code optimizations to aim for:
 
 # ╔═╡ bccadd7d-6126-4940-a4aa-4a892ffc0e47
 let
-	nowaiting = filter(:tag => !=(:Waiting), wide)
+	nowaiting = filter(:tag => !is_waiting_recv, wide)
 	combine(
 		groupby(nowaiting, :tag),
 		:duration => minimum,
@@ -137,6 +149,8 @@ md"## Internal Stuff"
 # ╠═52871948-356f-449f-b5a3-fb479945cfdd
 # ╟─45c6302c-afda-4f2f-a93e-a5761658fe7c
 # ╠═3c813346-a80a-4f8c-9c1c-d8c8ef4152ea
+# ╠═33159e26-d481-4f9e-9a0a-f615259165cb
+# ╠═1115cd97-ed84-4793-b97c-598dcd5b600a
 # ╠═2ac964d3-cc44-4754-9416-afd8c689fc64
 # ╟─2b8dfcad-70ac-4a5e-a5c9-f0d959ecca73
 # ╠═e34b4e67-e1ea-4166-80fc-e2001e9b52f8
