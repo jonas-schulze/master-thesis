@@ -2,6 +2,7 @@ using Stuff, Test
 using Base.Iterators: partition
 using DifferentialRiccatiEquations: DRESolution
 using MAT
+using ParaReal: fetch_from_owner
 
 P = matread(datadir("Rail371.mat"))
 @unpack E, A, B, C, X0 = P
@@ -30,36 +31,31 @@ Ed = collect(E) # d=dense
             dt = forward ? 1500.0 : -1500.0
             sol = solve(prob, Ros1(); dt=dt, save_state=save_state)
             mktempdir() do dir
-                wsave(dir, sol)
-                # Don't create spurious files:
-                @test readdir(dir) == ["K", "X"]
-                datafile = "t=0.0:4500.0.h5"
-                @test readdir(joinpath(dir, "K")) == [datafile]
-                @test readdir(joinpath(dir, "X")) == [datafile]
+                out = joinpath(dir, "test.h5")
+                wsave(out, sol)
+                @test isfile(out)
                 # Data integrity of K:
                 K = sol.K
-                Kmat = joinpath(dir, "K", datafile)
-                @test isfile(Kmat)
                 tstops = ["t=$t" for t in 0.0:1500:4500.0]
                 forward || reverse!(tstops)
-                h5open(Kmat) do f
+                h5open(out) do h5
+                    f = h5["K"]
                     @test sort(keys(f)) == sort(tstops)
                     @test [read(f, key) for key in tstops] == K
                 end
                 # Data integrity of X:
                 X = sol.X
-                Xmat = joinpath(dir, "X", datafile)
-                @test isfile(Xmat)
                 if !save_state
                     tstops = ["t=0.0", "t=4500.0"]
                     forward || reverse!(tstops)
                 end
-                h5open(Xmat) do f
+                h5open(out) do h5
+                    f = h5["X"]
                     @test sort(keys(f)) == sort(tstops)
                     @test [read(f, key) for key in tstops] == X
                 end
                 # Read data:
-                K′ = readdata.(dir, "K", 0.0:1500.0:4500.0)
+                K′ = readdata.(out, "K", 0.0:1500.0:4500.0)
                 forward || reverse!(K′)
                 @test K′ == K
             end
@@ -83,14 +79,27 @@ Ed = collect(E) # d=dense
                 csolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 1))
                 fsolve(prob::GDREProblem) = solve(prob, Ros1(); dt=_dt(prob, 3))
             end
-            alg = ParaReal.algorithm(csolve, fsolve)
-            sol = solve(ParaReal.problem(prob), alg; workers=ws)
+            alg = ParaReal.Algorithm(csolve, fsolve)
+
+            # Thanks to the authors of DeferredFutures.jl for this test strategy:
+            GC.gc()
+            size_before_solve = Base.summarysize(Distributed)
+
+            sol = solve(ParaReal.Problem(prob), alg; schedule=ProcessesSchedule(ws))
+
+            size_of_sol = Base.summarysize(sol)
+            size_of_stages = sum(sol.stages) do sr
+                fetch_from_owner(sr) do s::ParaReal.Stage
+                    Base.summarysize(s)
+                end
+            end
+            @test size_of_sol < size_of_stages
 
             # Individual solutions should not be fetched locally:
             @testset "no local data before save" begin
-                sols = sol.sols
-                @test all(isready, sols)
-                @test all(rr -> rr.v === nothing, sols)
+                GC.gc()
+                size_after_solve = Base.summarysize(Distributed)
+                @test size_after_solve < size_before_solve + size_of_stages
             end
 
             tspans = [(0., 1500.), (1500., 3000.), (3000., 4500.)]
@@ -106,9 +115,9 @@ Ed = collect(E) # d=dense
                 wsave(dir, sol)
                 # Individual solutions should still not be fetched locally:
                 @testset "no local data after save" begin
-                    sols = sol.sols
-                    @test all(isready, sols)
-                    @test all(rr -> rr.v === nothing, sols)
+                    GC.gc()
+                    size_after_wsave = Base.summarysize(Distributed)
+                    @test size_after_wsave < size_before_solve + size_of_stages
                 end
                 @testset "local solutions" begin
                     # All local solutions should be stored:
@@ -116,22 +125,17 @@ Ed = collect(E) # d=dense
                         tmin, tmax = extrema(tspan)
                         "t=$tmin:$tmax.h5"
                     end
-                    @test readdir(dir) == ["K", "X"]
-                    @test readdir(joinpath(dir, "K")) == sort(files)
-                    @test readdir(joinpath(dir, "X")) == sort(files)
+                    @test readdir(dir) == sort(files)
                     # Read data:
                     @testset "$file" for (file, tspan, ts) in zip(files, tspans, tstops)
-                        k = joinpath(dir, "K", file)
-                        x = joinpath(dir, "X", file)
-                        h5open(k) do k5
-                            @test sort(keys(k5)) == sort(["t=$t" for t in ts])
-                        end
-                        h5open(x) do x5
-                            @test sort(keys(x5)) == sort(["t=$t" for t in tspan])
+                        f = joinpath(dir, file)
+                        h5open(f) do h5
+                            @test sort(keys(h5["K"])) == sort(["t=$t" for t in ts])
+                            @test sort(keys(h5["X"])) == sort(["t=$t" for t in tspan])
                         end
                     end
                     @testset "read data (n=$n)" for n in 1:3
-                        s::DRESolution = fetch(sol.sols[n]).sol
+                        s::DRESolution = sol.stages[n].Fᵏ⁻¹
                         ts = tstops[n]
                         t0, tf = tspans[n]
                         X0, Xf = s.X
@@ -154,7 +158,7 @@ Ed = collect(E) # d=dense
                     end
                     # Read data:
                     @testset "read data (n=$n)" for n in 1:3
-                        s::DRESolution = fetch(sol.sols[n]).sol
+                        s::DRESolution = sol.stages[n].Fᵏ⁻¹
                         ts = tstops[n]
                         t0, tf = tspans[n]
                         X0, Xf = s.X

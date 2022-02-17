@@ -1,13 +1,27 @@
 _copyto(h5, key, val) = (h5[key] = val; nothing)
-_copyto(h5, key, val::HDF5.Dataset) = (h5[key] = read(val); nothing)
+
+# This method is hit by mergedata for overlapping K and X values.
+# Therefore, only store the first value encountered.
+function _copyto(h5, key, val::HDF5.Dataset)
+    haskey(h5, key) && return
+    h5[key] = read(val)
+    nothing
+end
 
 function _copyto(h5, key, val::Union{Dict{String}, HDF5.File, HDF5.Group})
     haskey(h5, key) || create_group(h5, key)
     h6 = h5[key]
     for (key′, val′) in pairs(val)
-        haskey(h6, key′) && continue
         _copyto(h6, key′, val′)
     end
+end
+
+function _copyto(h5, key, X::LDLᵀ)
+    haskey(h5, key) || create_group(h5, key)
+    h6 = h5[key]
+    L, D::Matrix = X
+    _copyto(h6, "L", L)
+    _copyto(h6, "D", D)
 end
 
 function mergedata(dir, out)
@@ -25,14 +39,9 @@ function mergedata(dir, out)
             end
         end
         # Copy solution data:
-        for K in readdir(joinpath(dir, "K"); join=true)
-            h5open(K) do k
-                _copyto(o, "K", k)
-            end
-        end
-        for X in readdir(joinpath(dir, "X"); join=true)
-            h5open(X) do x
-                _copyto(o, "X", x)
+        for f in readdir(dir; join=true)
+            h5open(f) do i
+                _copyto(o, "/", i)
             end
         end
     end
@@ -45,37 +54,43 @@ function storemeta(dir, data::Dict{String})
     end
 end
 
-function DrWatson._wsave(dir, sol::ParaReal.GlobalSolution)
-    @sync for rr in sol.sols
-        @async remotecall_wait(rr.where) do
-            s = fetch(rr)
-            DrWatson._wsave(dir, s.sol)
+function DrWatson._wsave(dir, sol::ParaReal.Solution)
+    mkpath(dir)
+    @sync for rr in sol.stages
+        @async fetch_from_owner(rr) do s::ParaReal.Stage
+            sol = s.Fᵏ⁻¹
+            tmin, tmax = extrema(sol.t)
+            fname = "t=$tmin:$tmax.h5"
+            out = joinpath(dir, fname)
+            DrWatson.wsave(out, sol)
         end
     end
 end
 
-function DrWatson._wsave(dir, sol::DRESolution)
+function DrWatson._wsave(fname, sol::DRESolution)
     @unpack t, K, X = sol
-    tmin, tmax = extrema(sol.t)
-    fname = "t=$tmin:$tmax.h5"
-    mkpath(joinpath(dir, "K"))
-    h5open(joinpath(dir, "K", fname), "w") do h5
+    h5open(fname, "w") do h5
+        create_group(h5, "K")
+        create_group(h5, "X")
+
+        # Store K:
+        gk = h5["K"]
         for (t, K) in zip(t, K)
-            h5["t=$t"] = K
+            _copyto(gk, "t=$t", K)
         end
-    end
-    mkpath(joinpath(dir, "X"))
-    h5open(joinpath(dir, "X", fname), "w") do h5
+
+        # Store X:
+        gx = h5["X"]
         if length(X) == 2
             t0 = first(t)
             X0 = first(X)
-            h5["t=$t0"] = X0
+            _copyto(gx, "t=$t0", X0)
             tf = last(t)
             Xf = last(X)
-            h5["t=$tf"] = Xf
+            _copyto(gx, "t=$tf", Xf)
         else
             for (t, X) in zip(t, X)
-                h5["t=$t"] = X
+                _copyto(gx, "t=$t", X)
             end
         end
     end
@@ -88,8 +103,7 @@ function readdata(dir, mat, t)
     fnames = String[]
     lo = Float64[]
     hi = Float64[]
-    mdir = joinpath(dir, mat)
-    for x in readdir(mdir)
+    for x in readdir(dir)
         (startswith(x, "t=") && endswith(x, ".h5")) || continue
         push!(fnames, x)
         s = split(x[3:end-3], ':')
@@ -106,5 +120,5 @@ function readdata(dir, mat, t)
     t <= hi[i] || error("$mat for t=$t not found")
     # Read data from corresponding file:
     fname = fnames[i]
-    h5read(joinpath(mdir, fname), "t=$t")
+    h5read(joinpath(dir, fname), "$mat/t=$t")
 end
