@@ -84,18 +84,14 @@ Therefore, it is critical that the individual coarse solutions are available as 
 \todo[inline]{Describe notion of \enquote{ramp-up delay}?}
 
 \begin{figure}[htb]
-  \missingfigure{%
-    only show \code{ComputingC}, \code{ComputingF}, \code{WarmingUpC}, \code{WarmingUpF} events,
-    maybe \code{ComputingU}
-  }
+  \includegraphics[width=\textwidth]{figures/fig_impl_warmup2.pdf}
   \caption[Timeline diagrams comparing the effect of JIT compiler warm-up.]{%
     Timeline diagrams comparing the effect of \acs{JIT} compiler warm-up.
-    top: 4 processes running on a laptop (1 thread each),
-    bottom: 8 processes running on two compute nodes (4 threads each),
-    left: no warm-up,
-    middle: warming up coarse solver,
-    right: warming up coarse and fine solver.
-    (TODO: omit right part?)
+    Left: 8 processes running on two compute nodes,
+    right: 4 processes running on a laptop.
+    Top: no warm-up,
+    middle: warming up coarse solver \julia{csolve} ($G$),
+    bottom warming up coarse and fine solver \julia{fsolve} ($F$).
   }
   \label{fig:impl:warmup}
 \end{figure}
@@ -112,7 +108,7 @@ there is a one-to-one mapping between processes and stages $n$,
 which means the compilation happens exactly once per stage $n$ and is reused between refinements $k$.\footnote{%
   As of the writing of this thesis, Julia does not reuse code compiled between processes.
 }
-This is visible in the left column of \autoref{fig:impl:warmup}
+This is visible in the first row of \autoref{fig:impl:warmup}
 by the first occurrences of $G$ for each stage $n$,
 which marks the computation of $G(U_n^0)$,
 whose execution time includes compilation time.
@@ -125,7 +121,7 @@ A more naive approach is to manually warm up critical parts of the code by execu
 In the context of \julia{ParaReal.jl},
 doing so allows to perform the compilation in parallel,
 which significantly decreases the time to compute all coarse solutions $G(U_n^*)$.
-This is visible in the middle and right columns of \autoref{fig:impl:warmup}.
+This is visible in the middle and bottom rows of \autoref{fig:impl:warmup}.
 $F$ and $G$ have a lot of code in common,\footnote{%
   For example, the Lyapunov solvers will be called with arguments having the exact same types,
   \ie they will call the same method internally.
@@ -201,7 +197,7 @@ The exact size of the gap between the computations of $G(U_{n-1}^k)$ and $F(U_{n
 \end{enumerate}
 For $k=0$, \ref{item:impl:gapsize:2} is zero.
 For $k=1$ and no warm-up, \ref{item:impl:gapsize:2} includes compilation time and dominates \ref{item:impl:gapsize:1},
-which shadows the effect described in the previous paragraph for the left column of \autoref{fig:impl:warmup}.
+which shadows the effect described in the previous paragraph for the first row of \autoref{fig:impl:warmup}.
 For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
   If due to user code the data types of $U_n^*$ changes, recompilation might be necessary.
 }
