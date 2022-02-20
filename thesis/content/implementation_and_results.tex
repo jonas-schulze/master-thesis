@@ -30,8 +30,10 @@ whose properties are described in this section.
 The first two requirements are achieved by the abstract type \julia{Schedule},
 whose only subtype (for now) is \julia{ProcessesSchedule}.
 It takes a list of $N$ worker/process ids, each of which will execute one stage.
-Other strategies may be defined by new subtype of \julia{Schedule},
-\eg \julia{ThreadsSchedule} and \julia{HybridSchedule}.
+Future strategies may be implemented by defining new subtype of \julia{Schedule}, \eg
+\julia{ThreadsSchedule} using threads on a single process,
+\julia{HybridSchedule} which uses both threads and processes, and
+\julia{DaggerSchedule} which uses the abstractions provided by \julia{Dagger.jl}.\footnote{\url{https://github.com/JuliaParallel/Dagger.jl}}
 
 The user interface fulfilling the third requirement is best described using an example:
 \lstinputlisting{code/parareal_counting.jl}
