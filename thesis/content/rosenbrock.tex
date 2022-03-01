@@ -1,3 +1,67 @@
 \chapter{Rosenbrock Method}
+
+Consider the autonomous \ac{IVP}
+\begin{equation}
+\left\{
+\begin{aligned}
+  \dot x &= f(x) \\
+  x(t_0) &= x_0
+\end{aligned}
+\right.
+\end{equation}
+on an equidistant time discretization $t_{n+1} = t_n + \tau$ for $n\geq 0$ and some $\tau\in\R$.
+Then, the $s$-stage Rosenbrock method~\cite{HairerWanner2} reads
+\begin{equation}
+\left\{
+\begin{aligned}
+  x_{n+1} &:= x_n + \sum_{j=1}^s b_j k_{nj}
+  \\
+  k_i &:= \tau f\left( x_n + \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
+  \qquad
+  \text{for } i = 1, \ldots, s
+\end{aligned}
+\right.
+\end{equation}
+where $\Jac := f'(x_n)$ and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
+We follow the common notation of neglecting a subscript $n$ for the stages $k_i=k_i(t_n)$.
+Of special interest are the methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
+For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{MPIMD11-06,HairerWanner2}.
+
+In this thesis we will focus on the implicit Euler method ($s=1$)
+\begin{equation}
+\left\{
+\begin{aligned}
+  x_{n+1} &= x_n + b_1 k_1 \\
+  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n)
+\end{aligned}
+\right.
+\end{equation}
+and the second order method first described in \cite{Verwer1999} ($s=2$)
+\begin{equation}
+\left\{
+\begin{aligned}
+  x_{n+1} &= x_n + \tfrac{3}{2} \tau k_1 + \tfrac{1}{2} \tau k_2 \\
+  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n) \\
+  (I - \gamma\tau \Jac) k_2 &= \tau f(x_n + \tau k_1) - 2k_1
+\end{aligned}
+\right.
+\end{equation}
+
+\todo[inline]{%
+Do I need the reformulation of \cite{MPIMD11-06}?
+Is this a generalization of the reformulation seen in \cite{Verwer1999}?
+}
+
 \section{Application to \act{DRE}s}
+
+\todo{Maybe switch transposes: $AX$ and $XA^\HT$}
+In the context of the autonomous \ac{DRE}
+\begin{gather*}
+  \dot X = \Ricc(X) :=
+  Q + AX + XA^\HT - XRX
+  \\
+  C^\T C + A^\T X + XA^\T - X BB^\T X
+\end{gather*}
+the $s$-stage Rosenbrock method is given by
+
 \section{Alternative One-Step Methods}

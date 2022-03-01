@@ -32,3 +32,29 @@
 \declaretheorem[style=myplain, numberlike=lemma]{example}
 
 \declaretheorem[style=myremark]{remark}
+
+
+% ******************************************************************************
+% Listings
+
+\setlist[enumerate]{font=\normalfont}
+\setlist[enumerate,1]{label=(\roman*)}
+\setlist[enumerate,2]{label=(\alph*)}
+\setlist[enumerate,3]{label=(\arabic*)}
+
+
+% ******************************************************************************
+% Source Code
+
+\lstset{
+  basicstyle=\small\ttfamily,
+  numberstyle=\footnotesize\sffamily,
+  numbers=left,
+  % use special julia comments as range markers: #== text ==#
+  rangeprefix=\#\=\=\ ,
+  rangesuffix=\ \=\=\#,
+  includerangemarker=false,
+  % add latex labels using #* \label{line:...}
+  escapeinside={\#*}{\^^M},
+}
+

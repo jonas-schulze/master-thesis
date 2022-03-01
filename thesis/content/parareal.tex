@@ -1,4 +1,5 @@
 \chapter{Parareal Method}
+\label{sec:pr}
 
 The parareal method is a parallel-in-time integration scheme to solve \acp{ODE}.
 It goes back to \cite{Lions2001},
@@ -251,65 +252,10 @@ using any of the techniques described in \autoref{sec:lr:compression},
   .
 \end{equation}
 
-\section{Parallel Scheduling and Implementation Details}
-
-In the context of \acp{DRE},
-we are not only interested in fast convergence but also in a high-resolution trajectory.
-Therefore, we will use a finer mesh for fine solver $F$ and store its trajectories of $K$ and (optionally) $X$ of the last parareal iteration $k$.
-
-\todo[inline]{Timeline plots of \ac{DRE}}
-
-Discuss ramp-up difficulties:
-\begin{itemize}
-  \item
-    Julia RemoteChannels not thread-safe, that is they must be used from thread 1 only.
-    Therefore, one either cannot use background transmission of interface values,
-    or one has to move the heavy computation into the \enquote{background}.
-    The latter requires a custom channel type.
-
-    \todo[inline]{Implement \julia{SafeRemoteChannel} that funnels communication from thread-safe sender/receiver \julia{Channel}s to a \julia{RemoteChannel} via thread 1.}
-  \item
-    If communication happens synchronously (not in the background),
-    and Julia runs single-threaded,%
-    \footnote{%
-      For highly local scheduling, this might actually be wanted,
-      as to not oversaturate the machine if the BLAS library starts its own threads.
-    }
-    as the channels reside on the executor of the next pipeline stage $n$,
-    even though the channels are buffered,
-    one has to wait for the receiver to not-be-busy.
-    This sometimes causes a delay for iterations $k \geq 1$.
-
-    Observation: only from the last stage $n=N$ downwards there is no such delay, $k \geq N-n+1$, \cf any timeline plot.
-    \todo[inline]{Check estimate on $k$ and put this in a remark.}
-  \item
-    JIT warm-up of $F$, $G$ and transmission code.
-    Warming up $G$ has a great benefit.
-    Additionally warming up $F$ has a very high overhead and only a very minor benefit,
-    as \eg the \ac{ALE} solvers are mostly common to $G$.
-
-    \todo[inline]{Warm-up transmission code on workers}
-
-    Maybe, this could be combined with a different initial value for the Newton / multiple shooting scheme.
-    Instead of using $U^0_n = G(U^0_{n-1})$, try $U^0_n = u_0$.
-\end{itemize}
-
-General scheduling comments:
-\begin{itemize}
-  \item
-    Early stages $n=0,1,2$ become idle even before later stages receive their first $U^0_n$.
-    Maybe they could be reused: measure runtime of $F$ and $G$ to compute optimum number $N$ for given number of processors.
-    Alternatively, one could adjust the local time slices, \cf \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/2}
-  \item
-    If $X$ trajectories shall not be saved, solving the \ac{DRE} isn't that memory heavy.
-    Creating a connection between workers in a cluster shouldn't be that expensive (they are initialized lazily, but cost should pay off).
-    It might be worth it to send $U^{k+1}_n$ as well as $G(U^k_n)$ and $F(U^k_n)$ over the network in order to recycle processors.
-    However, this requires a lazy DAG scheduling like \texttt{DAGGER.jl}.
-  \item
-    \cite[493]{Nielsen2018} relevant?
-  \item
-    Distributed processes vs local threads vs GPU?
-\end{itemize}
+\todo[inline]{%
+Due to \autoref{thm:basics:dre-limit-are},
+later parareal stages will require fewer Newton refinements
+(than earlier stages) to reach convergence.}
 
 \section{Alternative Parallel-in-Time Solvers}
 \label{sec:pr:alternatives}

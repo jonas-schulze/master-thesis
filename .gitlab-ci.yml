@@ -1,24 +1,35 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  # Store packages locally to allow caching.
+  JULIA_DEPOT_PATH: ${CI_PROJECT_DIR}/.julia
+  JULIA_PROJECT: '@.'
+
+cache:
+  key:
+    prefix: $CI_JOB_NAME
+    files:
+      - Project.toml
+  paths:
+    - .julia/packages
+    - .julia/compiled
+    - .julia/registries
 
 test-julia:
   interruptible: true
   image: julia:1.6
-  variables:
-    # Store packages locally to allow caching.
-    JULIA_DEPOT_PATH: ${CI_PROJECT_DIR}/.julia
-    JULIA_PROJECT: '@.'
   script:
     - julia -e 'using InteractiveUtils; versioninfo()'
     - julia -e 'using Pkg; Pkg.instantiate()'
     - julia test/runtests.jl
-  cache:
-    key: $CI_JOB_NAME
-    paths:
-      - .julia/packages
-      - .julia/compiled
-      - .julia/registries
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^thesis.*/
       when: manual
     - when: always
+
+test-thesis-codes:
+  interruptible: true
+  image: julia:1.6
+  script:
+    - julia -e 'using InteractiveUtils; versioninfo()'
+    - julia -e 'using Pkg; Pkg.instantiate()'
+    - julia thesis/code/parareal_counting.jl
