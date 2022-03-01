@@ -928,7 +928,7 @@ version = "1.47.0+0"
 deps = ["CommonSolve", "Distributed", "LinearAlgebra", "Logging", "LoggingExtras", "Requires", "UnPack"]
 path = "src/ParaReal.jl"
 uuid = "d8ab9f86-dde6-11e9-3216-afd74457b932"
-version = "0.4.0"
+version = "0.4.1"
 
 [[Parsers]]
 deps = ["Dates"]

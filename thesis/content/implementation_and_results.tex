@@ -2,48 +2,124 @@
 
 \section{ParaReal.jl}
 
-Design requirements / goals:
+This section describes the general properties of the \julia{ParaReal.jl} package.
+It has been designed with the following requirements in mind:
 \begin{enumerate}
-  \item
+  \item\label{item:impl:goal:schedule}
     Schedule each stage on a separate process.
-  \item
-    Prepare the scheduling strategy to be modifiable and extendable.
-  \item
-    The parareal implementation has to be modular,
-    \ie easy to use/adapt for other problems than \ac{LRSIF} formulations of \ac{DRE}.
-  \item
+
+    This is a sensible default for the application at hand,
+    which is memory bound for typical problem sizes.
+    Yet, the scheduling strategy should be modifiable/extendable.
+  \item\label{item:impl:goal:variablesize}
+    Allow the data transferred be variable in size.
+
+    This is necessary to transmit \ac{LRSIF} of varying rank and, therefore, storage size depending on $n$ (and $k$).
+  \item\label{item:impl:goal:notransfer}
     Do not transfer the final solution data back to the calling/managing process.
 
     For fine resolutions, the storage requirements are immense.
-    The overall solution might not fit in memory of one compute node.
+    The overall solution might not fit in memory of a single compute node.
     Therefore, it has to be possible that each stage $n$ saves its local solution along $[t_{n-1},t_n]$ directly to disk,
     without sending it to the calling process first.
-  \item
-    Allow the data transferred be variable in size.
-
-    This is necessary to transmit \ac{LRSIF} of varying rank and therefore storage size depending on $n$ (and $k$).
-    However, using Julia's \julia{RemoteChannel} data type, this is trivial.
 \end{enumerate}
-The result is the \julia{ParaReal.jl} package,
-whose properties are described in this section.
+On top of that:
+\begin{enumerate}[resume]
+  \item\label{item:impl:goal:modularity}
+    The parareal implementation has to be modular,
+    \ie easy to use/adapt for other problems than \ac{LRSIF} formulations of \ac{DRE}.
+\end{enumerate}
 
-The first two requirements are achieved by the abstract type \julia{Schedule},
-whose only subtype (for now) is \julia{ProcessesSchedule}.
+Requirement \ref{item:impl:goal:schedule} is achieved by the abstract type \julia{Schedule},
+whose sole subtype (for now) is \julia{ProcessesSchedule}.
 It takes a list of $N$ worker/process ids, each of which will execute one stage.
 Future strategies may be implemented by defining new subtype of \julia{Schedule}, \eg
 \julia{ThreadsSchedule} using threads on a single process,
 \julia{HybridSchedule} which uses both threads and processes, and
 \julia{DaggerSchedule} which uses the abstractions provided by \julia{Dagger.jl}.\footnote{\url{https://github.com/JuliaParallel/Dagger.jl}}
 
-The user interface fulfilling the third requirement is best described using an example:
-\lstinputlisting{code/parareal_counting.jl}
+Requirement \ref{item:impl:goal:variablesize} is trivial to fulfill using Julia's \julia{RemoteChannel} data type.
+Requirement \ref{item:impl:goal:modularity} imposes a non-specific naming scheme for
+user interface functions and the name of the unknown,
+as to not clash with the standard nomenclatures of other disciplines.\footnote{%
+  For example,
+  many parareal papers use $U$ to name the unknown,
+  many matrix \ac{ODE} papers use $X$,
+  and the widely-used \julia{DifferentialEquations.jl} package~\cite{DifferentialEquations} uses $u$.
+}
+The next section will describe the user interface of the \julia{ParaReal.jl} package,
+and how to cope with problem~\ref{item:impl:goal:notransfer}.
 
-This makes it handy to apply the package to problems having different standard nomenclatures,
-\eg $U$ as for many parareal papers, or
-$X$ as for many matrix \ac{ODE} papers, or
-$u$ as for the famous \julia{DifferentialEquations.jl} package~\cite{DifferentialEquations}.
+\subsection{User Interface}
 
-Running the example above yields the following values:
+In applications one is usually interested in a high temporal resolution,
+while the parareal method is only used to obtain \enquote{fast} convergence.
+Therefore, the \julia{ParaReal.jl} package distinguishes between a local solution along $[t_{n-1}, t_n]$ and the final value of which,
+\begin{align*}
+  F(U_{n-1}^k) &= \julia{value(fsolve(prob))} \\
+  G(U_{n-1}^k) &= \julia{value(csolve(prob))}
+\end{align*}
+where \julia{prob} is an instance of the global \ac{IVP}~\eqref{eq:IVP}
+restricted to the local time slice~$[t_{n-1}, t_n]$ and initial value~$U_{n-1}^k$.
+The actual solver functions \julia{csolve} (\enquote{coarse}) and \julia{fsolve} (\enquote{fine})
+are provided as arguments to \julia{ParaReal.Algorithm()}.
+In order to support custom \ac{IVP} types,
+a user has to defined methods for \julia{initial\_value()} to extract the global initial value $U_0$,
+and \julia{remake\_prob()} to adjust the global problem for the local time slice and initial value.
+For more details, refer to the documentation of the respective functions available from within Julia.
+
+In order to support new solution types,
+a custom implementation of the parareal update formula~\eqref{eq:pr:method} may be needed.
+This can be specified as an optional third argument to \julia{ParaReal.Algorithm}.
+The default is \julia{ParaReal.default\_update!()},
+whose implementation is given in~\autoref{lst:impl:default_update!}.
+Adding methods to \julia{default\_update!()} is not recommended.
+Any custom implementation of the parareal update formula must follow the interface of \julia{default\_update!()}.
+
+\def\sk{\textsuperscript{k}}
+\def\skmi{\textsuperscript{k-1}}
+\begin{lstlisting}[%
+  float=t,
+  label={lst:impl:default_update!},
+  caption={Default implementations of the parareal update formula},
+  escapechar=\%,
+  breaklines=true,
+]
+function default_update!(_, G%\sk%, F%\skmi%, G%\skmi%)
+    G%\sk% + F%\skmi% + (-G%\skmi%) # out-of-place
+end
+
+function default_update!(U%\sk%::Array, G%\sk%, F%\skmi%, G%\skmi%)
+    @. U%\sk% = G%\sk% + F%\skmi% - G%\skmi% # in-place
+end
+\end{lstlisting}
+
+The remainder of this section is devoted to a complete example of a user-defined problem type ($N=3$, $K=2$).
+The problem type will be a mere placeholder that forwards its initial value,
+while the solver functions will count the applications of $F$ and $G$ a particular solution is composed of.
+Start by launching some worker processes and loading the necessary packages:
+\lstinputlisting[%
+  caption={User-defined problem type for \julia{Parareal.jl}},
+  label={lst:impl:parareal_counting},
+  lastline=5,
+]{code/parareal_counting.jl}
+Next, define the problem type and ensure that definition is available on all processes.
+The only requirement to the problem type is to have a \julia{tspan} field.\footnote{%
+  Alternatively, it must support \julia{getproperty(prob, :tspan)}.
+}
+In the context of \ac{ODE}, this should not clash with any other notation.
+\addtocounter{lstnumber}{1} %FIXME
+\lstinputlisting[nolol, firstnumber=last, linerange=problem-end]{code/parareal_counting.jl}
+The solution type will hold counters of the applications of $F$ and $G$:
+\lstinputlisting[nolol, firstnumber=last, linerange=solution-end]{code/parareal_counting.jl}
+Define the solver functions and problem instance and execute the parareal pipeline.
+The solver functions are defined as closures,
+such that they can be serialized and transferred to the worker processes.
+Note that this code is only executed on the managing process:
+\lstinputlisting[nolol, firstnumber=last, linerange=solve-end]{code/parareal_counting.jl}
+Lastly, extracting the final values $U_1^1$, $U_2^2$, and $U_3^2$ via
+\lstinputlisting[nolol, firstnumber=last, linerange=result-end]{code/parareal_counting.jl}
+yields:
 \begin{align*}
   &\julia{Counters(1,0)}, \text{ since} &
   U_1^1 &= F(U_0) \\
@@ -53,20 +129,19 @@ Running the example above yields the following values:
   U_3^2 &= G(F(F(U_0))) + F(U_2^1) - G(U_2^1) \\
   && U_2^1 &= G(F(U_0)) + F(G(U_0)) - G(G(U_0))
 \end{align*}
-In the notion of \julia{ParaReal.jl},
-$F_n^k$ and $G_n^k$ denote the return values of calls to the fine coarse solvers, respectively,
-which may hold more data than just $F(U_n^k)$.
-In applications, one is usually interested in the complete trajectory of $U$ on $[t_0,t_f]$.
-Therefore, $F_n^k$ usually stores the trajectory on $[t_n,t_{n+1}]$,
-of which \julia{ParaReal.value} extracts the (final) value at $t_{n+1}$.
-In the example above, both are identical, though.
 
-\todo[inline]{%
-  Make code look pretty, maybe put it in the appendix.
-  Describe results of code better.
-  Note that $U_2^1$ isn't actually computed twice.
-  Maybe I should provide a custom update routing to account for this.
-}
+The full trajectory of the fine solver may be extracted using \julia{ParaReal.solution()}.
+However, solution and value are identical in the example above,
+\cf line~\ref{line:impl:parareal_counting:value}.
+\autoref{lst:impl:store} shows the recommended pattern of storing the fine solutions directly from the worker processes.
+
+\begin{lstlisting}[%
+  float=b, % TODO: ensure this doesn't disrupt the inline code snippets
+  caption={Store fine parareal solutions directly from the worker processes},
+  label={lst:impl:store},
+]
+TODO
+\end{lstlisting}
 
 \subsection{JIT Compilation and Warm-Up}
 
@@ -83,18 +158,22 @@ Therefore, it is critical that the individual coarse solutions are available as 
 
 \todo[inline]{Describe notion of \enquote{ramp-up delay}?}
 
-\begin{figure}[htb]
+\begin{figure}[tb]
   \includegraphics[width=\textwidth]{figures/fig_impl_warmup2.pdf}
   \caption[Timeline diagrams comparing the effect of JIT compiler warm-up.]{%
     Timeline diagrams comparing the effect of \acs{JIT} compiler warm-up.
-    Left: 8 processes running on two compute nodes,
-    right: 4 processes running on a laptop.
+    Left: $N=8$ processes running on two compute nodes,
+    right: $N=4$ processes running on a laptop.
     Top: no warm-up,
     middle: warming up coarse solver \julia{csolve} ($G$),
-    bottom warming up coarse and fine solver \julia{fsolve} ($F$).
+    bottom: warming up coarse and fine solver \julia{fsolve} ($F$).
   }
   \label{fig:impl:warmup}
 \end{figure}
+
+\begin{table}[tb]
+  \caption{Ramp-up delay}
+\end{table}
 
 \paragraph{Sequential \ac{JIT} compilation}
 
@@ -148,19 +227,7 @@ How to cite these webpages properly?
 Should I do anything about the speculation in the paragraph, or the exposure of which in the footnote?
 }
 
-\todo[inline]{Where should I put the next paragraph?}
-
-Note that if the coarse solver is warmed up,
-for $n=1$ the actual solve $G(U_0^0)$ is barely visible,
-because it is the exact call used for \ac{JIT} warm-up.
-For $n\geq 2$, the execution time of computing $G(U_{n-1}^0)$ is noticeably larger,
-which may be due to type inference.
-The local problem instance is updated for the new initial value $U_{n-1}^0$,
-which might cause some method invalidations.
-This gives more room for improvement.
-
 \subsection{Lack of Asynchronous Data Transfer}
-\todo[inline]{Should this just be another paragraph?}
 
 A common strategy to improve CPU utilization is to perform data transfers between processes asynchronously.
 Julia offers the \julia{RemoteChannel} data structure for this purpose.
@@ -175,6 +242,7 @@ This is particularly true for code that doesn't require~\ac{IO},
 \eg for many methods from Julia's \julia{LinearAlgebra} standard library,
 which internally call \code{LAPACK}.
 
+\todo{Mention that Julia runs single-threaded as to not oversaturate machine? BLAS/LAPACK launch their own threads.}
 The solution described in the previous paragraph is not yet implemented,
 \ie all data transfers are synchronous.
 This causes gaps visible in \autoref{fig:impl:warmup} after $G$ and before $F$,
@@ -201,4 +269,22 @@ which shadows the effect described in the previous paragraph for the first row o
 For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
   If due to user code the data types of $U_n^*$ changes, recompilation might be necessary.
 }
+
+\subsection{Advanced Scheduling Strategies}
+
+\begin{itemize}
+  \item
+    Early stages $n=0,1,2$ become idle even before later stages receive their first $U^0_n$.
+    Maybe they could be reused: measure runtime of $F$ and $G$ to compute optimum number $N$ for given number of processors.
+    Alternatively, one could adjust the local time slices, \cf \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/2}
+  \item
+    If $X$ trajectories shall not be saved, solving the \ac{DRE} isn't that memory heavy.
+    Creating a connection between workers in a cluster shouldn't be that expensive (they are initialized lazily, but cost should pay off).
+    It might be worth it to send $U^{k+1}_n$ as well as $G(U^k_n)$ and $F(U^k_n)$ over the network in order to recycle processors.
+    However, this requires a lazy DAG scheduling like \texttt{DAGGER.jl}.
+  \item
+    \cite[493]{Nielsen2018} relevant?
+  \item
+    Distributed processes vs local threads vs GPU?
+\end{itemize}
 

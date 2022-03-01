@@ -47,6 +47,14 @@
 % Source Code
 
 \lstset{
-  basicstyle = \ttfamily,
+  basicstyle=\small\ttfamily,
+  numberstyle=\footnotesize\sffamily,
+  numbers=left,
+  % use special julia comments as range markers: #== text ==#
+  rangeprefix=\#\=\=\ ,
+  rangesuffix=\ \=\=\#,
+  includerangemarker=false,
+  % add latex labels using #* \label{line:...}
+  escapeinside={\#*}{\^^M},
 }
 
