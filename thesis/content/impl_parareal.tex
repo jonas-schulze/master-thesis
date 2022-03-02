@@ -268,7 +268,7 @@ The solution described in the previous paragraph is not yet implemented,
 This causes gaps visible in \autoref{fig:impl:warmup} after $G$ and before $F$,
 whose ends roughly align with the beginnings of calls to $G$ on the next stage.
 
-Another effect is that the iterations $(n,k)$ for which $n+k \geq N$ do not show this gap,
+Another effect is that the iterations $(n,k)$ for which $n+k \geq N$ do not show this gap.
 The reason is twofold.
 The last stage $N$ doesn't need to send any data, therefore has no \ac{JIT} warm-up delay for the first iteration $k=0$ and no gap in the diagram.
 This causes the next refinement $k=1$ of the previous stage $N-1$ to have a noticeably smaller gap,

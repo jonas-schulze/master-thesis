@@ -10,11 +10,12 @@ Consider the autonomous \ac{IVP}
 \right.
 \end{equation}
 on an equidistant time discretization $t_{n+1} = t_n + \tau$ for $n\geq 0$ and some $\tau\in\R$.
-Then, the $s$-stage Rosenbrock method~\cite{HairerWanner2} reads
+Then, the $s$-stage Rosenbrock method~\Ros{$s$} reads
 \begin{equation}
+\label{eq:ros:def}
 \left\{
 \begin{aligned}
-  x_{n+1} &:= x_n + \sum_{j=1}^s b_j k_{nj}
+  x_{n+1} &:= x_n + \tau \sum_{j=1}^s b_j k_j
   \\
   k_i &:= \tau f\left( x_n + \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
   \qquad
@@ -22,22 +23,25 @@ Then, the $s$-stage Rosenbrock method~\cite{HairerWanner2} reads
 \end{aligned}
 \right.
 \end{equation}
-where $\Jac := f'(x_n)$ and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
+where $\Jac := f'(x_n)$ denotes the Jacobian and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
 We follow the common notation of neglecting a subscript $n$ for the stages $k_i=k_i(t_n)$.
-Of special interest are the methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
-For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{MPIMD11-06,HairerWanner2}.
+In the remainder, we restrict the analysis to methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
+For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{HairerWanner2}.
 
-In this thesis we will focus on the implicit Euler method ($s=1$)
+In this thesis we will focus on first-order method~\Ros{1}
 \begin{equation}
+\label{eq:ros:gen:ros1}
 \left\{
 \begin{aligned}
-  x_{n+1} &= x_n + b_1 k_1 \\
+  x_{n+1} &= x_n + \tau k_1 \\
   (I - \gamma\tau \Jac) k_1 &= \tau f(x_n)
 \end{aligned}
 \right.
 \end{equation}
-and the second order method first described in \cite{Verwer1999} ($s=2$)
+having $b_1=1$,
+and the second-order method~\Ros{2}
 \begin{equation}
+\label{eq:ros:gen:ros2}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tfrac{3}{2} \tau k_1 + \tfrac{1}{2} \tau k_2 \\
@@ -46,6 +50,16 @@ and the second order method first described in \cite{Verwer1999} ($s=2$)
 \end{aligned}
 \right.
 \end{equation}
+having $\alpha_{21}=1$, $b_1=b_2=\frac{1}{2}$, and $\gamma_{21}=-2\gamma$,
+which was first described in \cite{Verwer1999}.\footnote{%
+  The formulation \eqref{eq:ros:gen:ros2} as in \cite[Equation~(3.4)]{Verwer1999}
+  is based on $k_1 := \hat k_1$ and $k_2 := \hat k_2 - 2 \hat k_1$,
+  where $\hat k_1$ and $\hat k_2$ are the stages of the original form \eqref{eq:ros:def}.
+  Hence, $b_1$ and $b_2$ do not coincide with the coefficients of the first equation of~\eqref{eq:ros:gen:ros2}.
+}
+As the first method~\eqref{eq:ros:gen:ros1} can be derived from the implicit Euler scheme
+by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$,
+it is often referred to as the \emph{(linearly) implicit Euler} scheme.
 
 \todo[inline]{%
 Do I need the reformulation of \cite{MPIMD11-06}?
@@ -56,12 +70,192 @@ Is this a generalization of the reformulation seen in \cite{Verwer1999}?
 
 \todo{Maybe switch transposes: $AX$ and $XA^\HT$}
 In the context of the autonomous \ac{DRE}
-\begin{gather*}
+\begin{equation}
+\label{eq:ros:DRE}
   \dot X = \Ricc(X) :=
-  Q + AX + XA^\HT - XRX
-  \\
-  C^\T C + A^\T X + XA^\T - X BB^\T X
-\end{gather*}
-the $s$-stage Rosenbrock method is given by
+  C^\T C + A^\T X + XA - X BB^\T X
+\end{equation}
+the Jacobian $\Jac := \Ricc'(X_n)$ is given by the \Frechet derivative.
+Since $X$ is symmetric,
+$\Jac$ is itself a \Lyapunov operator,
+\begin{equation}
+  \Ricc'(X_n) : U \mapsto (A - BB^\T X_n)^\T U + U (A - BB^\T X_n)
+\end{equation}
+\todo{Find Ref: all implicit methods lead to \ac{ALE}; DRE leads to ARE according to \cite{Dieci1992}}
+which causes the stage equations~\eqref{eq:ros:def} to become \ac{ALE}.
+
+Therefore, the implicit Euler scheme \Ros{1} reads
+\begin{equation}
+\label{eq:ros:DRE:ros1}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tau K_1 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\tau \Ricc(X_n)
+\end{aligned}
+\right.
+\end{equation}
+while \Ros{2} is given by
+\begin{equation}
+\label{eq:ros:DRE:ros2}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\tau \Ricc(X_n) \\
+  \hat A_n^\T K_2 + K_2 \hat A_n &= -\tau \Ricc(X_n + \tau K_1) + 2K_1
+\end{aligned}
+\right.
+\end{equation}
+where $\hat A_n = \gamma\tau(A - BB^\T X_n) - \frac{1}{2} I$.
+
+\begin{remark}
+  When formulating these methods for generalized \ac{DRE},
+  \ie replacing
+  \begin{align*}
+    X &\gets E^\T X E, &
+    A &\gets E^{-1} A, &
+    B &\gets E^{-1} B
+  \end{align*}
+  and avoiding inversion of $E$,
+  the stages are generalized \ac{ALE}
+  with $E$ and $\hat A_n = \gamma\tau(A - BB^\T X_n E) - \frac{1}{2} E$
+  having the same right-hand sides as above.
+\end{remark}
+
+\subsection{Low-Rank Formulation}
+
+The key ingredient to solving \ac{ALE} in \ac{LRSIF} formulation is a low-rank formulation of the right-hand side.
+
+\paragraph{First Order Scheme}
+
+Apply \ac{LRSIF} to the \Riccati operator:
+\begin{align*}
+  \Ricc(LDL^\T)
+  &= C^\T C + A^\T (LDL^\T) + (LDL^\T) A - (LDL^\T) BB^\T (LDL^\T) \\
+  &= \begin{bmatrix}
+    C^\T & A^\T L & L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . & . & . \\
+    . & . & D & . \\
+    . & D & . & . \\
+    . & . & . & - DL^\T BB^\T LD
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\
+    L^\T A \\
+    L^\T \\
+    L^\T
+  \end{bmatrix} \\
+  &= \begin{bmatrix}
+    C^\T & A^\T L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . & . \\
+    . & . & D \\
+    . & D & - DL^\T BB^\T LD
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\
+    L^\T A \\
+    L^\T
+  \end{bmatrix}
+\end{align*}
+
+\paragraph{Second Order Scheme}
+
+The following construction goes back to \cite{Mena2007}.\footnote{%
+  The original contains many small mistakes,
+  which have hopefully all been eliminated in this thesis.
+}
+In the context of~\eqref{eq:ros:DRE:ros2},
+we first expand the \Riccati operator of a shifted argument:
+\begin{subequations}
+\begin{align}
+  \Ricc(X_n + \tau K_1)
+  &= \begin{multlined}[t]
+    \Ricc(X_n) + \tau K_1 A + \tau A^\T K_1 \\
+    - \tau K_1 BB^\T X_n - \tau X_n BB^\T K_1 - \tau^2 K_1 BB^\T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    \Ricc(X_n) - \tau^2 K_1 BB^\T K_1 \\
+    + \tau K_1 (A - BB^\T X_n) + \tau(A - BB^\T X_n)^\T K_1
+  \end{multlined}
+\end{align}
+\end{subequations}
+\todo{Deal with factor of $\tau$}
+and use that to write the second stage:
+\begin{subequations}
+\begin{align}
+  \MoveEqLeft
+  -\Ricc(X_n + \tau K_1) + 2K_1
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 + 2K_1 \\
+    - \tau K_1 (A - BB^\T X_n) - \tau(A - BB^\T X_n)^\T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
+    - K_1 \big(\tau(A - BB^\T X_n) - I\big)
+    - \big(\tau(A - BB^\T X_n) - I\big)^\T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
+    - K_1
+    \underbrace{
+      \big(\tau(A - BB^\T X_n) - I\big)
+    }_{\frac{1}{\gamma} \hat{A}_n - (1-\frac{1}{2\gamma}) I}
+    - \underbrace{
+      \big(\tau(A - BB^\T X_n) - I\big)
+    }_{\text{dito}}
+    \!{\vphantom{\big(}}^\T
+    K_1
+  \end{multlined} \\
+  &=
+  -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1
+  -\tfrac{1}{\gamma}
+  \underbrace{
+    (K_1 \hat{A}_n + \hat{A}_n^\T K_1)
+  }_{-\Ricc(X_n)}
+  + (2-\tfrac{1}{\gamma}) K_1 \\
+  &= -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
+  + \tau^2 K_1 BB^\T K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{align}
+\end{subequations}
+using the first stage equation.
+In summary:
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_2 + K_2 \hat A_n &=
+  -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
+  + \tau^2 K_1 BB^\T K_1
+  + (2-\tfrac{1}{\gamma}) K_1
+\end{aligned}
+\right.
+\end{equation}
+For arbitrary $\gamma$, this allows a decomposition according to:
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + (2-\tfrac{1}{\gamma}) K_1 \\
+  K_2 &= (1-\tfrac{1}{\gamma}) K_1 + K_{21}
+\end{aligned}
+\right.
+\end{equation}
+For $\gamma=1$ the method further simplifies to:
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_2 + K_2 \hat A_n &= \tau^2 K_1 BB^\T K_1 + K_1
+\end{aligned}
+\right.
+\end{equation}
 
 \section{Alternative One-Step Methods}
