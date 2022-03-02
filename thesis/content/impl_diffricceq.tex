@@ -1,0 +1,17 @@
+\section{DifferentialRiccatiEquations.jl}
+
+This section describes the general properties of the \julia{DifferentialRiccatiEquations.jl} package.
+
+\begin{itemize}
+  \item
+    Type of compression (none, $LDL^\T$) is selected by dispatching on the type of $Q$.
+    For a dense matrix \julia{Q::Matrix}, a dense solver will be used.
+    For a \ac{LRSIF} \julia{Q::\LDLt}, a low-rank solver will be used.
+  \item
+    \julia{Q::\LDLt} of rank $n_Q$ consisting of $L_Q \in\R^{n\times n_Q}$ and $D_Q\in\R^{n_Q\times n_Q}$ will be compressed,
+    \cf~\autoref{sec:lr:compression},
+    if the inner dimension becomes too big, $n_Q \geq 0.5 n$,
+    and every 20 modifications without compression,
+    \cf~\autoref{sec:lr:update}.
+    For now, this is not configurable.
+\end{itemize}
