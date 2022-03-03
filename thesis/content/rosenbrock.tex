@@ -29,7 +29,8 @@ We follow the common notation of neglecting a subscript $n$ for the stages $k_i=
 In the remainder, we restrict the analysis to methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
 For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{HairerWanner2}.
 
-In this thesis we will focus on first-order method~\Ros{1}
+In this thesis we will focus on a first-order one-stage method as well as a second-order two-stage method.
+The first method, \Ros{1}
 \begin{equation}
 \label{eq:ros:gen:ros1}
 \left\{
@@ -40,7 +41,10 @@ In this thesis we will focus on first-order method~\Ros{1}
 \right.
 \end{equation}
 having $b_1=1$ and $\gamma=1$,
-and the second-order method~\Ros{2}
+is often referred to as the \emph{(linearly) implicit Euler} scheme,
+as it can be derived from the implicit Euler scheme
+by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$.
+The second-order method, \Ros{2}
 \begin{equation}
 \label{eq:ros:gen:ros2}
 \left\{
@@ -52,20 +56,15 @@ and the second-order method~\Ros{2}
 \right.
 \end{equation}
 having $\alpha_{21}=1$, $b_1=b_2=\frac{1}{2}$, and $\gamma_{21}=-2\gamma$,
-which was first described in \cite{Verwer1999}.\footnote{%
+was first described in \cite{Verwer1999}.\footnote{%
   The formulation \eqref{eq:ros:gen:ros2} as in \cite[Equation~(3.4)]{Verwer1999}
   is based on $k_1 := \hat k_1$ and $k_2 := \hat k_2 - 2 \hat k_1$,
   where $\hat k_1$ and $\hat k_2$ are the stages of the original form \eqref{eq:ros:def}.
   Hence, $b_1$ and $b_2$ do not coincide with the coefficients of the first equation of~\eqref{eq:ros:gen:ros2}.
 }
-As the first method~\eqref{eq:ros:gen:ros1} can be derived from the implicit Euler scheme
-by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$,
-it is often referred to as the \emph{(linearly) implicit Euler} scheme.
-
-\todo[inline]{%
-Do I need the reformulation of \cite{MPIMD11-06}?
-Is this a generalization of the reformulation seen in \cite{Verwer1999}?
-}
+This method is L-stable for $\gamma = 1 \pm \frac{\sqrt{2}}{2}$,
+\cf~\cite[Table~6.4]{HairerWanner2},
+of which we will use the larger option.
 
 \section{Application to \act{DRE}s}
 
@@ -107,6 +106,7 @@ while \Ros{2} is given by
 \right.
 \end{equation}
 where $\hat A_n = \gamma\tau(A - BB^\T X_n) - \frac{1}{2} I$.
+The following sections are devoted to efficient low-rank formulations of above right-hand sides.
 
 \begin{remark}
   When formulating these methods for generalized \ac{DRE},
@@ -122,14 +122,12 @@ where $\hat A_n = \gamma\tau(A - BB^\T X_n) - \frac{1}{2} I$.
   having the same right-hand sides as above.
 \end{remark}
 
-\subsection{Low-Rank Formulation}
+\subsection{Low-Rank Formulation of the \Riccati Operator}
 
-The key ingredient to solving \ac{ALE} in \ac{LRSIF} formulation is a low-rank formulation of the right-hand side.
-
-\paragraph{First Order Scheme}
-
-Apply \ac{LRSIF} to the \Riccati operator:
-\begin{align*}
+The following construction goes back to~\cite{Lang2015}.
+Applying $\Ricc$ to a \ac{LRSIF} of rank $r\in\N$ reads
+\begin{subequations}
+\begin{align}
   \Ricc(LDL^\T)
   &= C^\T C + A^\T (LDL^\T) + (LDL^\T) A - (LDL^\T) BB^\T (LDL^\T) \\
   &= \begin{bmatrix}
@@ -159,17 +157,29 @@ Apply \ac{LRSIF} to the \Riccati operator:
     C \\
     L^\T A \\
     L^\T
-  \end{bmatrix}
-\end{align*}
+  \end{bmatrix} \\
+  &=: GSG^\T
+\end{align}
+\end{subequations}
+which is itself a \ac{LRSIF} of rank $n_C + 2r$.
 
-\paragraph{Second Order Scheme}
+\begin{remark}
+  For generalized \ac{DRE} it is $G = \begin{bmatrix}
+    C^\T & A^\T L & E^\T L
+  \end{bmatrix}$.
+\end{remark}
+
+\subsection{\Riccati Operator of a Shifted Argument}
 
 The following construction goes back to \cite{Mena2007}.\footnote{%
   The original contains many small mistakes,
   which have hopefully all been eliminated in this thesis.
 }
-In the context of~\eqref{eq:ros:DRE:ros2},
-we first expand the \Riccati operator of a shifted argument:
+Evaluating the \Riccati operator is rather expensive.
+In the context of \Ros{2}~\eqref{eq:ros:DRE:ros2},
+we therefore aim to reuse the evaluation of $\Ricc$ necessary to compute the first stage $K_1$
+for the computation of $K_2$.
+First, expand the \Riccati operator of a shifted argument
 \begin{subequations}
 \begin{align}
   \Ricc(X_n + \tau K_1)
@@ -183,7 +193,7 @@ we first expand the \Riccati operator of a shifted argument:
   \end{multlined}
 \end{align}
 \end{subequations}
-and use that to write the second stage:
+and use that to rewrite the right-hand side of the second stage
 \begin{subequations}
 \begin{align}
   \MoveEqLeft
@@ -232,7 +242,7 @@ In summary:
 \right.
 \end{equation}
 
-For arbitrary $\gamma$, this allows a decomposition according to:
+For arbitrary $\gamma$, this allows a decomposition of $K_2$ according to:
 \begin{equation}
 \left\{
 \begin{aligned}
@@ -243,17 +253,17 @@ For arbitrary $\gamma$, this allows a decomposition according to:
 \end{aligned}
 \right.
 \end{equation}
-For $\gamma=1$ the method further simplifies to:
+Then substituting $K_2$ into the update equation yields:
 \begin{equation}
 \left\{
 \begin{aligned}
-  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  X_{n+1} &= X_n + \tfrac{1}{2} (4 - \tfrac{1}{\gamma}) \tau K_1 + \tfrac{1}{2} \tau K_{21} \\
   \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
-  \hat A_n^\T K_2 + K_2 \hat A_n &= \tau^2 K_1 BB^\T K_1 + K_1
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + (2-\tfrac{1}{\gamma}) K_1
 \end{aligned}
 \right.
 \end{equation}
-We will, however, stick to $\gamma = 1 + \frac{\sqrt{2}}{2}$ such that the method is L-stable,
-\cf~\cite[Table~6.4]{HairerWanner2}.
+
+\todo[inline]{low-rank formulation of RHS of $K_{21}$}
 
 \section{Alternative One-Step Methods}
