@@ -34,11 +34,11 @@ In this thesis we will focus on first-order method~\Ros{1}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tau k_1 \\
-  (I - \gamma\tau \Jac) k_1 &= f(x_n)
+  (I - \tau \Jac) k_1 &= f(x_n)
 \end{aligned}
 \right.
 \end{equation}
-having $b_1=1$,
+having $b_1=1$ and $\gamma=1$,
 and the second-order method~\Ros{2}
 \begin{equation}
 \label{eq:ros:gen:ros2}
@@ -230,6 +230,7 @@ In summary:
 \end{aligned}
 \right.
 \end{equation}
+
 For arbitrary $\gamma$, this allows a decomposition according to:
 \begin{equation}
 \left\{
@@ -251,5 +252,7 @@ For $\gamma=1$ the method further simplifies to:
 \end{aligned}
 \right.
 \end{equation}
+We will, however, stick to $\gamma = 1 + \frac{\sqrt{2}}{2}$ such that the method is L-stable,
+\cf~\cite[Table~6.4]{HairerWanner2}.
 
 \section{Alternative One-Step Methods}
