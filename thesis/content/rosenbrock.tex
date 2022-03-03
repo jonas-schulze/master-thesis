@@ -207,7 +207,7 @@ and use that to rewrite the right-hand side of the second stage
     -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
     - \underbrace{
       \big(\tau(A - BB^\T X_n) - I\big)
-    }_{\frac{1}{\gamma} \hat{A}_n - (1-\frac{1}{2\gamma}) I}
+    }_{\frac{1}{\gamma} \hat{A}_n - \big( 1-\frac{1}{2\gamma} \big) I}
     \!{\vphantom{\big(}}^\T
     K_1
     - K_1
@@ -221,10 +221,10 @@ and use that to rewrite the right-hand side of the second stage
   \underbrace{
     (\hat{A}_n^\T K_1 + K_1 \hat{A}_n)
   }_{-\Ricc(X_n)}
-  + (2-\tfrac{1}{\gamma}) K_1 \\
+  + \big( 2-\tfrac{1}{\gamma} \big) K_1 \\
   &= -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
   + \tau^2 K_1 BB^\T K_1
-  + (2-\tfrac{1}{\gamma}) K_1
+  + \big( 2-\tfrac{1}{\gamma} \big) K_1
 \end{align}
 \end{subequations}
 using the first stage equation.
@@ -237,19 +237,20 @@ In summary:
   \hat A_n^\T K_2 + K_2 \hat A_n &=
   -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
   + \tau^2 K_1 BB^\T K_1
-  + (2-\tfrac{1}{\gamma}) K_1
+  + \big( 2-\tfrac{1}{\gamma} \big) K_1
 \end{aligned}
 \right.
 \end{equation}
 
+\todo{Check $()$ versus $\big(\big)$.}
 For arbitrary $\gamma$, this allows a decomposition of $K_2$ according to:
 \begin{equation}
 \left\{
 \begin{aligned}
   X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
   \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
-  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + (2-\tfrac{1}{\gamma}) K_1 \\
-  K_2 &= (1-\tfrac{1}{\gamma}) K_1 + K_{21}
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1 \\
+  K_2 &= \big( 1-\tfrac{1}{\gamma} \big) K_1 + K_{21}
 \end{aligned}
 \right.
 \end{equation}
@@ -257,9 +258,9 @@ Then substituting $K_2$ into the update equation yields:
 \begin{equation}
 \left\{
 \begin{aligned}
-  X_{n+1} &= X_n + \tfrac{1}{2} (4 - \tfrac{1}{\gamma}) \tau K_1 + \tfrac{1}{2} \tau K_{21} \\
+  X_{n+1} &= X_n + \big( 2 - \tfrac{1}{2\gamma} \big) \tau K_1 + \tfrac{1}{2} \tau K_{21} \\
   \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
-  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + (2-\tfrac{1}{\gamma}) K_1
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1
 \end{aligned}
 \right.
 \end{equation}
