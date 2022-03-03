@@ -30,11 +30,15 @@ tags = [
 	:WarmingUpF,
 	:ComputingC,
 	:ComputingF,
-	:ComputingU,
 ]
 
 # ╔═╡ ec719c08-ee95-4e20-af48-cd22274f1f0f
-desc = Dict(t => string(t) for t in tags)
+desc = Dict(
+	:WarmingUpC => "Warm up coarse solver",
+	:WarmingUpF => "Warm up fine solver",
+	:ComputingC => "Coarse solver",
+	:ComputingF => "Fine solver",
+)
 
 # ╔═╡ 330fee10-3012-48d8-9126-8a67162a546b
 # This is broken, as MathTeXEngine.jl only supports Computer Modern.
@@ -62,10 +66,9 @@ utopia_regular = "/usr/local/texlive/2018/texmf-dist/fonts/type1/adobe/utopia/pu
 function fig_impl_warmup(cols...)
 	fig = Figure(font=utopia_regular)
 
-	# Define colormap:
-	p(i) = (i-1) / (length(tags)-1)
-	colors = cgrad(:viridis)
-	colormap = Dict(t => colors[p(i)] for (i, t) in enumerate(tags))
+	# Color events by tag:
+	colors = to_colormap(:sun, length(tags))
+	colormap = Dict(t => colors[i] for (i, t) in enumerate(tags))
 
 	# Add timeline plots:
 	grid = fig[1, 1] = GridLayout()
@@ -77,7 +80,8 @@ function fig_impl_warmup(cols...)
 	]
 	for (c, col) in enumerate(cols)
 		for (r, df) in enumerate(col)
-			timeline!(ax[r,c], df, colormap)
+			colorcol = [colormap[t] for t in df.tag]
+			timeline!(ax[r,c], df, colorcol)
 		end
 	end
 	for c in 1:ncols
