@@ -173,12 +173,12 @@ we first expand the \Riccati operator of a shifted argument:
 \begin{align}
   \Ricc(X_n + \tau K_1)
   &= \begin{multlined}[t]
-    \Ricc(X_n) + \tau K_1 A + \tau A^\T K_1 \\
+    \Ricc(X_n) + \tau A^\T K_1 + \tau K_1 A \\
     - \tau K_1 BB^\T X_n - \tau X_n BB^\T K_1 - \tau^2 K_1 BB^\T K_1
   \end{multlined} \\
   &= \begin{multlined}[t]
     \Ricc(X_n) - \tau^2 K_1 BB^\T K_1 \\
-    + \tau K_1 (A - BB^\T X_n) + \tau(A - BB^\T X_n)^\T K_1
+    + \tau(A - BB^\T X_n)^\T K_1 + \tau K_1 (A - BB^\T X_n)
   \end{multlined}
 \end{align}
 \end{subequations}
@@ -190,30 +190,25 @@ and use that to write the second stage:
   \nonumber \\
   &= \begin{multlined}[t]
     -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 + 2K_1 \\
-    - \tau K_1 (A - BB^\T X_n) - \tau(A - BB^\T X_n)^\T K_1
+    - \tau(A - BB^\T X_n)^\T K_1 - \tau K_1 (A - BB^\T X_n)
   \end{multlined} \\
   &= \begin{multlined}[t]
     -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
-    - K_1 \big(\tau(A - BB^\T X_n) - I\big)
-    - \big(\tau(A - BB^\T X_n) - I\big)^\T K_1
-  \end{multlined} \\
-  &= \begin{multlined}[t]
-    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
+    - \underbrace{
+      \big(\tau(A - BB^\T X_n) - I\big)
+    }_{\frac{1}{\gamma} \hat{A}_n - (1-\frac{1}{2\gamma}) I}
+    \!{\vphantom{\big(}}^\T
+    K_1
     - K_1
     \underbrace{
       \big(\tau(A - BB^\T X_n) - I\big)
-    }_{\frac{1}{\gamma} \hat{A}_n - (1-\frac{1}{2\gamma}) I}
-    - \underbrace{
-      \big(\tau(A - BB^\T X_n) - I\big)
     }_{\text{dito}}
-    \!{\vphantom{\big(}}^\T
-    K_1
   \end{multlined} \\
   &=
   -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1
   -\tfrac{1}{\gamma}
   \underbrace{
-    (K_1 \hat{A}_n + \hat{A}_n^\T K_1)
+    (\hat{A}_n^\T K_1 + K_1 \hat{A}_n)
   }_{-\Ricc(X_n)}
   + (2-\tfrac{1}{\gamma}) K_1 \\
   &= -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
