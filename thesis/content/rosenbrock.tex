@@ -17,7 +17,7 @@ Then, the $s$-stage Rosenbrock method~\Ros{$s$} reads
 \begin{aligned}
   x_{n+1} &:= x_n + \tau \sum_{j=1}^s b_j k_j
   \\
-  k_i &:= \tau f\left( x_n + \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
+  k_i &:= f\left( x_n + \tau \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
   \qquad
   \text{for } i = 1, \ldots, s
 \end{aligned}
@@ -34,7 +34,7 @@ In this thesis we will focus on first-order method~\Ros{1}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tau k_1 \\
-  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n)
+  (I - \gamma\tau \Jac) k_1 &= f(x_n)
 \end{aligned}
 \right.
 \end{equation}
@@ -45,8 +45,8 @@ and the second-order method~\Ros{2}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tfrac{3}{2} \tau k_1 + \tfrac{1}{2} \tau k_2 \\
-  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n) \\
-  (I - \gamma\tau \Jac) k_2 &= \tau f(x_n + \tau k_1) - 2k_1
+  (I - \gamma\tau \Jac) k_1 &= f(x_n) \\
+  (I - \gamma\tau \Jac) k_2 &= f(x_n + \tau k_1) - 2k_1
 \end{aligned}
 \right.
 \end{equation}
@@ -90,7 +90,7 @@ Therefore, the implicit Euler scheme \Ros{1} reads
 \left\{
 \begin{aligned}
   X_{n+1} &= X_n + \tau K_1 \\
-  \hat A_n^\T K_1 + K_1 \hat A_n &= -\tau \Ricc(X_n)
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n)
 \end{aligned}
 \right.
 \end{equation}
@@ -100,8 +100,8 @@ while \Ros{2} is given by
 \left\{
 \begin{aligned}
   X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
-  \hat A_n^\T K_1 + K_1 \hat A_n &= -\tau \Ricc(X_n) \\
-  \hat A_n^\T K_2 + K_2 \hat A_n &= -\tau \Ricc(X_n + \tau K_1) + 2K_1
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_2 + K_2 \hat A_n &= -\Ricc(X_n + \tau K_1) + 2K_1
 \end{aligned}
 \right.
 \end{equation}
@@ -182,7 +182,6 @@ we first expand the \Riccati operator of a shifted argument:
   \end{multlined}
 \end{align}
 \end{subequations}
-\todo{Deal with factor of $\tau$}
 and use that to write the second stage:
 \begin{subequations}
 \begin{align}
