@@ -392,7 +392,13 @@ Consider the \ac{ALE}
 \label{eq:adi:ale}
   \Lyap(X) := AX + XA^\HT = -W
 \end{equation}
-where $W = W^\T$.
+where $W = W^\T$.\footnote{%
+  Note that the position of the transpose differs from the usage in~\autoref{sec:ros},
+  \eg~\eqref{eq:ros:gen:ros1} and~\eqref{eq:ros:gen:ros2}.
+  Both variants are common and we hope that no confusion will arise.
+  The notation in~\autoref{sec:ros} is closer to performant implementations using matrices in column-major storage,
+  while the notation in this chapter makes the low-rank formulation a little less verbose.
+}
 The \Lyapunov operator $\Lyap \equiv \Lyap_L + \Lyap_R$ naturally decomposes into
 left-multiplication $\Lyap_L : X \mapsto AX$ and
 right-multiplication $\Lyap_R : X \mapsto XA^\HT$.
