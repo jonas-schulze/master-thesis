@@ -11,9 +11,9 @@ and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme
 \section{Parametrized Splitting Schemes}
 
 Many iterative methods solving $Ax=b$ can be written in a one-step \emph{splitting} form
-\begin{equation*}
+\begin{equation}
   Mx^{k+1} = Nx^k + b
-\end{equation*}
+\end{equation}
 where $M-N = A$ and systems $Mx = d$ are \enquote{easy} to solve \cite[Section~11.2.3]{Golub2013}.
 These methods are \emph{consistent} by construction,
 \ie every solution to $Ax=b$ is a fixpoint of the iteration.
@@ -24,24 +24,24 @@ $G$ is called \emph{iteration matrix} of the scheme.
 The structure above is called \emph{first normal form} of the method.
 Consistency is equivalent to $M-N=A$.
 The \emph{second normal form} of a consistent linear iteration method reads
-\begin{equation*}
+\begin{equation}
   x^{k+1} = M^{-1} \big( (M-A) x^k + b \big) = x^k - M^{-1} (Ax^k - b)
-\end{equation*}
+\end{equation}
 and $B := M^{-1}$ is called \emph{matrix of the second normal form}.
 
 We call a splitting method \emph{parametrized} if the iteration matrix depends on the iteration,
 \ie $A = M_k - N_k$ for $k\in\N$.
 The normal forms are thus given by
-\begin{equation}
+\begin{subequations}
 \label{eq:adi:normalform}
-\begin{aligned}
+\begin{align}
   M_k x^{k+1} &= N_k x^k + b
   ,
   \\
   x^{k+1} &= x^k - M_k^{-1} (Ax^k - b)
   .
-\end{aligned}
-\end{equation}
+\end{align}
+\end{subequations}
 We further call an operator split and a method \emph{commuting} if $M_k, N_k$ commute, \ie
 \begin{equation*}
   M_k N_k = N_k M_k
@@ -194,10 +194,12 @@ This leads to an alternative formulation of the second normal form.
 
 Suppose $A=H+V$ and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   (H + \alpha I_n)x &= b - (V - \alpha I_n) x \\
   (V + \beta I_n)x &= b - (H - \beta I_n) x
-\end{align*}
+\end{aligned}
+\end{equation}
 for any $\alpha, \beta \in\C$.
 Define the short-hand notation
 \begin{equation}
@@ -225,23 +227,23 @@ where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iter
 Obviously, every sub-step is a splitting scheme.
 In fact, the ADI as a whole can be seen as a parametrized splitting scheme.
 Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the full step $x^{k+1}$ leads to
-\begin{equation*}
+\begin{equation}
   \Aiip x^{k+1}
   = b - \underbrace{
     \Aim\Aipinv
   }_{\Aipinv\Aim}
   (b - \Aiim \hat x^k)
   .
-\end{equation*}
+\end{equation}
 Multiplying by $\Aip$ then gives
-\begin{equation*}
+\begin{equation}
   \Aip\Aiip x^{k+1} = \Aim\Aiim x^k +
   \underbrace{%
   (\Aip - \Aim)
   }_{(\alpha_k + \beta_k) I_n}
   b
   .
-\end{equation*}
+\end{equation}
 Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formulation in its first normal form
 \begin{equation}
 \label{eq:adi:general1step}
@@ -256,11 +258,13 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formul
   .
 \end{equation}
 Indeed, $M_k - N_k = A$ since
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   \Aip\Aiip &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
   \Aim\Aiim &= HV + \beta_k\alpha_k I_n - \alpha_k H - \beta_k V
   .
-\end{align*}
+\end{aligned}
+\end{equation}
 
 \begin{corollary}[Fully Commuting Splitting Scheme]
   The ADI is a fully commuting parametrized splitting scheme if $H,V$ commute.
@@ -403,9 +407,9 @@ The \Lyapunov operator $\Lyap \equiv \Lyap_L + \Lyap_R$ naturally decomposes int
 left-multiplication $\Lyap_L : X \mapsto AX$ and
 right-multiplication $\Lyap_R : X \mapsto XA^\HT$.
 Furthermore, $\Lyap_L$ and $\Lyap_R$ commute:
-\begin{equation*}
+\begin{equation}
   \Lyap_L \circ \Lyap_R \equiv \Lyap_R \circ \Lyap_L \equiv X \mapsto AXA^\HT
-\end{equation*}
+\end{equation}
 All the operators above are linear and act on $\Rnn$.
 Apply the \ac{ADI} in its intermediate-step formulation~\eqref{eq:adi:general2step}:
 \begin{equation}
@@ -476,12 +480,12 @@ Define the short-hand notation
 \end{aligned}
 \end{equation}
 and let the low-rank factorizations
-\begin{equation*}
+\begin{equation}
 \begin{aligned}
   X_k &= L_k D_k L_k^\HT \\
   W &= GSG^\HT
 \end{aligned}
-\end{equation*}
+\end{equation}
 for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
 Typically, $n_G \ll n$.
 Then, \eqref{eq:adi:ale1step} reads
@@ -493,7 +497,8 @@ such that
 the \ac{ADI} can be stated in \ac{LRSIF} directly.
 Using the update formulas of \autoref{sec:lr:update},
 the iterates are build by successively adding column blocks of size $n_G$:
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   A_k^+ L_{k+1} &= \begin{bmatrix}
     A^-_k L_k &
     G
@@ -502,7 +507,8 @@ the iterates are build by successively adding column blocks of size $n_G$:
     D_k \\
     & -2\Re(\alpha_k) S
   \end{bmatrix}
-\end{align*}
+\end{aligned}
+\end{equation}
 Using an initial value $X^0=0$,
 the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
 As a consequence, computing $L_{k+1}$
@@ -538,19 +544,24 @@ such that \autoref{thm:adi:increment-form} yields the following equivalent formu
 Assume a factorization of the increment $\tilde V_k = V_k Y_k V_k^\HT$ for $k\in\N$.
 Then, for $W = GSG^\HT$,
 the low-rank version of the initial value $\tilde V_0$ reads
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   A_0^+ V_0 &= G, \\
   Y_0 &= -2\Re(\alpha_0) S.
-\end{align*}
+\end{aligned}
+\end{equation}
 Thus,
 the iteration of the increment $\tilde V_{k} = V_k Y_k V_k^\HT$ reads
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   A_k^+ V_k &= A_{k-1}^- V_{k-1} \\
   Y_k &= \frac{2\Re(\alpha_k)}{2\Re(\alpha_{k-1})} Y_{k-1}
   = -2\Re(\alpha_k) S
-\end{align*}
+\end{aligned}
+\end{equation}
 such that the overall iteration $X_{k+1} = X_k + \tilde V_k$ is given by
-\begin{align*}
+\begin{equation}
+\begin{aligned}
   L_{k+1} &= \begin{bmatrix}
     L_k &
     V_k
@@ -563,7 +574,8 @@ such that the overall iteration $X_{k+1} = X_k + \tilde V_k$ is given by
       D_k \\
       & -2\Re(\alpha_k) S
     \end{bmatrix}
-\end{align*}
+\end{aligned}
+\end{equation}
 Summing up,
 this leads to the low-rank procedure
 \begin{equation}
@@ -873,12 +885,12 @@ The derivation above neglected zero eigen-values of $N^\T N$,
 whose eigen-vectors are syzygies of $\colspan N$.
 Indeed, let $(\epsilon,s)\in\R\times\R^{un_G}$ be an eigen-pair of $N^\T N$ with $\norm{s}_2 = 1$.
 Then,
-\begin{equation*}
+\begin{equation}
   \norm{Ns}_2^2
   = s^\T (N^\T N s)
   = \epsilon\norm{s}_2^2
   = \epsilon
-\end{equation*}
+\end{equation}
 which for $\epsilon=0$ reveals linearly dependent columns of $N$.
 In that sense, small eigen-values $\lambda_*$ correspond to nearly linearly dependent columns.
 It is therefore advised to only consider the first $d \leq r$ eigen-values
