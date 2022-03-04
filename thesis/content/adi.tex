@@ -35,9 +35,11 @@ The normal forms are thus given by
 \begin{subequations}
 \label{eq:adi:normalform}
 \begin{align}
+\label{eq:adi:normalform:1}
   M_k x^{k+1} &= N_k x^k + b
   ,
   \\
+\label{eq:adi:normalform:2}
   x^{k+1} &= x^k - M_k^{-1} (Ax^k - b)
   .
 \end{align}
@@ -71,7 +73,7 @@ the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied d
 \begin{proof}
   The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
   Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
-  and $B_k := M_k^{-1}$ denote the matrix of the second normal form.
+  and $B_k := M_k^{-1}$ denote the matrix of the second normal form~\eqref{eq:adi:normalform:2}.
   Observe that the matrices $G_i, G_j$ as well as $A, B_i, B_j$ commute for $i,j\in\N$,
   since $ab=ba \implies a^{-1}b = ba^{-1}$ for any $a,b$ in a multiplicative group.
   Therefore, any neighboring steps may be exchanged,
@@ -104,8 +106,8 @@ the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied d
 
 A well known fact is that the iteration matrix $G_k$ determines
 the behavior of the \emph{error} $e^k := x^k - x^*$, where $Ax^* = b$.
-Due to the consistency, $M_k x^* = N_k x^* + b$.
-Subtract this from the first normalform~\eqref{eq:adi:normalform} to obtain
+Due to the consistency of the method, $M_k x^* = N_k x^* + b$.
+Subtract this from the first normal form~\eqref{eq:adi:normalform:1} to obtain
 $M_k e^{k+1} = N_k e^k$ or, equivalently:
 \begin{equation}
   e^{k+1} = G_k e^k
@@ -152,7 +154,7 @@ This leads to an alternative formulation of the second normal form.
 \begin{corollary}[Recursive Increment Form]
 \label{thm:adi:increment-form}
   Let $A = M_k - N_k$ define a commuting parametrized splitting method~\eqref{eq:adi:normalform}.
-  Then, the \emph{increment} $v^k := - M_k^{-1} r^k$ defining the second normal form
+  Then, the \emph{increment} $v^k := - M_k^{-1} r^k$ defining the second normal form~\eqref{eq:adi:normalform:2},
   \begin{equation*}
     x^{k+1} = x^k + v^k
   \end{equation*}
