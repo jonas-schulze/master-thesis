@@ -1,8 +1,7 @@
 using ParaReal
 using Distributed: addprocs, @everywhere
 
-N = 3
-addprocs(N)
+addprocs(3)
 @everywhere using ParaReal
 
 # Define problem type:

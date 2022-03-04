@@ -76,21 +76,13 @@ Any custom implementation of the parareal update formula must follow the interfa
 
 \def\sk{\textsuperscript{k}}
 \def\skmi{\textsuperscript{k-1}}
-\begin{lstlisting}[%
+\lstinputlisting[%
   float=t,
   label={lst:impl:default_update!},
   caption={Default implementations of the parareal update formula},
   escapechar=\%,
   breaklines=true,
-]
-function default_update!(_, G%\sk%, F%\skmi%, G%\skmi%)
-    G%\sk% + F%\skmi% + (-G%\skmi%) # out-of-place
-end
-
-function default_update!(U%\sk%::Array, G%\sk%, F%\skmi%, G%\skmi%)
-    @. U%\sk% = G%\sk% + F%\skmi% - G%\skmi% # in-place
-end
-\end{lstlisting}
+]{code/default_update.jl}
 
 The remainder of this section is devoted to a complete example of a user-defined problem type ($N=3$, $K=2$).
 The problem type will be a mere placeholder that forwards its initial value,
@@ -99,7 +91,7 @@ Start by launching some worker processes and loading the necessary packages:
 \lstinputlisting[%
   caption={User-defined problem type for \julia{ParaReal.jl}},
   label={lst:impl:parareal_counting},
-  lastline=5,
+  lastline=4,
 ]{code/parareal_counting.jl}
 Next, define the problem type and ensure that definition is available on all processes.
 The only requirement to the problem type is to have a \julia{tspan} field.\footnote{%
@@ -135,7 +127,7 @@ However, solution and value are identical in the example above,
 storing the fine solutions directly from the worker processes
 via \julia{ParaReal.fetch\_from\_owner()}.
 
-\begin{lstlisting}[%
+\lstinputlisting[%
   float=tpb, % TODO: ensure this doesn't disrupt the inline code snippets
   caption={%
     [Store fine parareal solutions directly from the worker processes]
@@ -143,25 +135,7 @@ via \julia{ParaReal.fetch\_from\_owner()}.
     This works well as a blueprint for \julia{DrWatson.\_wsave(dir, sol)} \cite{DrWatson}.
   },
   label={lst:impl:store},
-]
-using ParaReal: fetch_from_owner
-
-# Assume solution to be given:
-sol::ParaReal.Solution
-
-# Ensure output directory exists:
-mkpath(dir)
-
-@sync for sref in sol.stages
-    @async fetch_from_owner(sref) do s::ParaReal.Stage
-        sol = ParaReal.solution(s)
-        tmin, tmax = extrema(sol.t)
-        fname = joinpath(dir, "t=$tmin:$tmax.h5")
-        # Write `sol` to `fname`, e.g. via
-        DrWatson.wsave(fname, sol)
-    end
-end
-\end{lstlisting}
+]{code/parareal_store.jl}
 
 \subsection{JIT Compilation and Warm-Up}
 
