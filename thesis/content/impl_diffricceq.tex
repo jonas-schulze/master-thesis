@@ -1,4 +1,5 @@
 \section{DifferentialRiccatiEquations.jl}
+\label{sec:impl:DRE}
 
 This section describes the general properties of the \julia{DifferentialRiccatiEquations.jl} package.
 
@@ -15,6 +16,9 @@ This section describes the general properties of the \julia{DifferentialRiccatiE
     and every 20 modifications without compression,
     \cf~\autoref{sec:lr:update}.
     For now, this is not configurable.
+  \item
+    Usage of Sherman-Morrison-Woodbury formula, \cf~\autoref{sec:basics:smw},
+    is hidden from \ac{ADI} via \julia{LowRankUpdate}.
 \end{itemize}
 
 \begin{lstlisting}[%

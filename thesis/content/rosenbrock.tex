@@ -175,12 +175,50 @@ the right-hand side may be written as
 using the update formula from~\autoref{sec:lr:update},
 and compressing the redundant information.
 The result is a \ac{LRSIF} of rank $n_C + r$.
+See~\autoref{alg:ros1} for a summary.
 
 \begin{remark}
   For generalized \ac{DRE} it is $G = \begin{bmatrix}
     C^\T & E^\T L
   \end{bmatrix}$ and $S$ remains unchanged.
 \end{remark}
+
+\begin{remark}
+  The generalized \ac{ALE} on
+  \autoref{alg:ros1:adi} of \autoref{alg:ros1}
+  will be solved using the \ac{ADI} method,
+  which will be presented in \autoref{sec:ADI}.
+  In that context, note the low-rank update on \autoref{alg:ros1:smw},
+  which will be critical for an efficient implementation,
+  \cf~\autoref{sec:basics:smw}.
+  For more details, refer to~\autoref{sec:impl:DRE}.
+\end{remark}
+
+\begin{algorithm}[t]
+  \caption{Low-Rank Linearly Implicit Euler Method}
+  \label{alg:ros1}
+  \KwIn{%
+    Matrices $E, A, B, C$ defining a generalized \ac{DRE}~\eqref{eq:basics:DRE},
+    $X(t_0) = L_0 D_0 L_0^\T$,
+    $\tau : t_n = t_0 + n\tau$ for $n \leq N$
+  }
+  \KwOut{%
+    $L_n, D_n$ such that $X(t_n) \approx X_n = L_n D_n L_n^\T$, and
+    $K_n = B^\T X_n E$
+  }
+  \For{$n \in \Set{0,\ldots,N-1}$}{%
+    $K_n \gets \big( B^\T L_n D_n \big) \big( L_n^\T E \big)$\;
+    $\tilde A_n \gets \big( A - \frac{1}{2\tau} E \big) - B K_n$\; \nllabel{alg:ros1:smw}
+    $G_n \gets \begin{bmatrix} C^\T & E^\T L_n \end{bmatrix}$\;
+    $S_n \gets \begin{bmatrix}
+      I \\
+      & \big( B^\T L_n D_n \big)^\T \big( B^\T L_n D_n \big) + \frac{1}{\tau} D_n
+    \end{bmatrix}$\;
+    Solve $\tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n = - G_n S_n G_n^\T$ \linebreak
+    for $L_{n+1}, D_{n+1}$ such that $ X_{n+1} = L_{n+1} D_{n+1} L_{n+1}^\T$\; \nllabel{alg:ros1:adi}
+  }
+  $K_N \gets \big( B^\T L_N D_N \big) \big( L_N^\T E \big)$\;
+\end{algorithm}
 
 \subsection{Second-Order Scheme}
 
@@ -340,9 +378,57 @@ such that
   =: GSG^\T
   .
 \end{equation}
+See \autoref{alg:ros2} for a summary.
 
 \begin{remark}
   For generalized \ac{DRE} it is $G = E^\T T$ and $S$ remains unchanged.
+\end{remark}
+
+\begin{algorithm}[t]
+  \caption{Low-Rank Second-Order Rosenbrock Method}
+  \label{alg:ros2}
+  \KwIn{%
+    Matrices $E, A, B, C$ defining a generalized \ac{DRE}~\eqref{eq:basics:DRE},
+    $X(t_0) = L_0 D_0 L_0^\T$,
+    $\tau : t_n = t_0 + n\tau$ for $n \leq N$
+  }
+  \KwOut{%
+    $L_n, D_n$ such that $X(t_n) \approx X_n = L_n D_n L_n^\T$, and
+    $K_n = B^\T X_n E$
+  }
+  \For{$n \in \Set{0,\ldots,N-1}$}{%
+    $K_n \gets \big( B^\T L_n D_n \big) \big( L_n^\T E \big)$\;
+    $\hat A_n \gets \big( \gamma\tau A - \frac{1}{2} E \big) - \gamma\tau B K_n$\; \nllabel{alg:ros2:smw}
+    \Comment{First Stage:}
+    $G^{(1)}_n \gets \begin{bmatrix} C^\T & A^\T L_n & E^\T L_n \end{bmatrix}$\;
+    $S^{(1)}_n \gets \begin{bmatrix}
+      I & . & . \\
+      . & . & D \\
+      . & D & -\big( B^\T L_n D_n \big)^\T \big( B^\T L_n D_n \big)
+    \end{bmatrix}$\;
+    Solve $\hat A_n^\T K_1 E + E^\T K_1 \hat A_n = - G^{(1)}_n S^{(1)}_n {G^{(1)}_n}^\T$ \linebreak
+    for $T_1, M_1$ such that $ K_1 = T_1 M_1 T_1^\T$\;
+    \Comment{Second Stage:}
+    $G^{(21)}_n \gets E^\T T_1$\;
+    $S^{(21)}_n \gets \tau^2 \big( B^\T T_1 M_1 \big)^\T \big( B^\T T_1 M_1 \big) + \big(2 - \frac{1}{\gamma}\big) M_1$\;
+    Solve $\hat A_n^\T K_{21} E + E^\T K_{21} \hat A_n = - G^{(21)}_n S^{(21)}_n {G^{(21)}_n}^\T$ \linebreak
+    for $T_{21}, M_{21}$ such that $ K_{21} = T_{21} M_{21} T_{21}^\T$\;
+    \Comment{Next Iterate:}
+    $L_{n+1} \gets \begin{bmatrix}
+      L_n & T_1 & T_{21}
+    \end{bmatrix}$\;
+    $D_{n+1} \gets \begin{bmatrix}
+      D_n \\
+      & \big(2 - \frac{1}{2\gamma}\big)\tau M_1 \\
+      && -\frac{1}{2}\tau M_{21}
+    \end{bmatrix}$\;
+  }
+  $K_N \gets \big( B^\T L_N D_N \big) \big( L_N^\T E \big)$\;
+\end{algorithm}
+
+\begin{remark}
+  Again, note the low-rank update on \autoref{alg:ros2:smw} of \autoref{alg:ros2},
+  \cf~\autoref{sec:basics:smw}.
 \end{remark}
 
 \todo[inline]{Summarize methods using Algorithms (environments)}
