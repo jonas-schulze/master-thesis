@@ -473,6 +473,7 @@ the above becomes Hermitean:
 \end{remark}
 
 \subsection{Low-Rank Formulation}
+\label{sec:adi:lr1step}
 
 Define the short-hand notation
 \begin{equation}
@@ -626,6 +627,7 @@ that we aim to answer in the following sections:
 \end{enumerate}
 
 \subsection{Low-Rank Stopping Criterion}
+\label{sec:adi:lrstop}
 
 \begin{theorem}[Low-Rank Lyapunov Residual]
   The residual of the \ac{ADI},
@@ -694,6 +696,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
 }
 
 \subsection{Low-Rank Double-Step}
+\label{sec:adi:lr2step}
 
 \begin{proposition}[Complex Conjugated Parameters]
 \label{thm:adi:ale:complex-pair}
@@ -731,7 +734,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
   where
   \begin{align*}
     \hat V_k &= \sqrt{2} \big( \Re(V_k) + \delta_k \Im(V_k) \big) \\
-    \hat V_{k+1} &= \sqrt{\smash[b]{2(\delta_k^2 + 1)}} \Im(V_k)
+    \hat V_{k+1} &= \sqrt{\smash[b]{2\big( \delta_k^2 + 1 \big)}} \Im(V_k)
   \end{align*}
   and $D_{k+2}$ remains as in \eqref{eq:adi:si-lr-adi}.
 \end{corollary}
@@ -781,7 +784,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
       2 \big( \Re(V_k) + \delta_k \Im(V_k) \big)
       Y_k \big( \Re(V_k) + \delta_k \Im(V_k) \big)^\HT
       \\
-      + 2(\delta_k^2 + 1) \Im(V_k) Y_k \Im(V_k)^\HT
+      + 2\big( \delta_k^2 + 1 \big) \Im(V_k) Y_k \Im(V_k)^\HT
     \end{multlined}
     \\
     &= \hat V_k Y_k \hat V_k^\HT
@@ -914,6 +917,77 @@ to account for numerical instabilities caused by very small $\lambda_*$.
 \todo[inline]{Describe cost}
 
 \todo[inline]{Summarize as algorithm}
+
+\begin{algorithm}[t]
+  \caption{Low-Rank Alternating-Directions Implicit Method}
+  \label{alg:ADI}
+  \KwIn{%
+    Matrices $E, A, G, S$ defining a generalized \ac{ALE}~\eqref{eq:basics:ALE} where $W = GSG^\T$,
+    tolerance $0 < \epsilon \ll 1$
+    %iteration cap $J\in\N$ %TODO: reformulate chapter for index j
+  }
+  \KwOut{%
+    $L, D$ such that $X \approx LDL^\T$
+  }
+  \Comment{Compute initial parameters, \cf \autoref{sec:adi:parameters}:}
+  $Q \gets \orth G$\;
+  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+  \Comment{Perform actual \ac{ADI}:}
+  $R_0 \gets G$\;
+  $k \gets 1$\;
+  % Watch out: k as in the final condition already has the value for the next/upcoming iteration,
+  % therefore subtract one:
+  \Repeat{$\norm{R_{k-1}^\T R_{k-1} S} \leq \epsilon \norm{G^\T GS}$}{%
+  %TODO: ...or $j > J$
+    \If{$\alpha_k$ is not available}{%
+      $Q \gets$ \leIf{$\alpha_{k-1}\in\R$}{%
+        $\orth V_{k-1}$
+      }{%
+        $\orth \begin{bmatrix}
+          \hat V_{k-2} &
+          \hat V_{k-1}
+        \end{bmatrix}$
+      }
+      $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+    }
+    $Y_k \gets -2\Re(\alpha_k) S$\;
+    $A^+_k \gets A + \alpha_k E^\T$\;
+    \eIf{$\alpha_k \in\R$}{%
+      %TODO: Change me once autorefname of subsection is capitalized.
+      \Comment{Perform single step, \cf subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
+      Solve $A^+_k V_k = R_k$ for $V_k$\;
+      $L_k \gets \begin{bmatrix}
+        L_{k-1} &
+        V_k
+      \end{bmatrix}$,\quad
+      $D_k \gets \begin{bmatrix}
+        D_{k-1} \\
+        & Y_k
+      \end{bmatrix}$\;
+      $R_k \gets R_{k-1} - 2\alpha_k E^\T V_k$\;
+      $k \gets k+1$\;
+    }{%
+      \Comment{Perform double-step, \cf \autoref{sec:adi:lr2step}:}
+      Solve $A^+_k V_k = R_k$ for $V_k$\;
+      $\delta_k \gets \Re(\alpha_k) / \Im(\alpha_k)$\;
+      $\hat V_k \gets \sqrt{2} \big( \Re(V) + \delta_k \Im(V) \big)$\;
+      $\hat V_{k+1} \gets \sqrt{\smash[b]{2\big( \delta_k^2 + 1 \big)}} \Im(V)$\;
+      $L_{k+1} \gets \begin{bmatrix}
+        L_{k-1} &
+        \hat V_k &
+        \hat V_{k+1}
+      \end{bmatrix}$,\quad
+      $D_{k+1} \gets \begin{bmatrix}
+        D_{k-1} \\
+        & Y_k \\
+        && Y_k
+      \end{bmatrix}$\;
+      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E^\T \big( \Re(V) + \delta_k \Im(V) \big)$\;
+      $ k \gets k + 2$\;
+    }
+    Compress $L_{k-1}, D_{k-1}$ if necessary, \cf~\autoref{sec:lr:compression}\;
+  }(,~\cf \autoref{sec:adi:lrstop})
+\end{algorithm}
 
 \section{Alternative Lyapunov Solvers}
 Krylov subspace,
