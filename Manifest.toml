@@ -229,7 +229,7 @@ version = "0.3.14"
 deps = ["CommonSolve", "Compat", "LinearAlgebra", "MatrixEquations", "SparseArrays", "UnPack"]
 path = "src/DifferentialRiccatiEquations.jl"
 uuid = "9819f967-4574-4d9d-b214-002eeba273d9"
-version = "0.2.0"
+version = "0.2.1"
 
 [[Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
