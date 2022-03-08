@@ -45,13 +45,13 @@ function timeline(df::DataFrame, tag=:tag, stage=:n, start=:start, stop=:stop; c
     return fig
 end
 
-function timeline!(ax, df, colormap)
+function timeline!(ax, df, color)
     barplot!(
         ax,
         df.n,
         df.start,
         fillto = df.stop,
         direction = :x,
-        color = [colormap[t] for t in df.tag],
+        color = color,
     )
 end

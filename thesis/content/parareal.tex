@@ -67,14 +67,14 @@ This will become handy for the implementation.
 In particular, note that if stage $n$ of the parareal method converged,
 \ie $U^{k+1}_n \approx U^k_n$,
 stage $n+1$ will converge after the same iteration:
-\begin{equation*}
+\begin{equation}
   \begin{array}{r@{}l@{}l@{}l}
     U^{k+1}_{n+1}
     :={}      & F(U^k_n) &{}+ G(U^{k+1}_n) &{}- G(U^k_n) \\
     \approx{} & F(U^k_n) &{}+ G(U^k_n)     &{}- G(U^k_n)
     = F(U^k_n)
   \end{array}
-\end{equation*}
+\end{equation}
 Therefore,
 assuming $G$ is well conditioned,
 there is no need to compute $G(U^{k+1}_n)$.
@@ -215,11 +215,13 @@ A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U
 \todo[inline]{Formulate parareal update \wrt low-rank factorization $LDL^\T$}
 
 Let the \acp{LRSIF}
-\begin{align}
+\begin{equation}
+\begin{aligned}
   G(X^{k+1}_i) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
   F(X^k_i)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
   G(X^k_i)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
-\end{align}
+\end{aligned}
+\end{equation}
 be given.
 Using the low-rank update formulas described in \autoref{sec:lr:update},
 the parareal update of \eqref{eq:pr:method} reads

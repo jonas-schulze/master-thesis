@@ -48,7 +48,7 @@
 
 \lstset{
   basicstyle=\small\ttfamily,
-  numberstyle=\footnotesize\sffamily,
+  numberstyle=\scriptsize\sffamily, % matches algorithm2e
   numbers=left,
   % use special julia comments as range markers: #== text ==#
   rangeprefix=\#\=\=\ ,
@@ -58,3 +58,25 @@
   escapeinside={\#*}{\^^M},
 }
 
+% ******************************************************************************
+% algorithm2e
+
+\setlength{\algomargin}{0pt}
+
+\newcommand{\komacaptionsty}{\usekomafont{captionlabel}}
+\SetAlCapFnt{\usekomafont{captionlabel}}
+\SetNlSty{textsf}{}{} % matches listings
+\SetKwSty{komacaptionsty}
+\SetCommentSty{normalfont}
+\SetArgSty{normalfont} % used for conditions as well
+
+% Thanks to https://tex.stackexchange.com/a/147750/95100
+\makeatletter
+\renewcommand{\@algocf@capt@plain}{above}% formerly {bottom}
+\makeatother
+
+\AtBeginDocument{
+  \DontPrintSemicolon
+  \SetAlgorithmName{Algorithm}{Algorithm}{List of Algorithms}
+  \SetKwComment{Comment}{}{}
+}

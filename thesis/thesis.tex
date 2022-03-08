@@ -19,10 +19,11 @@
 \usepackage[utf8]{inputenc} % Use UTF-8 as input file encoding
 \usepackage[T1]{fontenc} % Use Type 1 (8bit) fonts
 \usepackage[ngerman,american]{babel} % Language settings
+\usepackage[final]{microtype} % Fix many overfull hboxes
 
 \usepackage[defaultsans,scale=0.9]{lato} % Use Lato as sans-serif font
 \usepackage{fourier} % Use Adobe Utopia as standard font
-%\usepackage[scaled=0.83]{beramono} % Use Bera Mono as monospace font
+\usepackage[scaled=0.83]{beramono} % Use Bera Mono as monospace font
 
 \usepackage[
   style=numeric-comp,
@@ -51,13 +52,16 @@
 \include{content/abstract}
 
 \cleardoublepage
-\pdfbookmark{\contentsname}{toc}
+%\pdfbookmark{\contentsname}{toc} % not needed due to [dotocloa]algorithm2e
 \tableofcontents
 \listoffigures
 
 \cleardoublepage
 \pdfbookmark{\listtheoremname}{loe}
 \listoftheorems[ignore=remark]
+
+\cleardoublepage
+\listofalgorithms
 
 \cleardoublepage
 \lstlistoflistings
@@ -82,7 +86,6 @@
 \appendix
 \include{appendix/notes}
 \include{appendix/adi_reordering}
-\include{appendix/ros2}
 
 \include{appendix/control}
 \include{appendix/vectorization}

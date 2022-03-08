@@ -1,4 +1,11 @@
 \chapter{Rosenbrock Method}
+\label{sec:ros}
+
+First, we give an overview on Rosenbrock methods in the classical \ac{ODE} setting,
+and state the selection of methods used in this thesis.
+Afterwards, we reformulate these methods for the matrix-valued \ac{DRE} with low-rank solutions.
+
+\section{Overview}
 
 Consider the autonomous \ac{IVP}
 \begin{equation}
@@ -10,58 +17,420 @@ Consider the autonomous \ac{IVP}
 \right.
 \end{equation}
 on an equidistant time discretization $t_{n+1} = t_n + \tau$ for $n\geq 0$ and some $\tau\in\R$.
-Then, the $s$-stage Rosenbrock method~\cite{HairerWanner2} reads
+Then, the $s$-stage Rosenbrock method~\Ros{$s$} reads
 \begin{equation}
+\label{eq:ros:def}
 \left\{
 \begin{aligned}
-  x_{n+1} &:= x_n + \sum_{j=1}^s b_j k_{nj}
+  x_{n+1} &:= x_n + \tau \sum_{j=1}^s b_j k_j
   \\
-  k_i &:= \tau f\left( x_n + \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
+  k_i &:= f\left( x_n + \tau \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
   \qquad
   \text{for } i = 1, \ldots, s
 \end{aligned}
 \right.
 \end{equation}
-where $\Jac := f'(x_n)$ and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
+where $\Jac := f'(x_n)$ denotes the Jacobian and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
 We follow the common notation of neglecting a subscript $n$ for the stages $k_i=k_i(t_n)$.
-Of special interest are the methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
-For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{MPIMD11-06,HairerWanner2}.
+In the remainder, we restrict the analysis to methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
+For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{HairerWanner2}.
 
-In this thesis we will focus on the implicit Euler method ($s=1$)
+In this thesis we will focus on a first-order one-stage method as well as a second-order two-stage method.
+\todo{Put $\gamma$ back in? Otherwise, in \eqref{eq:ros:DRE:ros1} and \eqref{eq:ros:DRE:ros2} one $\hat A_n$ would depend on $\gamma$, the other wouldn't}
+The first method, \Ros{1}
 \begin{equation}
+\label{eq:ros:gen:ros1}
 \left\{
 \begin{aligned}
-  x_{n+1} &= x_n + b_1 k_1 \\
-  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n)
+  x_{n+1} &= x_n + \tau k_1 \\
+  (I - \tau \Jac) k_1 &= f(x_n)
 \end{aligned}
 \right.
 \end{equation}
-and the second order method first described in \cite{Verwer1999} ($s=2$)
+having $b_1=1$ and $\gamma=1$,
+is often referred to as the \emph{(linearly) implicit Euler} scheme,
+as it can be derived from the implicit Euler scheme
+by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$.
+The second method, \Ros{2}
 \begin{equation}
+\label{eq:ros:gen:ros2}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tfrac{3}{2} \tau k_1 + \tfrac{1}{2} \tau k_2 \\
-  (I - \gamma\tau \Jac) k_1 &= \tau f(x_n) \\
-  (I - \gamma\tau \Jac) k_2 &= \tau f(x_n + \tau k_1) - 2k_1
+  (I - \gamma\tau \Jac) k_1 &= f(x_n) \\
+  (I - \gamma\tau \Jac) k_2 &= f(x_n + \tau k_1) - 2k_1
 \end{aligned}
 \right.
 \end{equation}
-
-\todo[inline]{%
-Do I need the reformulation of \cite{MPIMD11-06}?
-Is this a generalization of the reformulation seen in \cite{Verwer1999}?
+having $\alpha_{21}=1$, $b_1=b_2=\frac{1}{2}$, and $\gamma_{21}=-2\gamma$,
+was first described in \cite{Verwer1999}.\footnote{%
+  The formulation \eqref{eq:ros:gen:ros2} as in \cite[Equation~(3.4)]{Verwer1999}
+  is based on $k_1 := \hat k_1$ and $k_2 := \hat k_2 - 2 \hat k_1$,
+  where $\hat k_1$ and $\hat k_2$ are the stages of the original form \eqref{eq:ros:def}.
+  Hence, $b_1$ and $b_2$ do not coincide with the coefficients of the first equation of~\eqref{eq:ros:gen:ros2}.
 }
+This method is L-stable for $\gamma = 1 \pm \frac{\sqrt{2}}{2}$,
+\cf~\cite[Table~6.4]{HairerWanner2},
+of which we will use the larger option.
 
 \section{Application to \act{DRE}s}
 
 \todo{Maybe switch transposes: $AX$ and $XA^\HT$}
 In the context of the autonomous \ac{DRE}
-\begin{gather*}
+\begin{equation}
+\label{eq:ros:DRE}
   \dot X = \Ricc(X) :=
-  Q + AX + XA^\HT - XRX
-  \\
-  C^\T C + A^\T X + XA^\T - X BB^\T X
-\end{gather*}
-the $s$-stage Rosenbrock method is given by
+  C^\T C + A^\T X + XA - X BB^\T X
+\end{equation}
+the Jacobian $\Jac := \Ricc'(X_n)$ is given by the \Frechet derivative.
+Since $X$ is symmetric,
+$\Jac$ is itself a \Lyapunov operator,
+\begin{equation}
+  \Ricc'(X_n) : U \mapsto (A - BB^\T X_n)^\T U + U (A - BB^\T X_n)
+\end{equation}
+\todo{Find Ref: all implicit methods lead to \ac{ALE}; DRE leads to ARE according to \cite{Dieci1992}}
+which causes the stage equations~\eqref{eq:ros:def} to become \ac{ALE}.
+
+Therefore, the implicit Euler scheme \Ros{1} reads
+\begin{equation}
+\label{eq:ros:DRE:ros1}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tau K_1 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n)
+\end{aligned}
+\right.
+\end{equation}
+while \Ros{2} is given by
+\begin{equation}
+\label{eq:ros:DRE:ros2}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_2 + K_2 \hat A_n &= -\Ricc(X_n + \tau K_1) + 2K_1
+\end{aligned}
+\right.
+\end{equation}
+where $\hat A_n := \gamma\tau(A - BB^\T X_n) - \frac{1}{2} I$.
+The following sections are devoted to efficient low-rank formulations of the methods above.
+
+\begin{remark}
+  When formulating these methods for generalized \ac{DRE},
+  \ie replacing
+  \begin{align*}
+    X &\gets E^\T X E, &
+    A &\gets E^{-1} A, &
+    B &\gets E^{-1} B
+  \end{align*}
+  and avoiding inversion of $E$,
+  the stages are generalized \ac{ALE}
+  with $E$ and $\hat A_n = \gamma\tau(A - BB^\T X_n E) - \frac{1}{2} E$
+  having the same right-hand sides as above.
+\end{remark}
+
+\subsection{Linearly Implicit Euler Scheme}
+
+The following construction goes back to~\cite[Section~4.3.3]{Mena2007} and~\cite[Section~6.2.2]{Lang2017}.
+Substituting $K_1 = \frac{1}{\tau}(X_{n+1} - X_n)$ into the stage equation,
+\Ros{1} simplifies to a single \Lyapunov equation for the next iterate~$X_{n+1}$,
+\begin{subequations}
+\begin{align}
+  \MoveEqLeft
+  \tilde A_n^\T X_{n+1} + X_{n+1} \tilde A_n
+  \nonumber \\
+  &= -\Ricc(X_n) +
+  \tilde A_n^\T X_n + X_n \tilde A_n \\
+  &= -C^\T C - X_n BB^\T X_n - \tfrac{1}{\tau} X_n \\
+\intertext{%
+where $\tilde A_n := \frac{1}{\tau} \hat A_n = A - BB^\T X_n - \frac{1}{2\tau} I$.
+If $X_n = LDL^\T$ is a \ac{LRSIF} of rank $r\in\N$,
+the right-hand side may be written as
+}
+  &= -\begin{bmatrix}
+    C^\T & L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . & . \\
+    . & DL^\T BB^\T LD & . \\
+    . & . & \tfrac{1}{\tau} D
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\ L^\T \\ L^\T
+  \end{bmatrix} \\
+  \label{eq:ros:lr-condensed:1}
+  &= -\begin{bmatrix}
+    C^\T & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . \\
+    . & DL^\T BB^\T LD + \tfrac{1}{\tau} D
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\ L^\T
+  \end{bmatrix} \\
+  &=: -GSG^\T
+\end{align}
+\end{subequations}
+using the update formula from~\autoref{sec:lr:update},
+and compressing the redundant information.
+The result is a \ac{LRSIF} of rank $n_C + r$.
+See~\autoref{alg:ros1} for a summary.
+
+\begin{remark}
+  For generalized \ac{DRE} it is $G = \begin{bmatrix}
+    C^\T & E^\T L
+  \end{bmatrix}$ and $S$ remains unchanged.
+\end{remark}
+
+\begin{remark}
+  The generalized \ac{ALE} on
+  \autoref{alg:ros1:adi} of \autoref{alg:ros1}
+  will be solved using the \ac{ADI} method,
+  which will be presented in \autoref{sec:ADI}.
+  In that context, note the low-rank update on \autoref{alg:ros1:smw},
+  which will be critical for an efficient implementation,
+  \cf~\autoref{sec:basics:smw}.
+  For more details, refer to~\autoref{sec:impl:DRE}.
+\end{remark}
+
+\begin{algorithm}[t]
+  \caption{Low-Rank Linearly Implicit Euler Method}
+  \label{alg:ros1}
+  \KwIn{%
+    Matrices $E, A, B, C$ defining a generalized \ac{DRE}~\eqref{eq:basics:DRE},
+    $X(t_0) = L_0 D_0 L_0^\T$,
+    $\tau : t_n = t_0 + n\tau$ for $n \leq N$
+  }
+  \KwOut{%
+    $L_n, D_n$ such that $X(t_n) \approx X_n = L_n D_n L_n^\T$, and
+    $K_n = B^\T X_n E$
+  }
+  \For{$n \in \Set{0,\ldots,N-1}$}{%
+    $K_n \gets \big( B^\T L_n D_n \big) \big( L_n^\T E \big)$\;
+    $\tilde A_n \gets \big( A - \frac{1}{2\tau} E \big) - B K_n$\; \nllabel{alg:ros1:smw}
+    $G_n \gets \begin{bmatrix} C^\T & E^\T L_n \end{bmatrix}$\;
+    $S_n \gets \begin{bmatrix}
+      I \\
+      & \big( B^\T L_n D_n \big)^\T \big( B^\T L_n D_n \big) + \frac{1}{\tau} D_n
+    \end{bmatrix}$\;
+    Solve $\tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n = - G_n S_n G_n^\T$ \linebreak
+    for $L_{n+1}, D_{n+1}$ such that $ X_{n+1} = L_{n+1} D_{n+1} L_{n+1}^\T$\; \nllabel{alg:ros1:adi}
+  }
+  $K_N \gets \big( B^\T L_N D_N \big) \big( L_N^\T E \big)$\;
+\end{algorithm}
+
+\subsection{Second-Order Scheme}
+
+Instead of rewriting \Ros{2} to be a single equation,
+we will give separate low-rank formulations of the stage equations,
+and use the first stage equation for a more efficient formulation of the second one.
+
+\paragraph{Low-Rank Formulation of the \Riccati Operator}
+
+The following construction goes back to~\cite{Lang2015}.
+Suppose $X_n = LDL^\T$ is a \ac{LRSIF} of rank $r\in\N$.
+Then,
+\begin{subequations}
+\begin{align}
+  \Ricc(LDL^\T)
+  &= C^\T C + A^\T (LDL^\T) + (LDL^\T) A - (LDL^\T) BB^\T (LDL^\T) \\
+  &= \begin{bmatrix}
+    C^\T & A^\T L & L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . & . & . \\
+    . & . & D & . \\
+    . & D & . & . \\
+    . & . & . & - DL^\T BB^\T LD
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\
+    L^\T A \\
+    L^\T \\
+    L^\T
+  \end{bmatrix} \\
+  \label{eq:ros:lr-condensed:2}
+  &= \begin{bmatrix}
+    C^\T & A^\T L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    I & . & . \\
+    . & . & D \\
+    . & D & - DL^\T BB^\T LD
+  \end{bmatrix}
+  \begin{bmatrix}
+    C \\
+    L^\T A \\
+    L^\T
+  \end{bmatrix} \\
+  &=: GSG^\T
+\end{align}
+\end{subequations}
+\todo{Use $G^{(1)}$ and $G^{(21)}$ etc}
+which is itself a \ac{LRSIF} of rank $n_C + 2r$.
+
+\begin{remark}
+  These off-diagonal $D$ are another advantage of the \ac{LRSIF} over the \ac{LRCF},
+  which would have required complex arithmetic.
+\end{remark}
+
+\begin{remark}
+  For generalized \ac{DRE} it is $G = \begin{bmatrix}
+    C^\T & A^\T L & E^\T L
+  \end{bmatrix}$ and $S$ remains unchanged.
+\end{remark}
+
+\paragraph{\Riccati Operator of a Shifted Argument}
+
+The following construction goes back to \cite{Mena2007,MPIMD12-13}.\footnote{%
+  The original contains many small mistakes,
+  which have hopefully all been eliminated in this thesis.
+}
+Evaluating the \Riccati operator is rather expensive.
+In the context of \Ros{2}~\eqref{eq:ros:DRE:ros2},
+we therefore aim to reuse the evaluation of $\Ricc$ necessary to compute the first stage $K_1$
+for the computation of $K_2$.
+First, expand the \Riccati operator of a shifted argument
+\begin{subequations}
+\begin{align}
+  \Ricc(X_n + \tau K_1)
+  &= \begin{multlined}[t]
+    \Ricc(X_n) + \tau A^\T K_1 + \tau K_1 A \\
+    - \tau K_1 BB^\T X_n - \tau X_n BB^\T K_1 - \tau^2 K_1 BB^\T K_1
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    \Ricc(X_n) - \tau^2 K_1 BB^\T K_1 \\
+    + \tau(A - BB^\T X_n)^\T K_1 + \tau K_1 (A - BB^\T X_n)
+  \end{multlined}
+\end{align}
+\end{subequations}
+and use that to rewrite the right-hand side of the second stage
+\begin{subequations}
+\begin{align}
+  \MoveEqLeft
+  -\Ricc(X_n + \tau K_1) + 2K_1
+  \nonumber \\
+  &= \begin{multlined}[t]
+    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 + 2K_1 \\
+    - \tau(A - BB^\T X_n)^\T K_1 - \tau K_1 (A - BB^\T X_n)
+  \end{multlined} \\
+  &= \begin{multlined}[t]
+    -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1 \\
+    - \underbrace{
+      \big(\tau(A - BB^\T X_n) - I\big)
+    }_{\frac{1}{\gamma} \hat{A}_n - \big( 1-\frac{1}{2\gamma} \big) I}
+    \!{\vphantom{\big(}}^\T
+    K_1
+    - K_1
+    \underbrace{
+      \big(\tau(A - BB^\T X_n) - I\big)
+    }_{\text{dito}}
+  \end{multlined} \\
+  &=
+  -\Ricc(X_n) + \tau^2 K_1 BB^\T K_1
+  -\tfrac{1}{\gamma}
+  \underbrace{
+    \big( \hat{A}_n^\T K_1 + K_1 \hat{A}_n \big)
+  }_{-\Ricc(X_n)}
+  + \big( 2-\tfrac{1}{\gamma} \big) K_1 \\
+  &= -\big(1-\tfrac{1}{\gamma}\big) \Ricc(X_n)
+  + \tau^2 K_1 BB^\T K_1
+  + \big( 2-\tfrac{1}{\gamma} \big) K_1
+\end{align}
+\end{subequations}
+using the first stage equation.
+This allows a decomposition of $K_2$ according to:
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \tfrac{3}{2} \tau K_1 + \tfrac{1}{2} \tau K_2 \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1 \\
+  K_2 &= \big( 1-\tfrac{1}{\gamma} \big) K_1 + K_{21}
+\end{aligned}
+\right.
+\end{equation}
+In anticipation of the next chapter, we replace $K_{21}$ by its negative.
+Then substituting $K_2$ into the update equation yields:
+\begin{equation}
+\left\{
+\begin{aligned}
+  X_{n+1} &= X_n + \big( 2 - \tfrac{1}{2\gamma} \big) \tau K_1 - \tfrac{1}{2} \tau K_{21} \\
+  \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n) \\
+  \hat A_n^\T K_{21} + K_{21} \hat A_n &= -\big( \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1 \big)
+\end{aligned}
+\right.
+\end{equation}
+
+Finally, we follow~\cite{Lang2015} for a \ac{LRSIF} formulation of the right-hand side of the new second stage equation.
+Suppose $K_1 = TMT^\T$ and apply the same technique as
+in~\eqref{eq:ros:lr-condensed:1}
+and~\eqref{eq:ros:lr-condensed:2}
+to condense the redundant information,
+such that
+\begin{equation}
+  \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1
+  = T \begin{bmatrix}
+    \tau^2 MT^\T BB^\T TM + \big( 2-\tfrac{1}{\gamma} \big) M
+  \end{bmatrix}
+  T^\T
+  =: GSG^\T
+  .
+\end{equation}
+See \autoref{alg:ros2} for a summary.
+
+\begin{remark}
+  For generalized \ac{DRE} it is $G = E^\T T$ and $S$ remains unchanged.
+\end{remark}
+
+\begin{algorithm}[t]
+  \caption{Low-Rank Second-Order Rosenbrock Method}
+  \label{alg:ros2}
+  \KwIn{%
+    Matrices $E, A, B, C$ defining a generalized \ac{DRE}~\eqref{eq:basics:DRE},
+    $X(t_0) = L_0 D_0 L_0^\T$,
+    $\tau : t_n = t_0 + n\tau$ for $n \leq N$
+  }
+  \KwOut{%
+    $L_n, D_n$ such that $X(t_n) \approx X_n = L_n D_n L_n^\T$, and
+    $K_n = B^\T X_n E$
+  }
+  \For{$n \in \Set{0,\ldots,N-1}$}{%
+    $K_n \gets \big( B^\T L_n D_n \big) \big( L_n^\T E \big)$\;
+    $\hat A_n \gets \big( \gamma\tau A - \frac{1}{2} E \big) - \gamma\tau B K_n$\; \nllabel{alg:ros2:smw}
+    \Comment{First Stage:}
+    $G^{(1)}_n \gets \begin{bmatrix} C^\T & A^\T L_n & E^\T L_n \end{bmatrix}$\;
+    $S^{(1)}_n \gets \begin{bmatrix}
+      I & . & . \\
+      . & . & D \\
+      . & D & -\big( B^\T L_n D_n \big)^\T \big( B^\T L_n D_n \big)
+    \end{bmatrix}$\;
+    Solve $\hat A_n^\T K_1 E + E^\T K_1 \hat A_n = - G^{(1)}_n S^{(1)}_n {G^{(1)}_n}^\T$ \linebreak
+    for $T_1, M_1$ such that $ K_1 = T_1 M_1 T_1^\T$\;
+    \Comment{Second Stage:}
+    $G^{(21)}_n \gets E^\T T_1$\;
+    $S^{(21)}_n \gets \tau^2 \big( B^\T T_1 M_1 \big)^\T \big( B^\T T_1 M_1 \big) + \big(2 - \frac{1}{\gamma}\big) M_1$\;
+    Solve $\hat A_n^\T K_{21} E + E^\T K_{21} \hat A_n = - G^{(21)}_n S^{(21)}_n {G^{(21)}_n}^\T$ \linebreak
+    for $T_{21}, M_{21}$ such that $ K_{21} = T_{21} M_{21} T_{21}^\T$\;
+    \Comment{Next Iterate:}
+    $L_{n+1} \gets \begin{bmatrix}
+      L_n & T_1 & T_{21}
+    \end{bmatrix}$\;
+    $D_{n+1} \gets \begin{bmatrix}
+      D_n \\
+      & \big(2 - \frac{1}{2\gamma}\big)\tau M_1 \\
+      && -\frac{1}{2}\tau M_{21}
+    \end{bmatrix}$\;
+  }
+  $K_N \gets \big( B^\T L_N D_N \big) \big( L_N^\T E \big)$\;
+\end{algorithm}
+
+\begin{remark}
+  Again, note the low-rank update on \autoref{alg:ros2:smw} of \autoref{alg:ros2},
+  \cf~\autoref{sec:basics:smw}.
+\end{remark}
+
+\todo[inline]{Summarize methods using Algorithms (environments)}
 
 \section{Alternative One-Step Methods}

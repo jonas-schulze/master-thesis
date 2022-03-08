@@ -1,0 +1,50 @@
+\section{DifferentialRiccatiEquations.jl}
+\label{sec:impl:DRE}
+
+This section describes the general properties of the \julia{DifferentialRiccatiEquations.jl} package.
+
+\begin{itemize}
+  \item
+    Type of compression (none, $LDL^\T$) is selected by dispatching on the data type of the initial value $X_0$/\julia{X0},
+    \cf~\autoref{lst:impl:GDREProblem}.
+    For a dense matrix \julia{X0::Matrix}, a dense solver will be used.
+    For a \ac{LRSIF} \julia{X0::\LDLt}, a low-rank solver will be used.
+  \item
+    \julia{X::\LDLt} of rank $r$ consisting of $L \in\R^{n\times r}$ and $D\in\R^{r\times r}$ will be compressed,
+    \cf~\autoref{sec:lr:compression},
+    if the inner dimension becomes too big, $r \geq 0.5 n$,
+    and every 20 modifications without compression,
+    \cf~\autoref{sec:lr:update}.
+    For now, this is not configurable.
+  \item
+    Usage of Sherman-Morrison-Woodbury formula, \cf~\autoref{sec:basics:smw},
+    is hidden from \ac{ADI} via \julia{LowRankUpdate}.
+\end{itemize}
+
+\begin{lstlisting}[%
+  float=t,
+  caption={Definition and docstring of \julia{GDREProblem}},
+  label={lst:impl:GDREProblem},
+  escapechar=\%,
+]
+"""
+Generalized differential Riccati equation
+
+    E'%\.X%E = C'C + A'XE + E'XA - E'XBB'XE
+    X(t0) = X0
+
+having the fields `E`, `A`, `C`, `X0`, and `tspan`=`(t0, tf)`.
+"""
+struct GDREProblem{XT}
+    E
+    A
+    B
+    C
+    X0::XT
+    tspan
+
+    function GDREProblem(E, A, B, C, X0::XT, tspan) where {XT}
+        new{XT}(E, A, B, C, X0, tspan)
+    end
+end
+\end{lstlisting}
