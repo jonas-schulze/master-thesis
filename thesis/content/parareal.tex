@@ -82,42 +82,56 @@ there is no need to compute $G(U^{k+1}_n)$.
 \begin{figure}[htb]
   \missingfigure{DAG of parareal dependencies between $U^k_n$}
   \caption{Dependencies between approximations $U^k_n$ within parareal scheme}
+  \label{fig:pr:DAG}
 \end{figure}
 
 \begin{example}[Linear \acs*{ODE}]
+  Let $\phi := \frac{1+\sqrt{5}}{2}$ denote the golden ratio and
+  let $\kappa := \frac{2}{\pi} \log \phi$.
   Consider the \ac{IVP}
-  \todo{Use a different random numbers}
   \begin{equation}
     \label{eq:pr:linear}
     \left\{
     \begin{aligned}
-      \dot x &= \begin{bmatrix}
-        -0.02 & 0.2 \\
-        -0.2  & -0.02
-      \end{bmatrix} x \\
-      x(0) &= \begin{bmatrix}
-        1 \\ 0
+      \dot u &= \begin{bmatrix}
+        \kappa & -1 \\
+        1 & \kappa
+      \end{bmatrix} u \\
+      u(0) &= \begin{bmatrix}
+        -1 \\ -\kappa
       \end{bmatrix}
     \end{aligned}
     \right.
   \end{equation}
-  for $t\in[0,100]$.
-  Let $N := 10$, $h := 100/N$, and $t_n := nh$ for $n\in\Set{0,\ldots,N}$.
-  Further, let $F$ and $G$ be implicit Euler schemes using step sizes $h/10$ and $h$, respectively.
+  for $t\in[0,2\pi]$.
+  Let $N := 5$, $\tau := 2\pi/N$, and $t_n := n\tau$ for $n\in\Set{0,\ldots,N}$.
+  Further, let $F$ and $G$ be implicit Euler schemes using step sizes $\tau/100$ and $\tau$, respectively.
   If the fine solver internally uses a finer mesh,
   by \autoref{thm:pr:conv},
-  the global solution $x$ may be retrieved at that fine resolution $h/10$.
+  the global solution $x$ may be retrieved at that fine resolution $\tau/100$.
 
-  \autoref{fig:pr:linear} shows the first couple of iterations of the parareal method applied the problem above.
-  The solutions at the grid points, $x^k_n \approx x(t_n)$, are marked as dots
-  while the lines in between them are the internal solutions produced by $F$.
-  Therefore, before convergence is reached,
-  the high-resolution values are discontinues at $t_n$.
-  \begin{figure}[htb]
-    \missingfigure{some iterations for linear problem of Bargo2009}
-    \caption{Parareal method applied to the linear problem \eqref{eq:pr:linear}}
+  \begin{figure}[tb]
+    \includegraphics[width=\textwidth]{figures/fig_parareal_example.pdf}
+    \caption[Parareal method applied to a linear ODE]{%
+      First couple of refinements $k$ of the
+      parareal method applied to the linear problem \eqref{eq:pr:linear}.
+      The stages $n$ are decoded by color,
+      dots denoting $U^k_n$ and lines $F(\optional{}, t_{n-1}, U^k_{n-1})$.
+      The gray curve represents the exact solution.
+    }
     \label{fig:pr:linear}
   \end{figure}
+
+  \autoref{fig:pr:linear} shows the first couple of iterations of the parareal method applied the problem above.
+  For a fixed refinement $k$,
+  the values $U^k_n \approx u(t_n)$ (represented by dots) are computed in sequence,
+  \cf \autoref{fig:pr:DAG}.
+  After that, the fine solutions $F(U_n^k)$ (represented by lines) can then be computed in parallel.
+  The parareal method only ensures convergence of $U_n^k$.
+  Therefore, before convergence is reached,
+  the high-resolution trajectories are discontinues at $t_n$.
+  Furthermore, note that the overall accuracy of the parareal solution is limited by the accuracy of $F$,
+  which explains the remaining gap between the colored and the gray line.
 \end{example}
 
 The parareal method may be seen \eg as a deferred correction method,

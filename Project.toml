@@ -1,9 +1,14 @@
 name = "Stuff"
 
+[compat]
+DrWatson = "2.7.5"
+HDF5 = "0.15.7"
+
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dictionaries = "85a47980-9c8c-11e8-2b9f-f7ca1fa99fb4"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 DifferentialRiccatiEquations = "9819f967-4574-4d9d-b214-002eeba273d9"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
@@ -20,6 +25,5 @@ SlurmClusterManager = "c82cd089-7bf7-41d7-976b-6b5d413cbe0a"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
-[compat]
-DrWatson = "2.7.5"
-HDF5 = "0.15.7"
+[extras]
+CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
