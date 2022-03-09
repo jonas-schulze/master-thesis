@@ -818,7 +818,7 @@ Hopefully, this naturally translates to the \ac{LRSIF} factors $V_*$.
 }
 
 \begin{equation*}
-  \Lambda(Q^\HT A Q) \cap \C_-
+  \Lambda(Q^\HT A Q) \cap \Cneg
 \end{equation*}
 
 The general idea is to restrict $A$ onto
@@ -931,7 +931,7 @@ to account for numerical instabilities caused by very small $\lambda_*$.
   }
   \Comment{Compute initial parameters, \cf \autoref{sec:adi:parameters}:}
   $Q \gets \orth G$\;
-  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q) \cap \Cneg$\;
   \Comment{Perform actual \ac{ADI}:}
   $R_0 \gets G$\;
   $k \gets 1$\;
@@ -948,7 +948,7 @@ to account for numerical instabilities caused by very small $\lambda_*$.
           \hat V_{k-1}
         \end{bmatrix}$
       }
-      $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+      $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q) \cap \Cneg$\;
     }
     $Y_k \gets -2\Re(\alpha_k) S$\;
     $A^+_k \gets A + \alpha_k E^\T$\;
