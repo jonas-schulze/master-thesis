@@ -1,5 +1,27 @@
 \chapter{Notes}
 
+\begin{itemize}
+  \item
+    Does \Ros{2} work better if we don't condense the right-hand side of the second stage?
+    That is, does
+    \begin{equation}
+      \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1
+      = \begin{bmatrix}
+        T_1 & T_1
+      \end{bmatrix}
+      \begin{bmatrix}
+        \tau^2 M_1 T_1^\T BB^\T T_1 M_1 \\
+        &\big( 2-\tfrac{1}{\gamma} \big) M_1
+      \end{bmatrix}
+      \begin{bmatrix}
+        T_1^\T \\
+        T_1^\T
+      \end{bmatrix}
+    \end{equation}
+    work better?
+    Maybe it suffers from cancellation.
+\end{itemize}
+
 \begin{align}
   E\dot{X} &= AX + BU \\
   Y &= CX + DU \\

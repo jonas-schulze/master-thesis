@@ -36,18 +36,19 @@ In the remainder, we restrict the analysis to methods with $\gamma_{11} = \ldots
 For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{HairerWanner2}.
 
 In this thesis we will focus on a first-order one-stage method as well as a second-order two-stage method.
-\todo{Put $\gamma$ back in? Otherwise, in \eqref{eq:ros:DRE:ros1} and \eqref{eq:ros:DRE:ros2} one $\hat A_n$ would depend on $\gamma$, the other wouldn't}
 The first method, \Ros{1}
 \begin{equation}
 \label{eq:ros:gen:ros1}
 \left\{
 \begin{aligned}
   x_{n+1} &= x_n + \tau k_1 \\
-  (I - \tau \Jac) k_1 &= f(x_n)
+  (I - \gamma\tau \Jac) k_1 &= f(x_n)
 \end{aligned}
 \right.
 \end{equation}
-having $b_1=1$ and $\gamma=1$,
+having $b_1=1$,
+is A-stable for $\gamma \geq \frac{1}{2}$ \cite[Table~6.3]{HairerWanner2}.
+We use $\gamma=1$, for which the method
 is often referred to as the \emph{(linearly) implicit Euler} scheme,
 as it can be derived from the implicit Euler scheme
 by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$.
@@ -75,7 +76,6 @@ of which we will use the larger option.
 
 \section{Application to \act{DRE}s}
 
-\todo{Maybe switch transposes: $AX$ and $XA^\HT$}
 In the context of the autonomous \ac{DRE}
 \begin{equation}
 \label{eq:ros:DRE}
@@ -88,7 +88,6 @@ $\Jac$ is itself a \Lyapunov operator,
 \begin{equation}
   \Ricc'(X_n) : U \mapsto (A - BB^\T X_n)^\T U + U (A - BB^\T X_n)
 \end{equation}
-\todo{Find Ref: all implicit methods lead to \ac{ALE}; DRE leads to ARE according to \cite{Dieci1992}}
 which causes the stage equations~\eqref{eq:ros:def} to become \ac{ALE}.
 
 Therefore, the implicit Euler scheme \Ros{1} reads
@@ -264,10 +263,9 @@ Then,
     L^\T A \\
     L^\T
   \end{bmatrix} \\
-  &=: GSG^\T
+  &=: G^{(1)} S^{(1)} {G^{(1)}}^\T
 \end{align}
 \end{subequations}
-\todo{Use $G^{(1)}$ and $G^{(21)}$ etc}
 which is itself a \ac{LRSIF} of rank $n_C + 2r$.
 
 \begin{remark}
@@ -276,9 +274,9 @@ which is itself a \ac{LRSIF} of rank $n_C + 2r$.
 \end{remark}
 
 \begin{remark}
-  For generalized \ac{DRE} it is $G = \begin{bmatrix}
+  For generalized \ac{DRE} it is $G^{(1)} = \begin{bmatrix}
     C^\T & A^\T L & E^\T L
-  \end{bmatrix}$ and $S$ remains unchanged.
+  \end{bmatrix}$ and $S^{(1)}$ remains unchanged.
 \end{remark}
 
 \paragraph{\Riccati Operator of a Shifted Argument}
@@ -364,26 +362,32 @@ Then substituting $K_2$ into the update equation yields:
 \end{equation}
 
 Finally, we follow~\cite{Lang2015} for a \ac{LRSIF} formulation of the right-hand side of the new second stage equation.
-Suppose $K_1 = TMT^\T$ and apply the same technique as
-in~\eqref{eq:ros:lr-condensed:1}
-and~\eqref{eq:ros:lr-condensed:2}
-to condense the redundant information,
-such that
-\begin{equation}
+%Suppose $K_1 = T_1 M_1 T_1^\T$ and apply the same technique as
+%in~\eqref{eq:ros:lr-condensed:1}
+%and~\eqref{eq:ros:lr-condensed:2}
+%to condense the redundant information:
+Suppose $K_1 = T_1 M_1 T_1^\T$,
+which allows to directly factor the right-hand side of the second stage equation:
+\begin{subequations}
+\begin{align}
+  \MoveEqLeft
   \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1
-  = T \begin{bmatrix}
-    \tau^2 MT^\T BB^\T TM + \big( 2-\tfrac{1}{\gamma} \big) M
+  \nonumber \\
+  &= T_1 \begin{bmatrix}
+    \tau^2 M_1 T_1^\T BB^\T T_1 M_1 + \big( 2-\tfrac{1}{\gamma} \big) M_1
   \end{bmatrix}
-  T^\T
-  =: GSG^\T
-  .
-\end{equation}
+  T_1^\T
+  \\
+  &=: G^{(21)} S^{(21)} {G^{(21)}}^\T
+\end{align}
+\end{subequations}
 See \autoref{alg:ros2} for a summary.
 
 \begin{remark}
-  For generalized \ac{DRE} it is $G = E^\T T$ and $S$ remains unchanged.
+  For generalized \ac{DRE} it is $G^{(21)} = E^\T T_1$ and $S^{(21)}$ remains unchanged.
 \end{remark}
 
+%TODO: put the algorithm on a page of its own?
 \begin{algorithm}[t]
   \caption{Low-Rank Second-Order Rosenbrock Method}
   \label{alg:ros2}
@@ -427,10 +431,11 @@ See \autoref{alg:ros2} for a summary.
 \end{algorithm}
 
 \begin{remark}
-  Again, note the low-rank update on \autoref{alg:ros2:smw} of \autoref{alg:ros2},
-  \cf~\autoref{sec:basics:smw}.
+  Again, note the low-rank update on \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
 \end{remark}
 
-\todo[inline]{Summarize methods using Algorithms (environments)}
-
 \section{Alternative One-Step Methods}
+
+The application of any implicit method to an \ac{DRE} yields an \ac{ARE} to be solved at every step~\cite{Dieci1992} as cited in~\cite[50]{Lang2015}.
+Rosenbrock methods are appealing as they only require \acp{ALE} to be solved at every step.
+
