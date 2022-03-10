@@ -70,8 +70,10 @@
 \SetCommentSty{normalfont}
 \SetArgSty{normalfont} % used for conditions as well
 
-% Thanks to https://tex.stackexchange.com/a/147750/95100
 \makeatletter
+% Fix alignment of listofalgorithms:
+\renewcommand*\l@algocf{\@dottedtocline{1}{1.5em}{2.3em}}
+% Thanks to https://tex.stackexchange.com/a/147750/95100
 \renewcommand{\@algocf@capt@plain}{above}% formerly {bottom}
 \makeatother
 
