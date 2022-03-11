@@ -1,9 +1,5 @@
 name = "Stuff"
 
-[compat]
-DrWatson = "2.7.5"
-HDF5 = "0.15.7"
-
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -24,6 +20,10 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SlurmClusterManager = "c82cd089-7bf7-41d7-976b-6b5d413cbe0a"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+
+[compat]
+DrWatson = "2.7.5"
+HDF5 = "0.15.7"
 
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
