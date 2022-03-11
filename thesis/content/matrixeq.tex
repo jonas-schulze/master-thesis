@@ -17,6 +17,7 @@ the solution $X$ is dense.
 However, it usually is of low numerical rank.
 
 \section{Low-Rank Representations}
+\label{sec:lowrank}
 
 \todo{Find reference. Max Behr had a slide on that in his defense.}
 \begin{theorem}[Low-Rank Solutions]
@@ -100,8 +101,7 @@ though there exist equivalent triangular decompositions.
   It's better to defer the reader to the compression section.
 }
 
-\subsection{Low-Rank Update Formula}
-\label{sec:lr:update}
+\paragraph{Low-Rank Update Formula}
 
 Let $A, B \in\R^{n\times r}$ and $C, D\in\R^{r\times r}$.
 While an update for the \ac{LRCF} is straight-forward,
@@ -164,34 +164,27 @@ Having \autoref{thm:lowrank} in mind,
 and with iterative algorithms in sight,
 the inner dimension must not grow arbitrarily.
 
-\subsection{Column Compression}
-\label{sec:lr:compression}
-
+\todo[inline]{Write paragraph on compression, make algorithm float, refer to it as a summary}
 maximum-rank truncation,
 singular value tolerance,
 ...
 
-\todo{use proper algorithm}
 Taken from \cite[Section 6.3.3]{Lang2017}:
-Given $GSG^\T$, $G\in\Rnk$, and a tolerance $\epsilon\in\R$,
-compute $G_rS_rG_r^\T \approx GSG^\T$, $G_r\in\Rnr$.
-\begin{enumerate}
-  \item
-    Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$.
-  \item
-    Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
-    and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$.
-  \item
-    Set $G_r := QV_r \in\Rnr$ and $S := \Lambda_r$ with $r\leq k$ and $\abs{\lambda_{r+1}}\leq\epsilon$.
-    $V_r$ consists of the first $r$ columns of $V$ and $\Lambda_r$ of the first diagonal block of $\Lambda$.
-\end{enumerate}
-
-\todo[inline]{%
-The algorithm above uses an absolute cut-off $\epsilon$.
-How to integrate $G,S$ into a relative cut-off?
-Maybe a \enquote{cheap} adaptation of \cite[Algorithm~2.2, line~2]{Lang2017},
-or the even simpler $\epsilon\abs{\lambda_1}$?
-}
+\begin{algorithm}[h]
+  \caption{Column Compression for LRSIF}
+  \label{alg:lowrank:compression}
+  \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$, tolerance $0 < \epsilon \ll 1$}
+  \KwOut{$G_r\in\Rnr$, $S_r\in\R^{r\times r}$ such that $G_r S_r G_r^\T \approx GSG^\T$ and $r \leq k$}
+  Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$\;
+  Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
+  and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$\;
+  Select $r \leq k$ such that $\abs{\lambda_r} \geq \epsilon\max\Set{1, \lambda_1} \geq \abs{\lambda_{r+1}}$\;
+  $G_r \gets Q V_r$\;
+  $S_r \gets \Lambda_r$\;
+  \Comment{%
+    $V_r$ consists of the first $r$ columns of $V$ and $\Lambda_r$ of the first diagonal block of $\Lambda$
+  }
+\end{algorithm}
 
 \section{Model Order Reduction}
 Give brief overview.

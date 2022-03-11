@@ -237,7 +237,7 @@ Let the \acp{LRSIF}
 \end{aligned}
 \end{equation}
 be given.
-Using the low-rank update formulas described in \autoref{sec:lr:update},
+Using the low-rank update formulas described in \autoref{sec:lowrank},
 the parareal update of \eqref{eq:pr:method} reads
 \begin{equation}
   \hat L \hat D \hat L^\T :=
@@ -260,7 +260,7 @@ the parareal update of \eqref{eq:pr:method} reads
 \end{equation}
 Note the downdate in the last block component.
 The actual low-rank representation of $X^{k+1}_{i+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
-using any of the techniques described in \autoref{sec:lr:compression},
+using \autoref{alg:lowrank:compression},
 \begin{equation}
   X^{k+1}_{i+1}
   := LDL^\T

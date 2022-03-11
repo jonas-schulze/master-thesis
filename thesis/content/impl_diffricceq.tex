@@ -11,10 +11,10 @@ This section describes the general properties of the \julia{DifferentialRiccatiE
     For a \ac{LRSIF} \julia{X0::\LDLt}, a low-rank solver will be used.
   \item
     \julia{X::\LDLt} of rank $r$ consisting of $L \in\R^{n\times r}$ and $D\in\R^{r\times r}$ will be compressed,
-    \cf~\autoref{sec:lr:compression},
+    \cf~\autoref{alg:lowrank:compression},
     if the inner dimension becomes too big, $r \geq 0.5 n$,
     and every 20 modifications without compression,
-    \cf~\autoref{sec:lr:update}.
+    \cf~\autoref{sec:lowrank}.
     For now, this is not configurable.
   \item
     Usage of Sherman-Morrison-Woodbury formula, \cf~\autoref{sec:basics:smw},
