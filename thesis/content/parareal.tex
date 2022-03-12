@@ -86,6 +86,18 @@ there is no need to compute $G(U^{k+1}_n)$.
   \label{fig:pr:DAG}
 \end{figure}
 
+\todo[inline]{Add DAG of beginning of early parareal stages: $U_0^0,\ldots,U_2^2$}
+
+Note how $G(U_n^{k+1})$ is needed twice.
+Therefore, a reasonable scheduling pattern that exploits good data locality is the following:
+\begin{equation}
+  \text{stage $n+1$:}
+  \quad
+  %TODO: arrows     //
+  \ldots, G(U_n^k), U_{n+1}^{k+1}, F(U_n^{k+1}), \ldots
+  %        //
+\end{equation}
+
 \begin{example}[Linear \acs*{ODE}]
   Let $\phi := \frac{1+\sqrt{5}}{2}$ denote the golden ratio and
   let $\kappa := \frac{2}{\pi} \log \phi$.
@@ -126,7 +138,7 @@ there is no need to compute $G(U^{k+1}_n)$.
   \autoref{fig:pr:linear} shows the first couple of iterations of the parareal method applied the problem above.
   For a fixed refinement $k$,
   the values $U^k_n \approx u(t_n)$ (represented by dots) are computed in sequence,
-  \cf \autoref{fig:pr:DAG}.
+  \cf the horizontal traces in \autoref{fig:pr:DAG}.
   After that, the fine solutions $F(U_n^k)$ (represented by lines) can then be computed in parallel.
   The parareal method only ensures convergence of $U_n^k$.
   Therefore, before convergence is reached,
