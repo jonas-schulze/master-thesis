@@ -86,16 +86,39 @@ there is no need to compute $G(U^{k+1}_n)$.
   \label{fig:pr:DAG}
 \end{figure}
 
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_parareal_dag1.tex}
+  \caption{Dependencies between parareal values $U^0_0, \ldots, U_2^2$}
+\end{figure}
+
 \todo[inline]{Add DAG of beginning of early parareal stages: $U_0^0,\ldots,U_2^2$}
 
 Note how $G(U_n^{k+1})$ is needed twice.
 Therefore, a reasonable scheduling pattern that exploits good data locality is the following:
+\begin{align}
+  \text{stage } n &
+  \ldots, G(U_{n-1}^k), U_n^k, F(U_{n-1}^k), \ldots
+  \nonumber\\
+  \text{stage } n+1 & \enspace
+  \ldots, G(U_{n}^k), U_{n+1}^k, F(U_{n}^k), \ldots
+  \text{stage } n+2 & \quad
+  \ldots, G(U_{n}^k), U_{n+1}^k, F(U_{n}^k), \ldots
+  \nonumber
+\end{align}
+
 \begin{equation}
-  \text{stage $n+1$:}
-  \quad
-  %TODO: arrows     //
-  \ldots, G(U_n^k), U_{n+1}^{k+1}, F(U_n^{k+1}), \ldots
-  %        //
+  \begin{tikzpicture}[
+    baseline,
+    text height=2ex,
+    text depth=0.5ex,
+  ]
+    \graph[grow right=2cm] {
+      ""/"stage $n+1$: \ldots" -!- Gnk1/"$G(U_n^{k+1})$," -!- Un1k1/"$U_{n+1}^{k+1}$," -!- Fnk/"$F(U_n^{k+1})$," -!- ""/"\ldots"
+    };
+    \draw[<-] (Gnk1.south) -- +(-120:5mm);
+    \draw[->] (Un1k1.north) -- +(60:5mm);
+  \end{tikzpicture}
 \end{equation}
 
 \begin{example}[Linear \acs*{ODE}]
