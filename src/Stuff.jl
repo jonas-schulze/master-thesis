@@ -101,6 +101,8 @@ include("storage.jl")
 include("parareal_dre.jl")
 include("problems.jl")
 
+include("figures.jl")
+
 export ParallelConfig
 export load_rail, algorithms, Δt
 
