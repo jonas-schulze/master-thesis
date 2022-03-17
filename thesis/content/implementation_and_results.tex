@@ -2,3 +2,73 @@
 
 \input{content/impl_diffricceq}
 \input{content/impl_parareal}
+
+\section{Numerical Results}
+
+\todo[inline]{separate results by sequential/parareal?}
+
+\begin{example}[LTI Rail Profile]
+\label{thm:results:rail}
+\end{example}
+
+\subsection{Sequential Solvers}
+
+\begin{figure}[t]
+  \missingfigure{Replicate \cite[Figure~6.1]{Lang2017}, $\tau=\SI{112.5}{\milli\second}$}
+  \caption{Low-Rank Rosenbrock methods applied to Rail problem}
+\end{figure}
+
+\begin{figure}[t]
+  \missingfigure{Replicate \cite[Figure~6.6b]{Lang2017}}
+  \caption{Numerical rank of low-rank sequential solutions to Rail problem}
+\end{figure}
+
+\subsection{Parareal Solvers}
+
+Looking at \autoref{fig:results:parareal:rail},
+there clearly is a problem with the low-rank version of \Ros{2}.
+While the sample trajectory $K_{1,77}$ looks ok,
+the relative error of the whole $K$
+\begin{equation}
+  \frac{\norm{K(t) - K_\text{ref}(t)}_F}{\norm{K_\text{ref}(t)}_F}
+\end{equation}
+reveals the typical discontinuities at the interval bounds
+$t_n = \SI{45}{\second} - n \cdot \SI{100}{\milli\second}$
+before convergence is reached,
+\cf \autoref{fig:pr:linear}.
+Here, this is the case for $n > K = 10$, \ie $t \leq \SI{43.9}{\second}$.
+But even for $t > \SI{43.9}{\second}$ there is a noticeable difference between
+dense and low-rank versions of the algorithms involving \Ros{2}.
+As the dense algorithms converged, so should the low-rank ones.
+Only the parareal schemes of order 1/1 behave identically for dense and \ac{LRSIF} storage.
+Their errors look similar to~\cite[Fig.~1]{Lang2015}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_results_rail.pdf}
+  \caption[Parareal method applied to Rail problem]{%
+    Several parareal schemes (Rosenbrock methods of given coarse/fine order)
+    applied to the problem of \autoref{thm:results:rail},
+    running on $N=450$ cores and
+    computing up to $K=10$ refinements.
+    Each scheme performs
+    one coarse step ($\tau=\SI{100}{\milli\second}$) and
+    100 fine steps ($\tau=\SI{1}{\milli\second}$) per stage.
+    Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
+    % same as Lang2015, Fig. 1
+    % Lang2017, Fig 6.1 used K_{1,71} instead
+    bottom: relative error compared to reference solution
+    (dense parareal scheme of order 4/4).
+  }
+  \label{fig:results:parareal:rail}
+\end{figure}
+
+\begin{figure}[t]
+  \missingfigure{Replicate \cite[Figure~6.6b]{Lang2017}}
+  \caption{Numerical rank of low-rank parareal solutions to Rail problem}
+\end{figure}
+
+\todo[inline]{
+Replicate \cite[Table~6.2]{Lang2017},
+Estimate parallel efficiency based on timeline data,
+}

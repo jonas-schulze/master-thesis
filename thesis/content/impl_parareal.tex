@@ -284,3 +284,25 @@ For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
     Distributed processes vs local threads vs GPU?
 \end{itemize}
 
+\subsection{Parallel Programming Pitfalls}
+
+\begin{itemize}
+  \item
+    \julia{@sync} may block\footnote{\url{https://github.com/JuliaLang/julia/issues/32677}}
+    There is an experimental eager version,\footnote{\url{https://github.com/JuliaLang/julia/pull/34198}} but it doesn't support cancellation.
+    In general, as of the time of writing this thesis,
+    there is no recommended way to handle cancellation using the standard library,
+    especially (and frustratingly) in a distributed environment.
+  \item
+    By default, unhandled concurrent errors are transient.\footnote{%
+      \url{https://github.com/JuliaLang/julia/issues/10405}}
+    That means that if a background task fails, not only does the program keep running, it doesn't even print an error.\footnote{%
+      \url{https://github.com/JuliaLang/julia/pull/27722}}
+    It is not easy to let unhandled concurrent errors crash the whole program.
+    More severly, in a distributed environment, a failed task on one machine may easily cause a different machine to deadlock,
+    \cf the previous paragraph.
+    It is the user's (or the library developer's) responsibility to make errors observable,\footnote{%
+      \url{https://github.com/JuliaLang/julia/pull/39518}}
+    and to make sure that whole computation is properly cancelled.
+\end{itemize}
+
