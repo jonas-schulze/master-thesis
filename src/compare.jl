@@ -5,7 +5,7 @@ using HDF5, Dictionaries, LinearAlgebra
 
 Compute the relative error `norm(x1-x2) / norm(x2)` via Frobenius norm.
 """
-function δ end
+δ(x1, x2) = norm(x1-x2) / norm(x2)
 
 function δ(f1::String, f2::String, path::String="/")
     h5 = h5open(f1)
@@ -34,6 +34,6 @@ end
 function δ(d1::HDF5.Dataset, d2::HDF5.Dataset)
     x1 = read(d1)
     x2 = read(d2)
-    return norm(x1-x2) / norm(x2)
+    return δ(x1, x2)
 end
 
