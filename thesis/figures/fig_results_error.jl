@@ -41,6 +41,7 @@ de_jobs = Dict(
 # ╔═╡ 66eadee2-fb59-4ad7-a497-77b7449cb6c3
 function find_dataset(dir, jobid)
 	files = readdir(datadir(dir))
+	filter!(endswith(".h5"), files)
 	i = findfirst(contains("jobid=$jobid"), files)
 	i == nothing && return nothing
 	return datadir(dir, files[i])
@@ -117,7 +118,7 @@ md"## Internal Stuff"
 let
 	files = [
 		"/usr/local/texlive/2018/texmf-dist/fonts/type1/adobe/utopia/putr8a.pfb",
-		"~/utopia/putr8a.pfb",
+		joinpath(homedir(), "utopia", "putr8a.pfb"),
 	]
 	i = findfirst(isfile, files)
 	global utopia_regular = files[i]
