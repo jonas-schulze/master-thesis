@@ -20,13 +20,287 @@ generalized \ac{ALE}
   A^\T X E + E^\T X A = -W
 \end{equation}
 
+\section{Hamilton-Jacobi Theory}
+
+\subsection{Finite Control Horizon}
+
+Consider the \ac{OCP}
+\begin{equation}
+  \everymath{\displaystyle}
+  \begin{array}{cl}
+    \min_u & \int_{t_0}^{t_f} \ell\big(t, x(t), u(t)\big) \dt + m\big(t_f, x(t_f)\big) \\
+    \text{s.t.} & \dot{x} = f(t,x,u), \enspace x(t_0) = x_0
+  \end{array}
+  \label{eq:basics:OCP}
+\end{equation}
+using \emph{state}~$x(t)\in\R^n$, system \emph{input} or \emph{control}~$u(t)\in\R^m$,
+and scalar cost functions~$\ell$ and~$m$.
+Following \cite{Locatelli2011},
+a sufficient condition for
+an optimal control $u^*$ solving \eqref{eq:basics:OCP} may be stated by means of a
+continuously differentiable
+\emph{value function}~$V:\R\times\R^n\to\R$ satisfying the \emph{\ac{HJE}}
+\begin{equation}
+  V_t(t,z) + \Ham\big(t,z,u^h,V_z(t,z)^\T \big) = 0
+  \label{eq:basics:HJE}
+\end{equation}
+for any $z\in\R^n$,
+as well as
+\begin{equation}
+  V(t_f,z) = m(t_f,z)
+  \label{eq:basics:HJE:condition}
+\end{equation}
+for all admissible final events $(t_f,z)$.
+$V_t$ and $V_z$ denote the partial derivatives of $V$,
+the \emph{Hamiltonian} $\Ham:\R\times\R^n\times\R^m\times\R^n\to\R$ is given by
+\begin{equation}
+\label{eq:basics:Hamiltonian}
+  \Ham(t,z,u,\lambda) := \ell(t,z,u) + \lambda^\T f(t,z,u)
+\end{equation}
+and $u^h := u^h\big(t,z,V_z(t, z)^\T\big)$ denotes the \Ham-minimizing control.\footnote{%
+  It is $\Ham(t, z, u^h, \lambda) < \Ham(t, z, u, \lambda)$ for $u \neq u^h = u^h(t, z, \lambda)$.
+  \Ham{} is said to be \emph{regular} if $u^h$ exists and is unique for any $t, z, \lambda$.
+  Here, this is always assumed to be the case.
+}
+Namely, a control $u^*$ is optimal if it fulfills the feedback law
+\begin{equation}
+\label{eq:basics:HJ:feedback}
+  u^*(t) = u^h\big(t, x(t), V_z(t,z)^\T |_{z=x(t)} \big)
+\end{equation}
+where $x$ is determined by $\dot x = f(t, x, u^*)$ and $x(t_0) = x_0$,
+\cf~\cite[Corollary~2.1]{Locatelli2011}.
+
+In the remainder of the section,
+we apply this theory to the \ac{LQR} problem.
+Consider a linear \emph{(standard) state-space system}
+\begin{equation}
+\left\{
+\begin{aligned}
+  \dot x &= Ax + Bu \\
+  y &= Cx
+\end{aligned}
+\right.
+\end{equation}
+for \emph{state-space} matrix $A(t) \in \Rnn$,
+\emph{input map} $B(t) \in\R^{n \times m}$,
+\emph{output map} $C(t) \in\R^{q\times n}$,
+and quadratic cost functions
+\begin{equation}
+\begin{aligned}
+  \ell(t, x, u)
+  &= \tfrac{1}{2}\norm{y - \hat y}_Q^2 + \tfrac{1}{2}\norm{u}_R^2 \\
+  m(t, x)
+  &= \tfrac{1}{2} \norm{y - \hat y}_S^2
+\end{aligned}
+\end{equation}
+for symmetric positive definite weight matrices
+$Q\in\R^{q\times q}$,
+$R\in\R^{m\times m}$, and
+$S\in\R^{q\times q}$.
+If the \emph{system matrices} $A, B, C$ are constant,
+the system is called \ac{LTI} and \ac{LTV} otherwise.
+We restrict ourselves to the \ac{LTI} case.
+The \emph{output} $y(t) \in \R^q$, $q \ll n$, represents the subset or combination of the system states that is \enquote{measurable}.
+$\hat y(t) \in\R^q$ describes a desired trajectory the modeled system should follow,
+\eg by measurements of a real system, or economic requirements of the technical process behind it.
+
+The Hamiltonian~\eqref{eq:basics:Hamiltonian} is then given by
+\begin{equation*}
+  \Ham(t,z,u,\lambda) =
+  \onehalf \norm{Cz - \hat y}_Q^2 +
+  \onehalf \underbrace{
+    \norm{u}_R^2
+  }_{u^\T R u}
+  {} +
+  \lambda^\T (Ax + Bu)
+  ,
+\end{equation*}
+causing the \Ham-minimizing control $u^h$ to be defined by
+\begin{equation*}
+  \Ham_u = Ru^h + B^\T \lambda \overset{!}{=} 0,
+  \qquad
+  \Ham_{uu} = R \overset{!}{\succ} 0.
+\end{equation*}
+The second order criterion is fulfilled by construction,
+and ensures the existence of $R^{-1}$.
+Thus, the first order criterion implies
+\begin{equation}
+\label{eq:basics:LQR:uh}
+  u^h(t, z, \lambda) = -R^{-1} B^\T \lambda
+  .
+\end{equation}
+
+What follows is a very brief outline of the key ideas leading to a \ac{DRE} associated to the \ac{OCP} for \ac{LQR}.
+It is based on \cite{Locatelli2011} and \cite[Section~3.2.2]{Lang2017}, to which we refer the reader for more details.
+Making the ansatz
+\begin{equation}
+\label{eq:basics:LQR:ansatz}
+  V(t,z) := \onehalf z^\T X(t) z + w(t)^\T z + v(t)
+\end{equation}
+for the value function,
+its partial derivates read
+\begin{equation}
+\begin{aligned}
+  V_t &= \onehalf z^\T \dot X z + \dot w^\T z + \dot v \\
+  V_z &= z^\T X + w^\T
+  .
+\end{aligned}
+\end{equation}
+Substituting the above, and $u^h(t, z, V_z^\T)$ based on \eqref{eq:basics:LQR:uh},
+as well as the scalar identity
+\begin{equation}
+  z^T X A z = \onehalf z^T \big( X A + A^\T X^\T \big) z
+\end{equation}
+into the \ac{HJE}~\eqref{eq:basics:HJE},
+and regrouping based on the order of $z$ yields
+\begin{subequations}
+\label{eq:basics:LQR:HJE}
+\begin{align}
+  0 ={}
+\label{eq:basics:LQR:HJE:X}
+  & \tfrac{1}{2} z^\T \big( \dot X + C^\T Q C + X A + A^\T X^\T - X B R^{-1} B^\T X^\T \big) z \\
+  & + \big( \dot w^\T + w^\T A - w^\T B R^{-1} B^\T X^\T - \hat y^\T Q C \big) z \\
+  & + \big( \dot v - \tfrac{1}{2} \big( w^\T B R^{-1} B^\T w - \hat y Q \hat y \big) \big)
+\end{align}
+\end{subequations}
+while the final condition~\eqref{eq:basics:HJE:condition} reads
+\begin{equation}
+\label{eq:basics:LQR:condition}
+\begin{aligned}
+  \MoveEqLeft
+  \onehalf z(t_f)^\T X(t_f) z(t_f) + w^\T (t_f) z(t_f) + v(t_f)
+  \\
+  &= \onehalf z(t_f) \big( C^\T S C \big) z(t_f)
+  - \big( \hat y(t_f)^\T S C \big) z(t_f)
+  + \big( \onehalf \hat y(t_f)^\T S \hat y(t_f) \big)
+  .
+\end{aligned}
+\end{equation}
+Sufficient conditions are obtained by letting \eqref{eq:basics:LQR:HJE} be the (multivariate) zero polynomial in $z$,
+and comparing the coefficients of the therms in $z$ in \eqref{eq:basics:LQR:condition}.
+Upon noting that if $X$ fulfills the dynamics of \eqref{eq:basics:LQR:HJE:X}, so does $X^\T$,
+this leads to a \ac{DRE} in $X : \R\to\Rnn$,
+\begin{equation}
+\label{eq:basics:LQR:DRE}
+\left\{
+\begin{aligned}
+  \dot X &= -\big( C^\T Q C + X A + A^\T X - X B R^{-1} B^\T X \big) \\
+  X(t_f) &= C^\T S C
+  ,
+\end{aligned}
+\right.
+\end{equation}
+an \ac{ODE} in $w : \R\to\R^n$,
+the so-called \emph{adjoint state equation},
+\begin{equation}
+\left\{
+\begin{aligned}
+  \dot w &= - \big( A^\T - X B R^{-1} B^\T \big) w + C^\T Q \hat y \\
+  w(t_f) &= - C^\T S \hat y(t_f)
+  ,
+\end{aligned}
+\right.
+\end{equation}
+and another \ac{ODE} in $v : \R\to\R$,
+\begin{equation}
+\left\{
+\begin{aligned}
+  \dot v &= \onehalf ( w^\T B R^{-1} B^\T w - \hat y Q \hat y) \\
+  v(t_f) &= \onehalf \hat y(t_f)^\T S \hat y(t_f)
+  ,
+\end{aligned}
+\right.
+\end{equation}
+all to be solved backwards in time $t \in [t_0,t_f]$.
+
+However, the optimal control $u^*$ given by the feedback law \eqref{eq:basics:HJ:feedback},
+\begin{equation}
+\begin{aligned}
+  u^*(t)
+  &= - R^{-1} B^\T V_z\big(t, x(t)\big)^\T \\
+  &= - \underbrace{
+    R^{-1} B^\T X(t)
+  }_{=\mathrlap{:K(t)}}
+  x - R^{-1} B^\T w(t)
+\end{aligned}
+\end{equation}
+does not require $v$.
+The overall cost to compute $u^*$ is dominated by solving the \ac{DRE}~\eqref{eq:basics:LQR:DRE}.
+Furthermore, the full solution $X(t)\in\Rnn$ is not needed.
+Rather, it suffices to store the so-called \emph{gain-} or \emph{feedback matrix} $K(t) \in\R^{m\times n}$.
+Since typically $m \ll n$, this has a major impact on the storage requirements.
+
+\begin{remark}
+  A generalized linear state-space system
+  \begin{equation}
+  \left\{
+  \begin{aligned}
+    E \dot x &= Ax + Bu \\
+    y &= Cx
+  \end{aligned}
+  \right.
+  \end{equation}
+  with invertible \emph{mass matrix} $E\in\Rnn$ is equivalent to the
+  standard state-space system
+  \begin{equation}
+  \left\{
+  \begin{aligned}
+    \dot{\tilde x} &= \tilde A \tilde x + Bu \\
+    y &= \tilde C \tilde x
+  \end{aligned}
+  \right.
+  \end{equation}
+  where $\tilde x := E x$, $\tilde A := A E^{-1}$ and $\tilde C := C E^{-1}$.
+  By applying the theory above,
+  re-sub\-sti\-tut\-ing~$\tilde x$ by~$Ex$,
+  and avoiding the inversion of $E$ in the resulting equations,
+  one obtains the generalized \ac{DRE}
+  \begin{equation}
+  \left\{
+  \begin{aligned}
+    E^\T \dot X E &= -\big( C^\T Q C + E^\T X A + A^\T X E - E^\T X B R^{-1} B^\T X E \big) \\
+    E^\T X(t_f) E &= C^\T S C
+    ,
+  \end{aligned}
+  \right.
+  \end{equation}
+  and the generalized adjoint state equation
+  \begin{equation}
+  \left\{
+  \begin{aligned}
+    E^\T \dot w &= - \big( A^\T - E^\T X B R^{-1} B^\T \big) w + C^\T Q \hat y \\
+    E^\T w(t_f) &= - C^\T S \hat y(t_f)
+    .
+  \end{aligned}
+  \right.
+  \end{equation}
+  The feedback matrix $K$ is then given by
+  \begin{equation}
+    K(t) = R^{-1} B^\T X(t) E
+    .
+  \end{equation}
+\end{remark}
+
+\begin{example}[Steel Profile]
+  For the steel profile benchmark~\cite{morwiki_steel} it is
+  \begin{equation*}
+    Q = I_q,
+    \qquad
+    R = I_m,
+    \qquad
+    S = \tfrac{1}{100} I_q,
+  \end{equation*}
+  such that $K(t) = B^\T X(t) E$.
+\end{example}
+
+\subsection{Infinite Control Horizon}
+
 \begin{proposition}[Infinite Time Horizon]
 \label{thm:basics:dre-limit-are}
   \todo{Link to eqs}
   For $t\to\infty$, the solution $X(t)$ to the \ac{DRE} converges to a solution of an \ac{ARE}.
 \end{proposition}
 
-\section{Hamilton-Jacobi Theory}
 \section{Sherman-Morrison-Woodbury}
 \label{sec:basics:smw}
 
