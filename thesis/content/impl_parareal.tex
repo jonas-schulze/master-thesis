@@ -306,3 +306,15 @@ For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
     and to make sure that whole computation is properly cancelled.
 \end{itemize}
 
+\subsection{Where should I put this?}
+
+\begin{itemize}
+  \item
+    Due to \autoref{thm:basics:dre-limit-are},
+    I expect later parareal stages to require fewer Newton refinements to reach convergence.
+    Therefore, each stage $n$ may defer the computation of a refinement $k$,
+    until the previous stage $n-1$ finished computing its refinement $k+1$.
+    That is, the number of refinements computed may differ by at most one from stage to stage.
+
+    This effect is visible in the timeline diagram of \eg the reference solution of \autoref{fig:results:parareal:rail}.
+\end{itemize}

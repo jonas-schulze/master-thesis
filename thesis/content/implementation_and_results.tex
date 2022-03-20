@@ -8,7 +8,27 @@
 \todo[inline]{separate results by sequential/parareal?}
 
 \begin{example}[LTI Rail Profile]
+The steel profile benchmark \cite{morwiki_steel} originating from \cite{Benner2005}:
 \label{thm:results:rail}
+\begin{equation}
+\left\{
+\begin{aligned}
+  E^\T \dot X E &= C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E \\
+  E^\T X(t_f) E &= \tfrac{1}{100} C^\T C
+\end{aligned}
+\right.
+\end{equation}
+where
+\begin{equation}
+  E, A \in \Rnn,
+  \enspace
+  B \in \R^{n \times 7},
+  \enspace
+  C \in \R^{6 \times n}
+\end{equation}
+and $n=371$.
+The problem's time span $[0,4500]$ corresponds to a resolution of \SI{10}{\milli\second},
+\ie $t_f = \SI{45}{\second}$.
 \end{example}
 
 \subsection{Sequential Solvers}
@@ -28,7 +48,7 @@
 Looking at \autoref{fig:results:parareal:rail},
 there clearly is a problem with the low-rank version of \Ros{2}.
 While the sample trajectory $K_{1,77}$ looks ok,
-the relative error of the whole $K$
+the relative error of the whole $K := B^\T X E$
 \begin{equation}
   \frac{\norm{K(t) - K_\text{ref}(t)}_F}{\norm{K_\text{ref}(t)}_F}
 \end{equation}
@@ -41,7 +61,7 @@ But even for $t > \SI{43.9}{\second}$ there is a noticeable difference between
 dense and low-rank versions of the algorithms involving \Ros{2}.
 As the dense algorithms converged, so should the low-rank ones.
 Only the parareal schemes of order 1/1 behave identically for dense and \ac{LRSIF} storage.
-Their errors look similar to~\cite[Fig.~1]{Lang2015}
+Their errors look similar to~\cite[Fig.~1]{Lang2015}.
 
 \begin{figure}[t]
   \centering
@@ -59,8 +79,21 @@ Their errors look similar to~\cite[Fig.~1]{Lang2015}
     % Lang2017, Fig 6.1 used K_{1,71} instead
     bottom: relative error compared to reference solution
     (dense parareal scheme of order 4/4).
+    Left: global time span $[\SI{0}{\second}, \SI{45}{\second}]$,
+    right: zoom to $[\SI{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
   }
   \label{fig:results:parareal:rail}
+\end{figure}
+
+\autoref{fig:results:parareal:timeline} shows the timeline diagrams corresponding to the solvers
+Due to the problem with the low-rank \Ros{2} solver mentioned in the previous paragraph explains
+
+\begin{figure}[t]
+  \missingfigure{}
+  \caption[Timeline diagrams for parareal method applied to Rail problem]{%
+    Timeline diagrams for the solutions described in \autoref{fig:results:parareal:rail}.
+  }
+  \label{fig:results:parareal:timeline}
 \end{figure}
 
 \begin{figure}[t]

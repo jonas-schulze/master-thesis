@@ -262,8 +262,6 @@ A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U
 \section{Application to \act{DRE}s}
 \label{sec:pr:DRE}
 
-\todo[inline]{Formulate parareal update \wrt low-rank factorization $LDL^\T$}
-
 Let the \acp{LRSIF}
 \begin{equation}
 \begin{aligned}
@@ -303,11 +301,6 @@ using \autoref{alg:lowrank:compression},
   :\approx \hat L \hat D \hat L^\T
   .
 \end{equation}
-
-\todo[inline]{%
-Due to \autoref{thm:basics:dre-limit-are},
-later parareal stages will require fewer Newton refinements
-(than earlier stages) to reach convergence.}
 
 \section{Alternative Parallel-in-Time Solvers}
 \label{sec:pr:alternatives}
