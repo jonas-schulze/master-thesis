@@ -1,26 +1,14 @@
 \chapter{Mathematical Basics}
-\section{Linear Systems and Related Matrix Equations}
 
-refer to \cite{Simoncini2016}
+\autoref{sec:basics:HJT} derives the \Riccati equation in the context of optimal control following \cite{Locatelli2011},
+and mentions other linear matrix equations relevant to this thesis.
+Afterwards, \autoref{sec:basics:smw} gives a brief overview on the Sherman-Morrison-Woodbury formula
+as an efficient strategy to solve systems having the structure of a low-rank update.
 
-generalized \ac{DRE}
-\begin{equation}
-\label{eq:basics:DRE}
-\left\{
-\begin{aligned}
-  E^\T \dot X E &= C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E \\
-  X(t_0) &= X_0
-\end{aligned}
-\right.
-\end{equation}
-
-generalized \ac{ALE}
-\begin{equation}
-\label{eq:basics:ALE}
-  A^\T X E + E^\T X A = -W
-\end{equation}
+... \ac{DRE} arising in optimal control.
 
 \section{Hamilton-Jacobi Theory}
+\label{sec:basics:HJT}
 
 \subsection{Finite Control Horizon}
 
@@ -71,9 +59,16 @@ where $x$ is determined by $\dot x = f(t, x, u^*)$ and $x(t_0) = x_0$,
 \cf~\cite[Corollary~2.1]{Locatelli2011}.
 
 In the remainder of the section,
-we apply this theory to the \ac{LQR} problem.
-Consider a linear \emph{(standard) state-space system}
+we apply this theory to the \ac{LQR} tracking problem
+consisting of a linear system and quadratic cost functions.
+We only give a very brief outline of the ideas leading to a \ac{DRE}
+following \cite[Remarks~3.3 and~3.6]{Locatelli2011} and \cite[Section~3.2.2]{Lang2017},
+to which the reader may refer to for more details.
+
+Many applications can be expressed by means of a
+linear \emph{(standard) state-space system}
 \begin{equation}
+\label{eq:basics:system:standard}
 \left\{
 \begin{aligned}
   \dot x &= Ax + Bu \\
@@ -81,11 +76,17 @@ Consider a linear \emph{(standard) state-space system}
 \end{aligned}
 \right.
 \end{equation}
-for \emph{state-space} matrix $A(t) \in \Rnn$,
+consisting of, again, \emph{state} $x(t)\in\R^n$ and \emph{input} or \emph{control} $u(t)\in\R^m$.
+$y(t) \in\R^q$ with $q \ll n$ denotes the system's \emph{output},
+as for most applications it is impossible to measure the whole state $x$.
+The dynamics of the system are described by the
+\emph{state-space matrix} $A(t) \in \Rnn$,
 \emph{input map} $B(t) \in\R^{n \times m}$,
-\emph{output map} $C(t) \in\R^{q\times n}$,
-and quadratic cost functions
+and
+\emph{output map} $C(t) \in\R^{q\times n}$.
+Further, let the cost functions be given by the squared weighted norms
 \begin{equation}
+\label{eq:basics:LQR:cost}
 \begin{aligned}
   \ell(t, x, u)
   &= \tfrac{1}{2}\norm{y - \hat y}_Q^2 + \tfrac{1}{2}\norm{u}_R^2 \\
@@ -93,16 +94,19 @@ and quadratic cost functions
   &= \tfrac{1}{2} \norm{y - \hat y}_S^2
 \end{aligned}
 \end{equation}
-for symmetric positive definite weight matrices
+for symmetric positive-definite weight matrices
 $Q\in\R^{q\times q}$,
 $R\in\R^{m\times m}$, and
 $S\in\R^{q\times q}$.
-If the \emph{system matrices} $A, B, C$ are constant,
-the system is called \ac{LTI} and \ac{LTV} otherwise.
-We restrict ourselves to the \ac{LTI} case.
-The \emph{output} $y(t) \in \R^q$, $q \ll n$, represents the subset or combination of the system states that is \enquote{measurable}.
 $\hat y(t) \in\R^q$ describes a desired trajectory the modeled system should follow,
 \eg by measurements of a real system, or economic requirements of the technical process behind it.
+The system~\eqref{eq:basics:system:standard} is referred to as \ac{LTI}
+if the \emph{system matrices} $A(t), B(t), C(t)$ are constant for $t\in [t_0,t_f]$,
+and \ac{LTV} otherwise.
+We restrict ourselves to \ac{LTI} and \emph{controllable} systems,
+\todo{Is this notion of \enquote{controllable} correct?}
+\ie for any given $(t_0, x_0)$ and $(t_1, x_1)$, $t_1 > t_0$,
+there exists a bounded control $u(\optional{})$ such that $x(t_1; t_0, x_0, u(\optional{})) = x_1$.
 
 The Hamiltonian~\eqref{eq:basics:Hamiltonian} is then given by
 \begin{equation*}
@@ -112,7 +116,7 @@ The Hamiltonian~\eqref{eq:basics:Hamiltonian} is then given by
     \norm{u}_R^2
   }_{u^\T R u}
   {} +
-  \lambda^\T (Ax + Bu)
+  \lambda^\T (Az + Bu)
   ,
 \end{equation*}
 causing the \Ham-minimizing control $u^h$ to be defined by
@@ -130,8 +134,8 @@ Thus, the first order criterion implies
   .
 \end{equation}
 
-What follows is a very brief outline of the key ideas leading to a \ac{DRE} associated to the \ac{OCP} for \ac{LQR}.
-It is based on \cite{Locatelli2011} and \cite[Section~3.2.2]{Lang2017}, to which we refer the reader for more details.
+%What follows is a very brief outline of the key ideas leading to a \ac{DRE} associated to the \ac{OCP} for \ac{LQR}.
+%It is based on \cite[Remarks~3.3 and~3.6]{Locatelli2011} and \cite[Section~3.2.2]{Lang2017}, to which we refer the reader for more details.
 Making the ansatz
 \begin{equation}
 \label{eq:basics:LQR:ansatz}
@@ -146,10 +150,10 @@ its partial derivates read
   .
 \end{aligned}
 \end{equation}
-Substituting the above, and $u^h(t, z, V_z^\T)$ based on \eqref{eq:basics:LQR:uh},
+Substituting the above, $u^h(t, z, V_z^\T)$ based on \eqref{eq:basics:LQR:uh},
 as well as the scalar identity
 \begin{equation}
-  z^T X A z = \onehalf z^T \big( X A + A^\T X^\T \big) z
+  z^T X A z = \onehalf \Big( z^T X A z + \big( z^\T X A z \big)^\T \Big)
 \end{equation}
 into the \ac{HJE}~\eqref{eq:basics:HJE},
 and regrouping based on the order of $z$ yields
@@ -176,12 +180,13 @@ while the final condition~\eqref{eq:basics:HJE:condition} reads
   .
 \end{aligned}
 \end{equation}
+
 Sufficient conditions are obtained by letting \eqref{eq:basics:LQR:HJE} be the (multivariate) zero polynomial in $z$,
 and comparing the coefficients of the therms in $z$ in \eqref{eq:basics:LQR:condition}.
 Upon noting that if $X$ fulfills the dynamics of \eqref{eq:basics:LQR:HJE:X}, so does $X^\T$,
-this leads to a \ac{DRE} in $X : \R\to\Rnn$,
+this leads to a \ac{DRE} in $X(t)\in\Rnn$,
 \begin{equation}
-\label{eq:basics:LQR:DRE}
+\label{eq:basics:LQR:DRE:backwards}
 \left\{
 \begin{aligned}
   \dot X &= -\big( C^\T Q C + X A + A^\T X - X B R^{-1} B^\T X \big) \\
@@ -190,7 +195,7 @@ this leads to a \ac{DRE} in $X : \R\to\Rnn$,
 \end{aligned}
 \right.
 \end{equation}
-an \ac{ODE} in $w : \R\to\R^n$,
+an \ac{ODE} in $w(t)\in\R^n$,
 the so-called \emph{adjoint state equation},
 \begin{equation}
 \left\{
@@ -201,7 +206,7 @@ the so-called \emph{adjoint state equation},
 \end{aligned}
 \right.
 \end{equation}
-and another \ac{ODE} in $v : \R\to\R$,
+and another \ac{ODE} in $v(t)\in\R$,
 \begin{equation}
 \left\{
 \begin{aligned}
@@ -215,23 +220,27 @@ all to be solved backwards in time $t \in [t_0,t_f]$.
 
 However, the optimal control $u^*$ given by the feedback law \eqref{eq:basics:HJ:feedback},
 \begin{equation}
+\label{eq:basics:LQR:u*}
 \begin{aligned}
   u^*(t)
   &= - R^{-1} B^\T V_z\big(t, x(t)\big)^\T \\
   &= - \underbrace{
-    R^{-1} B^\T X(t)
+    R^{-1} B^\T \big( X(t)
   }_{=\mathrlap{:K(t)}}
-  x - R^{-1} B^\T w(t)
+  x(t) + w(t) \big)
+  %x(t) - R^{-1} B^\T w(t)
 \end{aligned}
 \end{equation}
 does not require $v$.
-The overall cost to compute $u^*$ is dominated by solving the \ac{DRE}~\eqref{eq:basics:LQR:DRE}.
+The overall cost to compute $u^*$ is dominated by solving the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}.
 Furthermore, the full solution $X(t)\in\Rnn$ is not needed.
 Rather, it suffices to store the so-called \emph{gain-} or \emph{feedback matrix} $K(t) \in\R^{m\times n}$.
 Since typically $m \ll n$, this has a major impact on the storage requirements.
 
+\todo[inline]{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
+
 \begin{remark}
-  A generalized linear state-space system
+  A \emph{generalized} linear state-space system
   \begin{equation}
   \left\{
   \begin{aligned}
@@ -240,7 +249,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   \end{aligned}
   \right.
   \end{equation}
-  with invertible \emph{mass matrix} $E\in\Rnn$ is equivalent to the
+  with invertible \emph{mass matrix} $E(t)\in\Rnn$ is equivalent to the
   standard state-space system
   \begin{equation}
   \left\{
@@ -251,8 +260,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   \right.
   \end{equation}
   where $\tilde x := E x$, $\tilde A := A E^{-1}$ and $\tilde C := C E^{-1}$.
-  By applying the theory above,
-  re-sub\-sti\-tut\-ing~$\tilde x$ by~$Ex$,
+  By applying the theory above
   and avoiding the inversion of $E$ in the resulting equations,
   one obtains the generalized \ac{DRE}
   \begin{equation}
@@ -282,7 +290,10 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
 \end{remark}
 
 \begin{example}[Steel Profile]
-  For the steel profile benchmark~\cite{morwiki_steel} it is
+  The steel profile benchmark \cite{morwiki_steel} goes back to \cite{Benner2005}.
+  It is a generalized system that has $m=7$ controls and $q=6$ outputs.
+  We'll use the variant having $n=371$ state variables.
+  Furthermore,
   \begin{equation*}
     Q = I_q,
     \qquad
@@ -293,13 +304,220 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   such that $K(t) = B^\T X(t) E$.
 \end{example}
 
-\subsection{Infinite Control Horizon}
+Within this thesis we'll only consider the \ac{LTI} case with invertible $E$.
+In fact, most computations will be performed for the problem above.
+Therefore, $Q$ and $R$ are assumed to be identity matrices of appropriate size.
 
-\begin{proposition}[Infinite Time Horizon]
-\label{thm:basics:dre-limit-are}
-  \todo{Link to eqs}
-  For $t\to\infty$, the solution $X(t)$ to the \ac{DRE} converges to a solution of an \ac{ARE}.
+\subsection{Infinite Control Horizon}
+% cf \cite[Remark~3.13, Theorem~3.3]{Locatelli2011}
+
+Consider the \ac{OCP} for \ac{LQR} over an infinite time horizon,
+\begin{equation}
+\label{eq:basics:OCP'}
+  \everymath{\displaystyle}
+  \begin{array}{cl}
+    \min_u & \int_{t_0}^{\infty} \ell\big(t, x(t), u(t)\big) \dt \\
+    \text{s.t.} & \dot{x} = Ax + Bu, \enspace x(t_0) = x_0
+    .
+  \end{array}
+\end{equation}
+For
+$
+  \ell(t, x, u) = \onehalf \norm{Cx - \hat y(t)}_Q^2 + \onehalf \norm{u}_R^2
+$
+as in \eqref{eq:basics:LQR:cost},
+following the proof of \cite[Theorem~3.2]{Locatelli2011},
+the optimal control is given by
+\begin{equation}
+  u^*(t) = - R^{-1} B^\T \big( \bar X(t) x(t) + \bar w(t) \big)
+\end{equation}
+for some $\bar w(t)$,
+where $\bar X(t) := \lim_{t_f \to\infty} X(t; t_f)$
+and $X(\optional{};t_f)$ is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
+having the boundary value $X(t_f; t_f) = 0$. % t_f < \infty
+By \cite[Theorem~3.3]{Locatelli2011},
+$\bar X(t) \equiv \bar X$ is constant.
+Hence, its derivative is zero such that $\bar X$ is a solution to the \ac{ARE}
+\begin{equation}
+\label{eq:basics:LQR:ARE}
+  C^\T Q C + \bar X A + A^\T \bar X - \bar X B R^{-1} B^\T \bar X = 0
+  .
+\end{equation}
+Compare this to the feedback law \eqref{eq:basics:LQR:u*} for a finite time horizon,
+where $X(t)$ is time-dependent.
+To summarize:
+
+\begin{proposition}[LQR over Infinite Time Horizon]
+\label{thm:basics:dre-limit-are:backwards}
+  The value $X(t_0; t_f)$ of the solution $X(\optional{}; t_f)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
+  having the boundary value $X(t_f; t_f) = C^\T S C =: X_f$
+  converges to
+  \begin{equation}
+    \lim_{t_f\to\infty} X(t_0; t_f) = \bar X + X_f
+  \end{equation}
+  where $\bar X$ is the solution to \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
 \end{proposition}
+\begin{proof}
+  Define $\hat X(t) := X(t; t_f) - X_f$,
+  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} having boundary value $\hat X(t_f) = 0$.
+  Following the proof of \cite[Theorem~3.3]{Locatelli2011},
+  $\hat X(t_0)$ converges to $\bar X$ for $t_f\to\infty$.
+  Therefore, $X(t_0, t_f) = \hat X(t_0) + X_f \to \bar X + X_f$.
+\end{proof}
+
+\section{Reformulating Problems Forward in Time}
+
+As mentioned previously, the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} has to be solved backwards in time.
+It is common practice to instead formulate it forward in time by defining
+\begin{equation}
+  \tilde X(t) := X(t_f - t + t_0)
+\end{equation}
+such that
+\begin{equation}
+\begin{gathered}
+  \dot{\tilde X}(t)
+  = - \dot X(t_f - t + t_0)
+  = + \big( C^\T Q C + A^\T \tilde X(t) + \tilde X(t) A - \tilde X(t) B R^{-1} B^\T \tilde X(t) \big)
+  \\
+  \tilde X(t_0)
+  = X(t_f - t_0 + t_0)
+  = X(t_f)
+  = C^\T S C
+\end{gathered}
+\end{equation}
+and still $t \in [t_0, t_f]$.
+Overall,
+\begin{equation}
+%\tag{\ref*{eq:basics:LQR:DRE:backwards}'}
+\label{eq:basics:LQR:DRE:forwards}
+\left\{
+\begin{aligned}
+  \dot{\tilde X} &= C^\T Q C + A^\T \tilde X + \tilde X A - \tilde X B R^{-1} B^\T \tilde X \\
+  \tilde X(t_0) &= C^\T S C
+  .
+\end{aligned}
+\right.
+\end{equation}
+As both variants of the \ac{DRE},
+\eqref{eq:basics:LQR:DRE:backwards} and
+\eqref{eq:basics:LQR:DRE:forwards},
+may easily be transformed into one another,
+the notation $A, B, C, X$ is used for both in this thesis.
+
+\begin{corollary}[LQR over Infinite Time Horizon]
+\label{thm:basics:dre-limit-are}
+  The solution $\tilde X(t)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards}
+  converges to
+  \begin{equation}
+    \lim_{t\to\infty} \tilde X(t) = \bar X + C^\T S C
+    ,
+  \end{equation}
+  where $\bar X$ is the solution to \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
+\end{corollary}
+\begin{proof}
+  Follows from \autoref{thm:basics:dre-limit-are:backwards} with the direction of time reversed,
+  $\lim \tilde X(t_f) = \lim X(t_0; t_f) = \bar X + C^\T S C$ for $t_f\to\infty$.
+\end{proof}
+
+\subsection{Alternative: Optimal Control Over an Infinite Horizon}
+
+% cf \cite[Remark~3.13, Theorem~3.3]{Locatelli2011}
+
+\begin{proposition}[LQR over Infinite Time Horizon]
+\label{thm:basics:dre-limit-are}
+  The solution $X(t)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards}
+  converges to
+  \begin{equation}
+    \lim_{t\to\infty} X(t) = \bar X + C^\T S C
+    ,
+  \end{equation}
+  where $\bar X$ is the solution of the \ac{ARE}
+  \begin{equation}
+  %\label{eq:basics:LQR:ARE}
+    C^\T Q C + A^\T \bar X + \bar X A - \bar X B R^{-1} B^\T \bar X = 0
+    .
+  \end{equation}
+\end{proposition}
+\begin{proof}
+  Define $\bar X(t) := X(t) - X(t_0)$,
+  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards} having initial value $\bar X(t_0) = 0$.
+  Following the proof of \cite[Theorem~3.3]{Locatelli2011},
+  $\bar X(t)$ converges to $\bar X$ for $t\to\infty$.
+  Therefore, $X(t) = \bar X(t) + X(t_0) \to \bar X + X(t_0)$.
+\end{proof}
+
+\begin{remark}
+  The \ac{OCP}
+  \begin{equation}
+    \everymath{\displaystyle}
+    \begin{array}{cl}
+      \min_u & \int_{t_0}^{\infty} \ell\big(t, x(t), u(t)\big) \dt \\
+      \text{s.t.} & \dot{x} = Ax + Bu, \enspace x(t_0) = x_0
+    \end{array}
+  \end{equation}
+  may be seen as the limit of \ac{OCP}~\eqref{eq:basics:OCP}
+  for \ac{LQR} when $m \equiv 0$ and $t_f \to\infty$.
+  For
+  \begin{equation}
+    \ell(t, x, u) = \onehalf \norm{Cx - \hat y(t)}_Q^2 + \onehalf \norm{u}_R^2
+  \end{equation}
+  as in \eqref{eq:basics:LQR:cost},
+  the optimal control is given by the control law
+  \begin{equation}
+    u^*(t) = - R^{-1} B^\T \big( \bar X x(t) + \bar w(t) \big)
+  \end{equation}
+  with $\bar X$ being the limit value from \autoref{thm:basics:dre-limit-are}.
+  The exact structure of $\bar w(t)$ is not important for this thesis.
+  Compare this to the feedback law \eqref{eq:basics:LQR:u*} for a finite time horizon,
+  where $X(t)$ is time-dependent, while here $\bar X$ is not.
+\end{remark}
+
+\subsection{Other Related Matrix Equations}
+
+As mentioned in \cite{Dieci1992},
+any implicit time-stepping method applied to a (generalized) \ac{DRE} will yield a (generalized) \ac{ARE}
+\begin{equation}
+\label{eq:basics:ARE}
+    A^\T X E + E^\T X A - E^\T X S X E = -W,
+    \quad
+    W = W^\T
+\end{equation}
+to be solved at every step.
+Some methods, including the Rosenbrock-type methods to be covered in \autoref{sec:ros},
+only require a (generalized) \ac{ALE}
+\begin{equation}
+\label{eq:basics:ALE}
+  A^\T X E + E^\T X A = -W,
+  \quad
+  W = W^\T
+\end{equation}
+to be solved at every step,
+which is a special case of the \ac{ARE}.
+\ac{ALE} may be solved \eg using the \ac{ADI} method,
+which will be covered in \autoref{sec:ADI}.
+
+\todo[inline]{Quote theorems about existance and uniqueness of solutions}
+
+\begin{theorem}[Solvability of DRE]
+  todo
+\end{theorem}
+\begin{proof}
+  todo
+\end{proof}
+
+\begin{theorem}[Solvability of ARE]
+  todo
+\end{theorem}
+\begin{proof}
+  todo
+\end{proof}
+
+\begin{theorem}[Solvability of ALE]
+  todo
+\end{theorem}
+\begin{proof}
+  See \eg \cite{Lancaster1995}.
+\end{proof}
 
 \section{Sherman-Morrison-Woodbury}
 \label{sec:basics:smw}
