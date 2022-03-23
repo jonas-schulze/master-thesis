@@ -1,11 +1,9 @@
 \chapter{Mathematical Basics}
 
-\autoref{sec:basics:HJT} derives the \Riccati equation in the context of optimal control following \cite{Locatelli2011},
-and mentions other linear matrix equations relevant to this thesis.
-Afterwards, \autoref{sec:basics:smw} gives a brief overview on the Sherman-Morrison-Woodbury formula
-as an efficient strategy to solve systems having the structure of a low-rank update.
-
-... \ac{DRE} arising in optimal control.
+\autoref{sec:basics:HJT} derives the \Riccati equation in the context of optimal control following \cite{Locatelli2011}.
+\autoref{sec:basics:tdir} transforms the derived equation into the shape used in the remainder of the thesis.
+\autoref{sec:basics:matrixeqs} then outlines all matrix equations occurring in this thesis.
+Finally, \autoref{sec:basics:smw} shows an efficient strategy to solve shifted linear systems.
 
 \section{Hamilton-Jacobi Theory}
 \label{sec:basics:HJT}
@@ -27,7 +25,7 @@ Following \cite{Locatelli2011},
 a sufficient condition for
 an optimal control $u^*$ solving \eqref{eq:basics:OCP} may be stated by means of a
 continuously differentiable
-\emph{value function}~$V:\R\times\R^n\to\R$ satisfying the \emph{\ac{HJE}}
+\emph{value function}~$V:\R\times\R^n\to\R$ satisfying the \ac{HJE}
 \begin{equation}
   V_t(t,z) + \Ham\big(t,z,u^h,V_z(t,z)^\T \big) = 0
   \label{eq:basics:HJE}
@@ -63,7 +61,7 @@ we apply this theory to the \ac{LQR} tracking problem
 consisting of a linear system and quadratic cost functions.
 We only give a very brief outline of the ideas leading to a \ac{DRE}
 following \cite[Remarks~3.3 and~3.6]{Locatelli2011} and \cite[Section~3.2.2]{Lang2017},
-to which the reader may refer to for more details.
+to which the reader may refer to for further details.
 
 Many applications can be expressed by means of a
 linear \emph{(standard) state-space system}
@@ -236,8 +234,7 @@ The overall cost to compute $u^*$ is dominated by solving the \ac{DRE}~\eqref{eq
 Furthermore, the full solution $X(t)\in\Rnn$ is not needed.
 Rather, it suffices to store the so-called \emph{gain-} or \emph{feedback matrix} $K(t) \in\R^{m\times n}$.
 Since typically $m \ll n$, this has a major impact on the storage requirements.
-
-\todo[inline]{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
+\todo{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
 
 \begin{remark}
   A \emph{generalized} linear state-space system
@@ -289,7 +286,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   \end{equation}
 \end{remark}
 
-\begin{example}[Steel Profile]
+\begin{example}[Parameters of Steel Profile]
   The steel profile benchmark \cite{morwiki_steel} goes back to \cite{Benner2005}.
   It is a generalized system that has $m=7$ controls and $q=6$ outputs.
   We'll use the variant having $n=371$ state variables.
@@ -301,7 +298,8 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
     \qquad
     S = \tfrac{1}{100} I_q,
   \end{equation*}
-  such that $K(t) = B^\T X(t) E$.
+  such that $K(t) = B^\T X(t) E$
+  and $E^\T X(t_0) E = C^\T C /100$.
 \end{example}
 
 Within this thesis we'll only consider the \ac{LTI} case with invertible $E$.
@@ -366,6 +364,7 @@ To summarize:
 \end{proof}
 
 \section{Reformulating Problems Forward in Time}
+\label{sec:basics:tdir}
 
 As mentioned previously, the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} has to be solved backwards in time.
 It is common practice to instead formulate it forward in time by defining
@@ -419,72 +418,28 @@ the notation $A, B, C, X$ is used for both in this thesis.
   $\lim \tilde X(t_f) = \lim X(t_0; t_f) = \bar X + C^\T S C$ for $t_f\to\infty$.
 \end{proof}
 
-\subsection{Alternative: Optimal Control Over an Infinite Horizon}
+\section{Solution of the \texorpdfstring{\act{DRE}}{DRE}}
+\label{sec:basics:matrixeqs}
 
-% cf \cite[Remark~3.13, Theorem~3.3]{Locatelli2011}
-
-\begin{proposition}[LQR over Infinite Time Horizon]
-\label{thm:basics:dre-limit-are}
-  The solution $X(t)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards}
-  converges to
-  \begin{equation}
-    \lim_{t\to\infty} X(t) = \bar X + C^\T S C
-    ,
-  \end{equation}
-  where $\bar X$ is the solution of the \ac{ARE}
-  \begin{equation}
-  %\label{eq:basics:LQR:ARE}
-    C^\T Q C + A^\T \bar X + \bar X A - \bar X B R^{-1} B^\T \bar X = 0
-    .
-  \end{equation}
-\end{proposition}
-\begin{proof}
-  Define $\bar X(t) := X(t) - X(t_0)$,
-  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards} having initial value $\bar X(t_0) = 0$.
-  Following the proof of \cite[Theorem~3.3]{Locatelli2011},
-  $\bar X(t)$ converges to $\bar X$ for $t\to\infty$.
-  Therefore, $X(t) = \bar X(t) + X(t_0) \to \bar X + X(t_0)$.
-\end{proof}
-
-\begin{remark}
-  The \ac{OCP}
-  \begin{equation}
-    \everymath{\displaystyle}
-    \begin{array}{cl}
-      \min_u & \int_{t_0}^{\infty} \ell\big(t, x(t), u(t)\big) \dt \\
-      \text{s.t.} & \dot{x} = Ax + Bu, \enspace x(t_0) = x_0
-    \end{array}
-  \end{equation}
-  may be seen as the limit of \ac{OCP}~\eqref{eq:basics:OCP}
-  for \ac{LQR} when $m \equiv 0$ and $t_f \to\infty$.
-  For
-  \begin{equation}
-    \ell(t, x, u) = \onehalf \norm{Cx - \hat y(t)}_Q^2 + \onehalf \norm{u}_R^2
-  \end{equation}
-  as in \eqref{eq:basics:LQR:cost},
-  the optimal control is given by the control law
-  \begin{equation}
-    u^*(t) = - R^{-1} B^\T \big( \bar X x(t) + \bar w(t) \big)
-  \end{equation}
-  with $\bar X$ being the limit value from \autoref{thm:basics:dre-limit-are}.
-  The exact structure of $\bar w(t)$ is not important for this thesis.
-  Compare this to the feedback law \eqref{eq:basics:LQR:u*} for a finite time horizon,
-  where $X(t)$ is time-dependent, while here $\bar X$ is not.
-\end{remark}
-
-\subsection{Other Related Matrix Equations}
-
-As mentioned in \cite{Dieci1992},
-any implicit time-stepping method applied to a (generalized) \ac{DRE} will yield a (generalized) \ac{ARE}
+The application of
+any implicit time-stepping method applied to a generalized \ac{DRE}
+\begin{equation}
+\label{eq:basics:DRE}
+  E^\T \dot X E = C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E
+\end{equation}
+will yield some generalized \ac{ARE}
 \begin{equation}
 \label{eq:basics:ARE}
     A^\T X E + E^\T X A - E^\T X S X E = -W,
     \quad
-    W = W^\T
+    W = W^\T,
+    \quad
+    S = S^\T
 \end{equation}
-to be solved at every step.
+to be solved at every step \cite{Dieci1992},
+as cited in \cite[50]{Lang2015}.
 Some methods, including the Rosenbrock-type methods to be covered in \autoref{sec:ros},
-only require a (generalized) \ac{ALE}
+only require a generalized \ac{ALE}
 \begin{equation}
 \label{eq:basics:ALE}
   A^\T X E + E^\T X A = -W,
@@ -496,29 +451,77 @@ which is a special case of the \ac{ARE}.
 \ac{ALE} may be solved \eg using the \ac{ADI} method,
 which will be covered in \autoref{sec:ADI}.
 
-\todo[inline]{Quote theorems about existance and uniqueness of solutions}
+\begin{remark}
+  Equations \eqref{eq:basics:ARE} and \eqref{eq:basics:ALE} are often referred to as
+  continuous-time \ac{ARE} and \ac{ALE}, \cf~\cite[Remark~2.11]{Lang2017}.
+\end{remark}
+
+\begin{remark}
+  The matrices denoted with $A$ and $W$ in \eqref{eq:basics:DRE}, \eqref{eq:basics:ARE}, and \eqref{eq:basics:ALE} are not necessarily the same.
+  Matrix $S$ in \eqref{eq:basics:ARE} is not related to the weight matrix of \autoref{sec:basics:HJT}.
+\end{remark}
 
 \begin{theorem}[Solvability of DRE]
-  todo
+  Let $X_0 \succeq 0$.
+  Then there exists a unique solution $X$ of the generalized \ac{DRE}~\eqref{eq:basics:DRE}
+  with initial condition $E^\T X(t_0) E = X_0$ for $t \geq t_0$.
+  Furthermore, $X(\optional{}) \succeq 0$.
 \end{theorem}
 \begin{proof}
-  todo
+  Compare \cite[Theorem~2.7]{Lang2017}, \cite[Theorem~4.1.6]{Abou2003}
+  for $W = C^\T C \succeq 0$, $S=BB^\T \succeq 0$.
 \end{proof}
 
 \begin{theorem}[Solvability of ARE]
-  todo
+  Let $S, W \succeq 0$ and $(E, A, S, W)$ be a stabilizable and detectable system.
+  Then there exists a unique symmetric stabilizing solution $X_*$ of the generalized \ac{ARE}~\eqref{eq:basics:ARE}
+  such that $\Lambda(A - SX_*E, E) \subseteq \Cneg$.
+  If in addition the system $(E, A, S, W)$ is observable, then $X_* \succ 0$.
 \end{theorem}
 \begin{proof}
-  todo
+  Compare \cite[Theorem~2.9]{Lang2017}.
+  For a proof, refer to \cite{Lancaster1995}.
 \end{proof}
 
 \begin{theorem}[Solvability of ALE]
-  todo
+  Let $\lambda_j \neq -\lambda_k$ for any $\lambda_j, \lambda_k \in\Lambda(A, E)$.
+  Then there exists a unique solution $X$ of the generalized \ac{ALE}~\eqref{eq:basics:ALE}.
 \end{theorem}
 \begin{proof}
-  See \eg \cite{Lancaster1995}.
+  Compare \cite[Theorem~2.10]{Lang2017}, \cite[Corollary~1.1.4]{Abou2003}.
 \end{proof}
 
-\section{Sherman-Morrison-Woodbury}
+\begin{example}[Regularity of Steel Profile]
+  For the steel profile benchmark \cite{morwiki_steel} it is
+  $E \succ 0$ and $A \prec 0$, hence the system is stable.
+  As $E^\T X_0 E = C^\T C / 100 \succeq 0$,
+  the associated generalized \ac{DRE} has a unique solution.
+  \todo{Do all \ac{ALE} appearing in this thesis have a unique solution as well?}
+\end{example}
+
+\section{Sherman-Morrison-Woodbury Formula}
 \label{sec:basics:smw}
 
+Anticipating the coming chapters,
+the \ac{ADI} method has to perform a number of linear system solves
+\begin{equation}
+  \big(A + \alpha^{-1} UV \big) x = b
+\end{equation}
+where the system matrix has the structure of a low-rank update.
+$A\in\Rnn$ is usually sparse,
+\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
+$\alpha\in\C$ is a scalar,
+and $U, V^\T \in\R^{n\times k}$ are dense and have a low numerical rank $k\ll n$.
+Therefore, the product $UV \in\Rnn$ is dense,
+which makes assembling the system matrix infeasible for many applications.
+Still, the solution $x$ to that shifted system is itself a shift of the solution $\hat x$ to $A\hat x = b$,
+see \eg \cite{Strang2016, Golub2013}.
+This is summarized by the Sherman-Morrison-Woodbury formula:
+\begin{equation}
+  \big( A + \alpha^{-1}UV \big)^{-1} =
+  A^{-1} - A^{-1} U (\alpha I_k + V A^{-1} U)^{-1} V A^{-1}
+\end{equation}
+That is, instead of inverting the dense $A + \alpha^{-1} UV \in\Rnn$,
+one only has to invert the sparse $A \in \Rnn$ as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
+
+\todo[inline]{Move this to next chapter? Rename this chapter to \enquote{Linear Systems and Hamilton-Jacobi Theory}?}
