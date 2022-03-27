@@ -85,6 +85,70 @@ Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$)
 
 \cite{Lang2017}
 
+\section{Low-Rank Factorizations}
+
+\begin{proposition}[Triangular Low-Rank Factorizations]
+  Let $X=ZZ^\T$ or $X=ZDZ^\T$ for some $Z\in\R^{n\times r}$ and $D\in\R^{r\times r}$,
+  $r \leq n$,
+  then there exist a lower triangular $\hat{Z}$
+  and some $\hat D$ of the same size satisfying
+  $X=\hat Z \hat Z^\T$
+  or $X=\hat Z \hat D \hat Z^\T$.
+\end{proposition}
+\begin{proof}
+  We are looking for a transformation $H\in\R^{r\times r}$ such that $\hat Z := ZH$ is triangular and $HH^\T = I_r$.
+  Then $\hat Z := ZH$ and $\hat D := H^\T DH$ have the desired properties.
+
+  \todo{How to handle row permutations?}
+  Without loss of generality, let the first $r$ rows of $Z$ have full rank.
+  Let $z_1\in\R^r$ denote the first row of $Z$.
+  Let $H_r\in\R^{r\times r}$ be the \Householder transformation mapping
+  $z_1$ onto $\norm{z_1}e_1 = (\norm{z_1},0,\ldots) \in \R^r$, \ie
+  \begin{equation}
+    H_r := I_r - \frac{2}{v^\T v} vv^T
+  \end{equation}
+  for $v := z_1 - \norm{z_1}e_1$.
+  Note that $H_r H_r^\T = I_r$ and $H_r = H_r^\T$.
+  As $Z$ has full rank, $v \neq 0$ and $H_r$ is well defined.
+  Indeed,
+  \begin{equation*}
+    H_r z_1
+    = z_1 - \frac{2v^\T z_1}{v^\T v} \cdot v
+    = z_1 - 1 \cdot v
+    = \norm{z_1}e_1
+  \end{equation*}
+  such that
+  \begin{equation}
+    Z H_r = (H_r Z^\T) = \begin{pmatrix}
+      \norm{z_1} & 0 \\
+      Z_{12} & Z_{22}
+    \end{pmatrix}
+  \end{equation}
+  for some $Z_{12} \in \R^{n-1 \times 1}$ and $Z_{22} \in \R^{n-1 \times r-1}$.
+
+  Similarly, let $z_2\in\R^{r-1}$ denote the first row of $Z_{22}$ and
+  let $H_{r-1} \in \R^{r-1 \times r-1}$ be the \Householder matrix mapping
+  $z_2$ onto $\norm{z_2}e_1 \in\R^{r-1}$.
+  This iteratively defines the matrix
+  \begin{equation}
+    H :=
+    H_r \cdot
+    \begin{pmatrix}
+      I_1 \\ & H_{r-1}
+    \end{pmatrix}
+    \cdots
+    \begin{pmatrix}
+      I_{r-2} \\ & H_2
+    \end{pmatrix}
+    .
+  \end{equation}
+
+  Note that $H_1 = I_1$ or $H_1 = -I_1$,
+  which therefore isn't needed for the transformation into a triangular matrix.
+  Further, note that every factor in the product above is itself a \Householder transformation acting on $\R^r$,
+  whose corresponding vector has its leading components filled with zeros.
+\end{proof}
+
 \section{Software}
 
 \cite{DrWatson}

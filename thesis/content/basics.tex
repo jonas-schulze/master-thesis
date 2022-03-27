@@ -2,7 +2,8 @@
 
 \autoref{sec:basics:HJT} derives the \Riccati equation in the context of optimal control following \cite{Locatelli2011}.
 \autoref{sec:basics:tdir} transforms the derived equation into the shape used in the remainder of the thesis.
-\autoref{sec:basics:matrixeqs} then outlines all matrix equations occurring in this thesis.
+\autoref{sec:basics:matrixeqs} then outlines all matrix equations occurring in this thesis,
+for a general overview refer to \eg~\cite{Simoncini2016}.
 Finally, \autoref{sec:basics:smw} shows an efficient strategy to solve shifted linear systems.
 
 \section{Hamilton-Jacobi Theory}
@@ -237,8 +238,10 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
 \todo{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
 
 \begin{remark}
+  \todo{generalized \emph{descriptor system}?}
   A \emph{generalized} linear state-space system
   \begin{equation}
+  \label{eq:basics:system:generalized}
   \left\{
   \begin{aligned}
     E \dot x &= Ax + Bu \\
@@ -290,7 +293,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   The steel profile benchmark \cite{morwiki_steel} goes back to \cite{Benner2005}.
   It is a generalized system that has $m=7$ controls and $q=6$ outputs.
   We'll use the variant having $n=371$ state variables.
-  Furthermore,
+  Furthermore, the \ac{LQR} weights are
   \begin{equation*}
     Q = I_q,
     \qquad
@@ -299,7 +302,9 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
     S = \tfrac{1}{100} I_q,
   \end{equation*}
   such that $K(t) = B^\T X(t) E$
-  and $E^\T X(t_0) E = C^\T C /100$.
+  and $E^\T X(t_f) E = C^\T C /100$.
+  The problem's time span $[0,4500]$ corresponds to a resolution of \SI{10}{\milli\second},
+  \ie $t_f = \SI{45}{\second}$.
 \end{example}
 
 Within this thesis we'll only consider the \ac{LTI} case with invertible $E$.
