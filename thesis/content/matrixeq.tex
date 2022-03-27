@@ -1,6 +1,13 @@
 \chapter{Large-Scale Matrix Equations}
 
+This chapter will give a very brief overview on common strategies necessary to solve large-scale matrix equations.
+First, \autoref{sec:matrixeq:sparse} is concerned with suitable representations of matrices having only very few non-zero entries.
+\autoref{sec:basics:smw} then shows an efficient strategy to solve shifted linear systems.
+\autoref{sec:lowrank} presents a memory-efficient representations of matrices having a low (numerical) rank.
+Finally, \autoref{sec:mor} hints at strategies to reduce the dimension of the matrices involved.
+
 \section{Sparse Matrices}
+\label{sec:matrixeq:sparse}
 
 Many matrices arising in applications are sparse.
 For example, the shape regularity of the space triangulation of a \ac{PDE}
@@ -48,7 +55,30 @@ and Julia\footnote{\url{https://docs.julialang.org/en/v1.6/stdlib/SparseArrays/}
   \label{fig:spy}
 \end{figure}
 
-\section{Sherman-Morrison-Woodbury Formula?}
+\section{Sherman-Morrison-Woodbury Formula}
+\label{sec:basics:smw}
+
+Anticipating the coming chapters,
+the \ac{ADI} method has to perform a number of linear system solves
+\begin{equation}
+  \big(A + \alpha^{-1} UV \big) x = b
+\end{equation}
+where the system matrix has the structure of a low-rank update.
+$A\in\Rnn$ is usually sparse,
+\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
+$\alpha\in\C$ is a scalar,
+and $U, V^\T \in\R^{n\times k}$ are dense and have a low numerical rank $k\ll n$.
+Therefore, the product $UV \in\Rnn$ is dense,
+which makes assembling the system matrix infeasible for many applications.
+Still, the solution $x$ to that shifted system is itself a shift of the solution $\hat x$ to $A\hat x = b$,
+see \eg \cite{Strang2016, Golub2013}.
+This is summarized by the Sherman-Morrison-Woodbury formula:
+\begin{equation}
+  \big( A + \alpha^{-1}UV \big)^{-1} =
+  A^{-1} - A^{-1} U (\alpha I_k + V A^{-1} U)^{-1} V A^{-1}
+\end{equation}
+That is, instead of inverting the dense $A + \alpha^{-1} UV \in\Rnn$,
+one only has to invert the sparse $A \in \Rnn$ as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
 
 \section{Low-Rank Representations}
 \label{sec:lowrank}
@@ -193,6 +223,7 @@ The resulting factorization has a diagonal $D$ and (potentially) a lower inner d
 \end{algorithm}
 
 \section{Model Order Reduction}
+\label{sec:mor}
 
 The goal of model order reduction is to find a so-called \ac{ROM}
 \begin{equation}

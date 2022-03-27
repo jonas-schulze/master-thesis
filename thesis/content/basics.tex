@@ -1,15 +1,12 @@
-\chapter{Mathematical Basics}
+\chapter{Hamilton-Jacobi Theory}
 
-\autoref{sec:basics:HJT} derives the \Riccati equation in the context of optimal control following \cite{Locatelli2011}.
-\autoref{sec:basics:tdir} transforms the derived equation into the shape used in the remainder of the thesis.
-\autoref{sec:basics:matrixeqs} then outlines all matrix equations occurring in this thesis,
-for a general overview refer to \eg~\cite{Simoncini2016}.
-Finally, \autoref{sec:basics:smw} shows an efficient strategy to solve shifted linear systems.
+This chapter gives an overview on the \Riccati equations arising in optimal control
+of linear dynamical systems following~\cite{Locatelli2011},
+as well as the \Lyapunov equation to be seen in this thesis.
+For a more general overview on matrix equations refer to \eg~\cite{Simoncini2016}.
 
-\section{Hamilton-Jacobi Theory}
+\section{Finite Control Horizon}
 \label{sec:basics:HJT}
-
-\subsection{Finite Control Horizon}
 
 Consider the \ac{OCP}
 \begin{equation}
@@ -311,7 +308,7 @@ Within this thesis we'll only consider the \ac{LTI} case with invertible $E$.
 In fact, most computations will be performed for the problem above.
 Therefore, $Q$ and $R$ are assumed to be identity matrices of appropriate size.
 
-\subsection{Infinite Control Horizon}
+\section{Infinite Control Horizon}
 % cf \cite[Remark~3.13, Theorem~3.3]{Locatelli2011}
 
 Consider the \ac{OCP} for \ac{LQR} over an infinite time horizon,
@@ -503,30 +500,3 @@ which will be covered in \autoref{sec:ADI}.
   the associated generalized \ac{DRE} has a unique solution.
   \todo{Do all \ac{ALE} appearing in this thesis have a unique solution as well?}
 \end{example}
-
-\section{Sherman-Morrison-Woodbury Formula}
-\label{sec:basics:smw}
-
-Anticipating the coming chapters,
-the \ac{ADI} method has to perform a number of linear system solves
-\begin{equation}
-  \big(A + \alpha^{-1} UV \big) x = b
-\end{equation}
-where the system matrix has the structure of a low-rank update.
-$A\in\Rnn$ is usually sparse,
-\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
-$\alpha\in\C$ is a scalar,
-and $U, V^\T \in\R^{n\times k}$ are dense and have a low numerical rank $k\ll n$.
-Therefore, the product $UV \in\Rnn$ is dense,
-which makes assembling the system matrix infeasible for many applications.
-Still, the solution $x$ to that shifted system is itself a shift of the solution $\hat x$ to $A\hat x = b$,
-see \eg \cite{Strang2016, Golub2013}.
-This is summarized by the Sherman-Morrison-Woodbury formula:
-\begin{equation}
-  \big( A + \alpha^{-1}UV \big)^{-1} =
-  A^{-1} - A^{-1} U (\alpha I_k + V A^{-1} U)^{-1} V A^{-1}
-\end{equation}
-That is, instead of inverting the dense $A + \alpha^{-1} UV \in\Rnn$,
-one only has to invert the sparse $A \in \Rnn$ as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
-
-\todo[inline]{Move this to next chapter? Rename this chapter to \enquote{Linear Systems and Hamilton-Jacobi Theory}?}
