@@ -7,17 +7,17 @@
     grow right=2cm,
     diag/.style={bend left, shorten >=2pt},
   ]{
-    Unk/"U_n^k" [label=above:$\vdots$]
-    -> Gnk/"G(U_n^k)" -> Un1k/"U_{n+1}^k" [label=above:$\vdots$]
-    -> Gn1k/"G(U_{n+1}^k)" -> Un2k/"U_{n+2}^k" [label=above:$\vdots$],
-    "" -!- Fnk/"F(U_n^k)" -!- "" -!- Fn1k/"F(U_{n+1}^k)",
-    Unk1/"U_n^{k+1}"
-    -> Gnk1/"G(U_n^{k+1})" -> Un1k1/"U_{n+1}^{k+1}"
-    -> Gn1k1/"G(U_{n+1}^{k+1})" -> Un2k1/"U_{n+2}^{k+1}",
-    "" -!- Fnk1/"F(U_n^{k+1})" -!- "" -!- Fn1k1/"F(U_{n+1}^{k+1})",
-    Unk2/"U_n^{k+2}" [label=below:$\vdots$]
-    -> Gnk2/"G(U_n^{k+2})" -> Un1k2/"U_{n+1}^{k+2}" [label=below:$\vdots$]
-    -> Gn1k2/"G(U_{n+1}^{k+2})" -> Un2k2/"U_{n+2}^{k+2}" [label=below:$\vdots$];
+    Unk/"U_{n-1}^{k-1}" [label=above:$\vdots$]
+    -> Gnk/"G(U_{n-1}^{k-1})" -> Un1k/"U_{n}^{k-1}" [label=above:$\vdots$]
+    -> Gn1k/"G(U_{n}^{k-1})" -> Un2k/"U_{n+1}^{k-1}" [label=above:$\vdots$],
+    "" -!- Fnk/"F(U_{n-1}^{k-1})" -!- "" -!- Fn1k/"F(U_{n}^{k-1})",
+    Unk1/"U_{n-1}^{k}"
+    -> Gnk1/"G(U_{n-1}^{k})" -> Un1k1/"U_{n}^{k}"
+    -> Gn1k1/"G(U_{n}^{k})" -> Un2k1/"U_{n+1}^{k}",
+    "" -!- Fnk1/"F(U_{n-1}^{k})" -!- "" -!- Fn1k1/"F(U_{n}^{k})",
+    Unk2/"U_{n-1}^{k+1}" [label=below:$\vdots$]
+    -> Gnk2/"G(U_{n-1}^{k+1})" -> Un1k2/"U_{n}^{k+1}" [label=below:$\vdots$]
+    -> Gn1k2/"G(U_{n}^{k+1})" -> Un2k2/"U_{n+1}^{k+1}" [label=below:$\vdots$];
 
     Unk -> Fnk -> Un1k1 -> Fn1k1 -> Un2k2;
     Un1k -> Fn1k -> Un2k1;

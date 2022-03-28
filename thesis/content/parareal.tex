@@ -9,7 +9,7 @@ and derive it as a Newton method following \cite{Gander2007}.
 Then, in \autoref{sec:pr:DRE} we'll adapt the method for \acp{DRE}.
 Lastly, in \autoref{sec:pr:alternatives} we'll briefly discuss alternative methods to parallelize matrix equations.
 
-\section{General Properties}
+\section{Overview}
 \label{sec:pr:properties}
 
 Consider the autonomous \ac{IVP}
@@ -37,9 +37,46 @@ Then the parareal method to compute $U_n \approx u(t_n)$ reads
   \end{aligned}
   \right.
 \end{equation}
-where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$
-integrates from $t_n$ to $t_{n+1}$,
-and similarly does $F$.
+where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$,
+$F(U_n) := F(t_{n+1}, t_n, U_n)$
+integrate from~$t_n$ to~$t_{n+1}$.
+
+The general data dependencies between the parareal iterates~$U_n^k$
+based on \eqref{eq:pr:method} are shown in \autoref{fig:pr:DAG}.
+Notice how in general each coarse solution $G(\optional{})$ is needed twice.
+Therefore, a reasonable scheduling pattern of the directed acyclic graph of \autoref{fig:pr:DAG}
+that exploits good data locality is a pipeline of stages $n$ which compute
+\begin{equation}
+\label{eq:pr:stage}
+  \begin{tikzpicture}[
+    baseline=(Un1k1.base),
+    text height=1.5ex,
+    text depth=0.25ex,
+    >=Stealth,
+    shorten <=0.5ex,
+  ]
+    \graph[grow right sep=0] {
+      ""/"\ldots," -!- Gnk1/"$G(U_{n-1}^{k})$," -!- Un1k1/"$U_{n}^{k}$," -!- Fnk/"$F(U_{n-1}^{k})$," -!- ""/"\ldots"
+    };
+    \draw[<-] (Gnk1.south) -- +(-120:3ex);
+    \draw[->] (Un1k1.north) -- +(60:3ex);
+  \end{tikzpicture}
+\end{equation}
+where the arrows denote data dependencies or transmissions from and to the adjacent stages.
+Note how the stages correspond to the columns of \autoref{fig:pr:DAG}.
+Each stage~$n$ holds~$G(U_{n-1}^{k-1})$ and~$F(U_{n-1}^{k-1})$ in memory,
+receives~$U_{n-1}^k$, and sends~$U_n^k$.
+For this thesis, each stage~$n$ is mapped onto a fixed process.
+However, due to \autoref{thm:pr:conv} some processes will finish earlier than others,
+which leaves potential to better utilize given hardware.
+More on this in \autoref{sec:results}.
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_parareal_dag2.tex}
+  \caption{Dependencies between parareal values $U^{k}_{n}$}
+  \label{fig:pr:DAG}
+\end{figure}
 
 \begin{proposition}[Diagonal Convergence]
 \label{thm:pr:conv}
@@ -63,10 +100,12 @@ and similarly does $F$.
   \end{equation*}
 \end{proof}
 
-This will become handy for the implementation.
-In particular, note that if stage $n$ of the parareal method converged,
+The early iterates $U_n^k$ for $k=n$ thus have fewer dependencies between them,
+\cf \autoref{fig:pr:DAG:early}.
+Furthermore, the same reasoning as in the proof of \autoref{thm:pr:conv} can
+be applied if stage $n$ converges after refinement $k < n$,
 \ie $U^{k+1}_n \approx U^k_n$,
-stage $n+1$ will converge after the same iteration:
+causing stage $n+1$ to converge the iteration thereafter:
 \begin{equation}
   \begin{array}{r@{}l@{}l@{}l}
     U^{k+1}_{n+1}
@@ -81,47 +120,23 @@ there is no need to compute $G(U^{k+1}_n)$.
 
 \begin{figure}[t]
   \centering
-  \input{figures/fig_parareal_dag2.tex}
-  \caption{Dependencies between parareal values $U^{k+1}_{n+1}$}
-  \label{fig:pr:DAG}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
   \input{figures/fig_parareal_dag1.tex}
   \caption{Dependencies between parareal values $U^0_0, \ldots, U_2^2$}
+  \label{fig:pr:DAG:early}
 \end{figure}
 
-\todo[inline]{Add DAG of beginning of early parareal stages: $U_0^0,\ldots,U_2^2$}
-
-Note how $G(U_n^{k+1})$ is needed twice.
-Therefore, a reasonable scheduling pattern that exploits good data locality is the following:
-\begin{align}
-  \text{stage } n &
-  \ldots, G(U_{n-1}^k), U_n^k, F(U_{n-1}^k), \ldots
-  \nonumber\\
-  \text{stage } n+1 & \enspace
-  \ldots, G(U_{n}^k), U_{n+1}^k, F(U_{n}^k), \ldots
-  \text{stage } n+2 & \quad
-  \ldots, G(U_{n}^k), U_{n+1}^k, F(U_{n}^k), \ldots
-  \nonumber
-\end{align}
-
-\begin{equation}
-  \begin{tikzpicture}[
-    baseline,
-    text height=2ex,
-    text depth=0.5ex,
-  ]
-    \graph[grow right=2cm] {
-      ""/"stage $n+1$: \ldots" -!- Gnk1/"$G(U_n^{k+1})$," -!- Un1k1/"$U_{n+1}^{k+1}$," -!- Fnk/"$F(U_n^{k+1})$," -!- ""/"\ldots"
-    };
-    \draw[<-] (Gnk1.south) -- +(-120:5mm);
-    \draw[->] (Un1k1.north) -- +(60:5mm);
-  \end{tikzpicture}
-\end{equation}
+Following \autoref{thm:pr:conv},
+the parareal method converges after $k=N$ iterations at the latest,
+at which point the parareal solutions equal the fine solution,
+$U_n^N = F(U_{n-1}^N)$ for $1\leq n \leq N$.
+In practice, however, it may converge much earlier than that,
+\ie~$k\ll N$,
+as the method can be seen \eg as a Newton method.
+This will be covered in the next section.
+We end this section with an illustrative example.
 
 \begin{example}[Linear \acs*{ODE}]
+\label{example:parareal}
   Let $\phi := \frac{1+\sqrt{5}}{2}$ denote the golden ratio and
   let $\kappa := \frac{2}{\pi} \log \phi$.
   Consider the \ac{IVP}
@@ -170,15 +185,12 @@ Therefore, a reasonable scheduling pattern that exploits good data locality is t
   which explains the remaining gap between the colored and the gray line.
 \end{example}
 
-The parareal method may be seen \eg as a deferred correction method,
-a special case of multiple shooting, or a Newton method.
-
-\section{Parareal as a Special Case of Multiple Shooting}
+\section{Parareal as a Multiple Shooting Method}
 \label{sec:pr:newton}
 
 Consider the autonomous \ac{IVP}
 \begin{equation}
-  \label{eq:IVP}
+  \tag{\ref*{eq:IVP}}
   \left\{
   \begin{aligned}
     \dot u &= f \circ u \\
@@ -199,7 +211,9 @@ define the local problems
 \end{equation}
 for $i \in \Set{0,\ldots,N-1}$
 and determine suitable initial values $U_i$.
-Watch the slight abuse of notation for the initial value $u_0 \in V$ and the solution to the local problem $u_0 : [t_0,t_1] \to V$.
+Watch the slight abuse of notation in $u_0$
+for the initial value $u_0 \in V$
+and the solution $u_0 : [t_0,t_1] \to V$ to the first local problem.
 The local solutions $u_i : [t_i,t_{i+1}] \to V$ represent a global solution to \eqref{eq:IVP} if
 \begin{equation}
   F(U_0, \ldots, U_{N-1}) :=
@@ -294,13 +308,6 @@ the parareal update of \eqref{eq:pr:method} reads
 \end{equation}
 Note the downdate in the last block component.
 The actual low-rank representation of $X^{k+1}_{i+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
-using \autoref{alg:lowrank:compression},
-\begin{equation}
-  X^{k+1}_{i+1}
-  := LDL^\T
-  :\approx \hat L \hat D \hat L^\T
-  .
-\end{equation}
+using \autoref{alg:lowrank:compression}.
 
-\section{Alternative Parallel-in-Time Solvers}
-\label{sec:pr:alternatives}
+%\section{Alternative Parallel-in-Time Solvers}
