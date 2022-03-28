@@ -59,6 +59,56 @@ If $E=I$ the system is said to be in \emph{standard state-space form}.
 
 From system \eqref{eq:basics:system} one may derive a \ac{DRE}, \ac{ARE}, \ac{ALE}, \etc
 
+\section{Cayley Transformation}
+
+\begin{lemma}
+  Let $\alpha_k,\beta_k\in\C$ and $A=H+V$ be given.
+  Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
+  The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
+\end{lemma}
+\begin{proof}
+  For brevity, we omit the subscript $k$.
+  Observe
+  \begin{align*}
+    \Aip\Aiip
+    &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H + \alpha_k(H+V) \\
+    \Aim\Aiim
+    &= HV + \alpha_k\beta_k I_n - \alpha_k H - \beta_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H - \beta_k(H+V)
+  \end{align*}
+  such that
+  \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
+  \begin{equation*}
+    M_k^{-1} N_k
+    = (\Aip\Aiip)^{-1}(\Aim\Aiim)
+    = \Cayley(B_k, A, \alpha_k, \beta_k)
+  \end{equation*}
+  for
+  \begin{equation*}
+    B_k := HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H
+    .
+  \end{equation*}
+\end{proof}
+
+As we will see later, $\beta_k = \conj{\alpha_k}$.
+Thus, if $\Lambda(H), \Lambda(V) \subseteq \Cneg$
+and $\alpha_k \in \Cneg$ for all $k\in\N$, then $\rho(G_k) < 1$ for all $k$.
+This is a reasonable starting point towards showing $G_k\cdots G_0 \to 0$,
+\cf~\autoref{thm:adi:convergence},
+but not a necessary condition.
+
+If further $\alpha_k = \conj{\beta_k} \in\R$ and $H,V$ are hermitean, so is $G_k$.
+As they all commute,
+they are simultaneously diagonalizable and $\rho(\optional{}) = \norm{}_2$,
+such that the eigenvalues of $G_k$ are given by
+\begin{equation}
+  \frac{\lambda - \beta_k}{\lambda + \alpha_k}
+  \cdot
+  \frac{\mu - \alpha_k}{\mu + \beta_k}
+\end{equation}
+where $\lambda \in \Lambda(H)$, $\mu\in\Lambda(V)$.
+
 \section{Equation Types}
 \subsection{Standard}
 
