@@ -1,6 +1,7 @@
 BUILDDIR = output
-DIRS = $(BUILDDIR) $(BUILDDIR)/content $(BUILDDIR)/appendix
+DIRS = tables $(BUILDDIR) $(BUILDDIR)/content $(BUILDDIR)/appendix
 DEPS = Makefile *.bib *.tex */*.tex
+DEPS += tables/warmup4.tex tables/warmup8.tex
 
 .PHONY: update
 update: | $(DIRS)
@@ -22,3 +23,6 @@ $(DIRS):
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)
+
+tables/%.tex: tables/%.csv
+	sed -e 's/,/ \& /g' -e 's/$$/ \\\\/' < $< > $@

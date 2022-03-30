@@ -207,7 +207,6 @@ As will be described later,
 \ie the goal is to offset/reduce the ramp-up delay $\trampup$
 at the cost of a one-time overhead $\twarmup$.
 $t_{\JIT(G)}$ denotes the compile time of $G$.
-Refer to \autoref{tab:impl:warmup} for the measurements corresponding to \autoref{fig:impl:warmup}.
 
 \begin{figure}[p]
   \includegraphics[width=\textwidth]{figures/fig_impl_warmup2.pdf}
@@ -224,20 +223,34 @@ Refer to \autoref{tab:impl:warmup} for the measurements corresponding to \autore
 
 \begin{table}[p]
   \centering
-  \begin{tabular}{lccccccc}
+  \begin{tabular}{%
+    lcc
+    S[table-format=2.2]
+    S[table-format=2.2]
+    S[table-format=1.2]
+    S[table-format=2.2]
+    S[table-format=3.2]
+    S[table-format=3.2]
+    S[table-format=-1.1e-1, round-precision=1, scientific-notation=engineering]
+  }
     \toprule
-    warm-up & $N$ & $\twarmup$ & $\trampup$ & $t_G$ & $t_F$ & $\tpar$ & $\hattpar$ \\
+    {warm-up} &
+    {$N$} &
+    {$K$} &
+    {$\twarmup$} &
+    {$\trampup$} &
+    {$t_G$} &
+    {$t_F$} &
+    {$\tpar$} &
+    {$\hattpar$} &
+    {$\frac{\hattpar-\tpar}{\tpar}$} \\
     \midrule
-    none  & 8 \\
-    $G$   & 8 \\
-    $G,F$ & 8 \\
+    \input{tables/warmup8.tex}
     \midrule
-    none  & 4 \\
-    $G$   & 4 \\
-    $G,F$ & 4 \\
+    \input{tables/warmup4.tex}
     \bottomrule
   \end{tabular}
-  \caption[Measurements corresponding to \autoref*{fig:impl:warmup}]{%
+  \caption[Timeline measurements comparing the effect of JIT compiler warm-up]{%
     Measurements corresponding to \autoref*{fig:impl:warmup}
     based on~\eqref{eq:impl:tpar}.
     The actual runtime is denoted by $\tpar$.
@@ -298,6 +311,10 @@ while adding a major overhead to~$\hattpar$ as generally $t_F \gg t_G$.
 Besides reducing the delay of executing $F$ and $G$,
 it is also important to reduce the delay of any code from \julia{ParaReal.jl} that doesn't depend on them.
 The package is merely responsible for orchestrating the execution of the parareal iterations $(n,k)$.
+\todo{%
+How to cite these webpages properly?
+Should I do anything about the speculation in the paragraph, or the exposure of which in the footnote?
+}
 Therefore, the delay of the first execution of \julia{ParaReal.jl} code is dominated by type inference.\footnote{%
   At least it likely is. Taking measurements is highly non-trivial and out of the scope of this thesis.
   For more details see: \url{https://julialang.org/blog/2020/08/invalidations/}
@@ -307,21 +324,19 @@ which happens when the package is first loaded,
 and whose results are cached and reused when the package is loaded again.
 Exploiting this is highly non-trivial and out of the scope of this thesis.\footnote{\url{https://julialang.org/blog/2021/01/precompile_tutorial/}}
 
-\todo[inline]{%
-How to cite these webpages properly?
-Should I do anything about the speculation in the paragraph, or the exposure of which in the footnote?
-}
+\paragraph{Numerical Results}
 
-\paragraph{Summary}
-
-\todo[inline]{
-  Relate \autoref{fig:impl:warmup} and \autoref{fig:timeline:revised}:
-  $k=K$ and thus early convergence not visible.
-  $n+K\geq N$ most pronounced in top left diagram.
-}
+Refer to \autoref{tab:impl:warmup} for the measurements corresponding to \autoref{fig:impl:warmup}.
+They are based on dense first-order Rosenbrock methods $G$ and $F$ applied to the Rail benchmark~\cite{morwiki_steel},
+taking 1 step ($\tau=\SI{45}{\second}/N$) and 10 steps ($\tau=\SI{45}{\second}/10N$), respectively.
+The (signed) relative error in the final column show that the assumptions on \autopageref{item:impl:assumption:tU} are reasonable in this context.
+Note that $K=N-1$, which is due to \autoref{thm:pr:conv}.
 
 In the case of no warm-up, $\twarmup=0$, the overall compilation overhead caused by $G$ scales linearly in $N$.
-If $G$ is instead being warmed up, $\twarmup=t_{\JIT(G)}$, that overhead depends only on the underlying problem.
+If $G$ is instead being warmed up,
+that overhead is constant and depends only on the underlying problem and solver.
+$\trampup$ is significantly reduced in this case.
+There is no point in warming-up $F$ as well.
 However, the remaining $t_\text{other}$ includes compilation time for communications,
 \eg to serialize the data types representing $U_n^k$,
 and to establish a connection between adjacent pipeline stages.\footnote{%
@@ -330,10 +345,9 @@ and to establish a connection between adjacent pipeline stages.\footnote{%
   each executing a pipeline stage,
   have been created.
 }
-This still leaves a linear overhead in the number of stages $N$.
-Furthermore, due to the one-to-one mapping between stages $n$ and processes,
-some processes will finish earlier than others.
-This leaves potential to better utilize given hardware.
+This still leaves a linear overhead in the number of stages $N$
+and potential for further improvements.
+For the remainder of the thesis, we will always warm-up $G$ and $G$ only.
 
 \subsection{Lack of Asynchronous Data Transfer}
 \label{sec:impl:pr:sync}
@@ -387,6 +401,12 @@ Also considering \autoref{thm:pr:conv}, ...
 To summarize, the revised timeline plot is shown in \autoref{fig:timeline:revised},
 \cf~\autoref{fig:timeline:generic}.
 
+\todo[inline]{
+  Relate \autoref{fig:impl:warmup} and \autoref{fig:timeline:revised}:
+  $k=K$ and thus early convergence not visible.
+  $n+K\geq N$ most pronounced in top left diagram.
+}
+
 \begin{figure}[t]
   \centering
   \input{figures/fig_parareal_timeline_revised.tex}
@@ -417,6 +437,10 @@ To summarize, the revised timeline plot is shown in \autoref{fig:timeline:revise
   \item
     Distributed processes vs local threads vs GPU?
 \end{itemize}
+
+Furthermore, due to the one-to-one mapping between stages $n$ and processes,
+some processes will finish earlier than others.
+This leaves potential to better utilize given hardware.
 
 \subsection{Parallel Programming Pitfalls}
 

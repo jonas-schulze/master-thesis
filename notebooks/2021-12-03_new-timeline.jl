@@ -235,14 +235,11 @@ function _filter(df; kwargs...)
 	filter(ks => pred, df)
 end
 
-# ╔═╡ 45ddf305-0646-4f34-8b12-e5861457c3d4
-first_send = _filter(wide, tag=:WaitingSend, k=0);
-
 # ╔═╡ 786b3ed6-69c2-4d8b-97a9-2e4dc05128d0
 #t_rampup = (t_par - (t_warmup + N*t_G + K*(t_F + t_G) + t_F)) / N 
-#t_rampup = only(_filter(delays, tag=:ComputingC, k=0).start_delay) - t_G
+t_rampup = only(_filter(delays, tag=:ComputingC, k=0).start_delay) - t_G
 #t_rampup = only(_filter(delays, tag=:ComputingF, k=0).start_delay) - t_G
-t_rampup = mean(diff(vcat(t_warmup, first_send.stop[1:end-1]))) - t_G
+#t_rampup = mean(diff(vcat(t_warmup, first_send.stop[1:end-1]))) - t_G
 
 # ╔═╡ 3a3913d0-0078-4c8f-8544-c80a04277f93
 function t̂_par(;
@@ -309,6 +306,9 @@ Without any ramp-up delay and if $F$ took $x times as long,
 the parallel efficiency would be
 $(round(efficiency_x_ideal / efficiency, digits=2)) times as high.
 """
+
+# ╔═╡ 45ddf305-0646-4f34-8b12-e5861457c3d4
+first_send = _filter(wide, tag=:WaitingSend, k=0);
 
 # ╔═╡ cc55b617-1cc1-4bce-a837-e25047049730
 @assert issorted(first_send.n)
