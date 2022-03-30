@@ -75,7 +75,7 @@ function fig_impl_warmup(cols...)
 	ncols = length(cols)
 	nrows = length(first(cols))
 	ax = [
-		Axis(grid[r,c], yticks=[4,8], xtickformat="{:d}s")
+		Axis(grid[r,c]; yticks=[4,8], xtickformat=string("{:d}", unit_space, 's'))
 		for r in 1:nrows, c in 1:ncols
 	]
 	for (c, col) in enumerate(cols)
