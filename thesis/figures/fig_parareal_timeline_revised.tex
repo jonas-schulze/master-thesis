@@ -1,0 +1,23 @@
+\begin{tikzpicture}
+  \def\myscale{0.6}
+  % axis and labels
+  \node[below] at (5,-0.5*\myscale-0.3) {\footnotesize Wallclock Time};
+  \node[rotate=90, above] at (-0.5-0.3,5*\myscale) {\footnotesize Parareal Stage};
+\begin{scope}[yscale=\myscale]
+  \draw[semithick] (-0.5,-0.5) rectangle (10.5,10.5);
+  % timeline diagram
+  \draw[thick] (0,0) rectangle node[rotate=90] {warm-up} (1,10);
+  \draw[thick] (1.1,0)
+    -- node[right] {$k=0$} (3.1,10)
+    -- node[below] {$n=N$} (9,10)
+    -- (7.4,2)
+    -- node[below] {$n=k$} cycle;
+  \node[right] at (8,5) {$k=K$};
+  % lack of asynchronous data transfer
+  \draw[thick,gray,dotted] (8.25,6.25)
+    -- node[black,left] {$n+K \geq N$} (8.5,10);
+  % early convergence due to "delta k = 1"
+  \draw[thick,gray,dashed] (7.5,2.5)
+    -- node[black,left] {convergence} (6,10);
+\end{scope}
+\end{tikzpicture}

@@ -39,9 +39,11 @@ Then the parareal method to compute $U_n \approx u(t_n)$ reads
 where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$,
 $F(U_n) := F(t_{n+1}, t_n, U_n)$
 integrate from~$t_n$ to~$t_{n+1}$.
-
 The general data dependencies between the parareal iterates~$U_n^k$
-based on \eqref{eq:pr:method} are shown in \autoref{fig:pr:DAG}.
+are shown in \autoref{fig:pr:DAG}.
+Observe that in any topological order of that graph,
+the coarse solutions $G(U_n^k)$ for any fixed~$k$ need to be computed sequentially over $0 \leq n < N$.
+
 Notice how in general each coarse solution $G(\optional{})$ is needed twice.
 Therefore, a reasonable scheduling pattern of the directed acyclic graph of \autoref{fig:pr:DAG}
 that exploits good data locality is a pipeline of stages $n$ which compute
@@ -51,24 +53,25 @@ that exploits good data locality is a pipeline of stages $n$ which compute
     baseline=(Un1k1.base),
     text height=1.5ex,
     text depth=0.25ex,
-    >=Stealth,
-    shorten <=0.5ex,
   ]
     \graph[grow right sep=0] {
-      ""/"\ldots," -!- Gnk1/"$G(U_{n-1}^{k})$," -!- Un1k1/"$U_{n}^{k}$," -!- Fnk/"$F(U_{n-1}^{k})$," -!- ""/"\ldots"
+      ""/"\ldots\rlap{,}"
+      -!- Gnk1/"$G(U_{n-1}^{k})$\rlap{,}"
+      -!- Un1k1/"$U_{n}^{k}$\rlap{,}"
+      -!- Fnk/"$F(U_{n-1}^{k})$\rlap{,}"
+      -!- ""/"\ldots"
     };
-    \draw[<-] (Gnk1.south) -- +(-120:3ex);
-    \draw[->] (Un1k1.north) -- +(60:3ex);
+    \draw[<-] (Gnk1) -- +(70:-1cm);
+    \draw[->] (Un1k1) -- +(70:1cm);
   \end{tikzpicture}
 \end{equation}
 where the arrows denote data dependencies or transmissions from and to the adjacent stages.
-Note how the stages correspond to the columns of \autoref{fig:pr:DAG}.
+Dependencies within a stage are not shown.
+Note how this pattern correspond to the rows of \autoref{fig:pr:DAG}.
 Each stage~$n$ holds~$G(U_{n-1}^{k-1})$ and~$F(U_{n-1}^{k-1})$ in memory,
 receives~$U_{n-1}^k$, and sends~$U_n^k$.
-For this thesis, each stage~$n$ is mapped onto a fixed process.
-However, due to \autoref{thm:pr:conv} some processes will finish earlier than others,
-which leaves potential to better utilize given hardware.
-More on this in \autoref{sec:results}.
+However, there is no need that all stages $n$ compute the same number of refinements $k$,
+due to the following proposition.
 
 \begin{figure}[t]
   \centering
@@ -117,7 +120,7 @@ Therefore,
 assuming $G$ is well conditioned,
 there is no need to compute $G(U^{k+1}_n)$.
 
-\begin{figure}[t]
+\begin{figure}[p]
   \centering
   \input{figures/fig_parareal_dag1.tex}
   \caption{Dependencies between parareal values $U^0_0, \ldots, U_2^2$}
@@ -129,10 +132,24 @@ the parareal method converges after $k=N$ iterations at the latest,
 at which point the parareal solutions equal the fine solution,
 $U_n^N = F(U_{n-1}^N)$ for $1\leq n \leq N$.
 In practice, however, it may converge much earlier than that,
-\ie~$k\ll N$,
-as the method can be seen \eg as a Newton method.
-This will be covered in the next section.
-We end this section with an illustrative example.
+\ie~$k\ll N$.
+Limiting the number of refinements to~$k\leq K$,
+and assuming that $F$, $G$, and communication all take constant time,
+the expected timeline of a parareal execution is shown in \autoref{fig:timeline:generic}.
+Note how the diagram corresponds to \autoref{fig:pr:DAG};
+the slope of the $k=0$ face depends on the runtime of $G$.
+
+\begin{figure}[p]
+  \centering
+  \input{figures/fig_parareal_timeline_generic.tex}
+  \caption[Schematic parareal timeline]{%
+    Schematic parareal timeline.
+    Time passed and refinement $k$ both increase to the right,
+    the parareal stage $n$ increases to the top.
+    The $k=K$ boundary won't be visible if $K\geq N$.
+  }
+  \label{fig:timeline:generic}
+\end{figure}
 
 \begin{example}[Linear \acs*{ODE}]
 \label{example:parareal}
@@ -167,7 +184,7 @@ We end this section with an illustrative example.
       parareal method applied to the linear problem \eqref{eq:pr:linear}.
       The stages $n$ are decoded by color,
       dots denoting $U^k_n$ and lines $F(\optional{}, t_{n-1}, U^k_{n-1})$.
-      The gray curve represents the exact solution.
+      The dashed gray curve represents the exact solution.
     }
     \label{fig:pr:linear}
   \end{figure}
@@ -187,7 +204,7 @@ We end this section with an illustrative example.
 \section{Parareal as a Multiple Shooting Method}
 \label{sec:pr:newton}
 
-Consider the autonomous \ac{IVP}
+Consider again the autonomous \ac{IVP}
 \begin{equation}
   \tag{\ref*{eq:IVP}}
   \left\{

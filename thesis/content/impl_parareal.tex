@@ -18,7 +18,7 @@ It has been designed with the following requirements in mind:
 
     For fine resolutions, the storage requirements are immense.
     The overall solution might not fit in memory of a single compute node.
-    Therefore, it has to be possible that each stage $n$ saves its local solution along $[t_{n-1},t_n]$ directly to disk,
+    Therefore, it has to be possible that each stage $n$ saves its local (fine) solution along $[t_{n-1},t_n]$ directly to disk,
     without sending it to the calling process first.
 \end{enumerate}
 On top of that:
@@ -83,6 +83,10 @@ Any custom implementation of the parareal update formula must follow the interfa
   escapechar=\%,
   breaklines=true,
 ]{code/default_update.jl}
+% The form a+b+(-c) is for historical reasons. The LDLt data structure used to eagerly concatenate the
+% matrices instead of collecting them lazily, as it does now. Back then, using a ternary plus meant
+% fewer allocations (then: 2 allocs for L and 2 allocs for D, now: 0 allocs for L and 1 alloc for D)
+% before compression.
 
 The remainder of this section is devoted to a complete example of a user-defined problem type ($N=3$, $K=2$).
 The problem type will be a mere placeholder that forwards its initial value,
@@ -150,33 +154,112 @@ $G(U_n^*)$ is essentially a sequential operation over all $n$.
 The computations of $F(U^*_n)$ can only be parallelized after such a global coarse solve.
 Therefore, it is critical that the individual coarse solutions are available as fast as possible.
 
-\todo[inline]{Describe notion of \enquote{ramp-up delay}?}
+In order to describe the runtime of the present parareal implementation,
+let $t_F$, $t_G$ denote the runtime of $F$ and $G$, respectively.
+Let $N$ be the number of stages $1 \leq n \leq N$,
+and $K$ be the number of refinements $0 \leq k \leq K$.
+Let $\trampup$ be the overhead imposed on each computing the first coarse solution $G(U_n^0)$,
+and $\twarmup$ be a general global overhead.
+Further, we make the following assumptions:
+\begin{enumerate}
+  \item
+    $t_F$ and $t_G$ are constant, \ie do not depend on $n, k$.
+  \item
+    \label{item:impl:assumption:tU}
+    The time to compute the actual value $U_n^k$ is negligible,
+    \cf~\autoref{lst:impl:default_update!}.
+  \item
+    The overhead to check for convergence is negligible.
+  \item
+    Communication time is negligible.
+  \item
+    All stages $n$ compute $K$ refinements, \ie $k_n = K \enspace\forall n$.
+\end{enumerate}
+The runtime may then be estimated using
+\begin{equation}
+\label{eq:impl:tpar}
+  \hattpar
+  = \twarmup
+  + \underbrace{
+    \strut
+    N \cdot (\trampup + t_G)
+  }_{\substack{
+    \text{stages $1\leq n\leq N$}\\
+    \text{refinement $k=0$}
+  }}
+  + \underbrace{
+    \strut
+    K \cdot (t_F + t_G)
+  }_{\substack{
+    \vphantom{\text{stage}}
+    n = N \\
+    1 \leq k \leq K
+  }}
+  + t_F
+\end{equation}
+where the final $t_F$ is to compute the best fine solution available.
+These assumptions are compatible to the generic timeline \autoref{fig:timeline:generic}.
+As will be described later,
+\begin{equation}
+  \twarmup + \trampup
+  = t_{\JIT(G)} + t_\text{other}
+\end{equation}
+\ie the goal is to offset/reduce the ramp-up delay $\trampup$
+at the cost of a one-time overhead $\twarmup$.
+$t_{\JIT(G)}$ denotes the compile time of $G$.
+Refer to \autoref{tab:impl:warmup} for the measurements corresponding to \autoref{fig:impl:warmup}.
 
-\begin{figure}[tb]
+\begin{figure}[p]
   \includegraphics[width=\textwidth]{figures/fig_impl_warmup2.pdf}
   \caption[Timeline diagrams comparing the effect of JIT compiler warm-up]{%
     Timeline diagrams comparing the effect of \acs{JIT} compiler warm-up.
     Left: $N=8$ processes running on two compute nodes,
     right: $N=4$ processes running on a laptop.
     Top: no warm-up,
-    middle: warming up coarse solver \julia{csolve} ($G$),
-    bottom: warming up coarse and fine solver \julia{fsolve} ($F$).
+    middle: warming up coarse solver $G$ (\julia{csolve}),
+    bottom: warming up coarse and fine solver $F$ (\julia{fsolve}).
   }
   \label{fig:impl:warmup}
 \end{figure}
 
-\begin{table}[tb]
-  \caption{Ramp-up delay}
+\begin{table}[p]
+  \centering
+  \begin{tabular}{lccccccc}
+    \toprule
+    warm-up & $N$ & $\twarmup$ & $\trampup$ & $t_G$ & $t_F$ & $\tpar$ & $\hattpar$ \\
+    \midrule
+    none  & 8 \\
+    $G$   & 8 \\
+    $G,F$ & 8 \\
+    \midrule
+    none  & 4 \\
+    $G$   & 4 \\
+    $G,F$ & 4 \\
+    \bottomrule
+  \end{tabular}
+  \caption[Measurements corresponding to \autoref*{fig:impl:warmup}]{%
+    Measurements corresponding to \autoref*{fig:impl:warmup}
+    based on~\eqref{eq:impl:tpar}.
+    The actual runtime is denoted by $\tpar$.
+    $t_F$ and $t_G$ are estimated as the median,
+    $\twarmup$ as the maximum of their respective runtimes.
+    $\trampup$ is taken as the mean delay between adjacent $G(U_n^0)$.
+    All timings are in seconds.
+  }
+  \label{tab:impl:warmup}
 \end{table}
 
 \paragraph{Sequential \ac{JIT} compilation}
 
 Without any precautions,
+\begin{equation*}
+  \twarmup = 0,
+\end{equation*}
 \ac{JIT} compilation of $G$ happens sequentially,
-as computing $G(U_n^k)$ is essentially sequential.
+as computing $G(U_n^k)$ is essentially sequential over $n$.
 This effect is especially severe if the executors of different parareal iterations $(n,k)$ do not share the results of code compilation.
 These executors may be processes, threads~(pthreads), or tasks~(green threads).
-As of the writing of this thesis,
+For the present implementation,
 there is a one-to-one mapping between processes and stages $n$,
 which means the compilation happens exactly once per stage $n$ and is reused between refinements $k$.\footnote{%
   As of the writing of this thesis, Julia does not reuse code compiled between processes.
@@ -185,8 +268,10 @@ This is visible in the first row of \autoref{fig:impl:warmup}
 by the first occurrences of $G$ for each stage $n$,
 which marks the computation of $G(U_n^0)$,
 whose execution time includes compilation time.
+Therefore, the first occurrences of $G$ take substantially longer than the subsequent ones.
 The computation of the parareal update has a negligible duration,
-and is therefore not shown in the timeline plot.
+and is therefore not shown in the timeline plot,
+\cf assumption~\ref{item:impl:assumption:tU}.
 
 \paragraph{Parallel \acs{AOT} compilation}
 
@@ -196,13 +281,17 @@ A more naive approach is to manually warm up critical parts of the code by execu
 In the context of \julia{ParaReal.jl},
 doing so allows to perform the compilation in parallel,
 which significantly decreases the time to compute all coarse solutions $G(U_n^*)$.
-This is visible in the middle and bottom rows of \autoref{fig:impl:warmup}.
-$F$ and $G$ have a lot of code in common,\footnote{%
-  For example, the Lyapunov solvers will be called with arguments having the exact same types,
-  \ie they will call the same method internally.
-  Unless that method has been inlined, the results of its compilation will be reused.
-}
-such that warming up both shows a much smaller improvement compared to just warming up the coarse solver $G$.
+This is visible in the middle and bottom rows of \autoref{fig:impl:warmup},
+where
+\begin{align*}
+  \twarmup &= t_{\JIT(G)} + t_G
+  \enspace
+  \text{and} \\
+  \twarmup &= t_{\JIT(G)} + t_G + t_{\JIT(F)} + t_F,
+\end{align*}
+respectively.
+Warming up both $F$ and $G$ has (as expected) a negligible effect on~$\trampup$,
+while adding a major overhead to~$\hattpar$ as generally $t_F \gg t_G$.
 
 \paragraph{Precompilation}
 
@@ -223,7 +312,31 @@ How to cite these webpages properly?
 Should I do anything about the speculation in the paragraph, or the exposure of which in the footnote?
 }
 
+\paragraph{Summary}
+
+\todo[inline]{
+  Relate \autoref{fig:impl:warmup} and \autoref{fig:timeline:revised}:
+  $k=K$ and thus early convergence not visible.
+  $n+K\geq N$ most pronounced in top left diagram.
+}
+
+In the case of no warm-up, $\twarmup=0$, the overall compilation overhead caused by $G$ scales linearly in $N$.
+If $G$ is instead being warmed up, $\twarmup=t_{\JIT(G)}$, that overhead depends only on the underlying problem.
+However, the remaining $t_\text{other}$ includes compilation time for communications,
+\eg to serialize the data types representing $U_n^k$,
+and to establish a connection between adjacent pipeline stages.\footnote{%
+  By default, connections between processes are established when they are first used.
+  Here, only the connections between the calling process and the worker processes,
+  each executing a pipeline stage,
+  have been created.
+}
+This still leaves a linear overhead in the number of stages $N$.
+Furthermore, due to the one-to-one mapping between stages $n$ and processes,
+some processes will finish earlier than others.
+This leaves potential to better utilize given hardware.
+
 \subsection{Lack of Asynchronous Data Transfer}
+\label{sec:impl:pr:sync}
 
 A common strategy to improve CPU utilization is to perform data transfers between processes asynchronously.
 Julia offers the \julia{RemoteChannel} data structure for this purpose.
@@ -265,6 +378,27 @@ which shadows the effect described in the previous paragraph for the first row o
 For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
   If due to user code the data types of $U_n^*$ changes, recompilation might be necessary.
 }
+
+\subsection{Early Convergence}
+\label{sec:impl:pr:conv}
+
+Also considering \autoref{thm:pr:conv}, ...
+
+To summarize, the revised timeline plot is shown in \autoref{fig:timeline:revised},
+\cf~\autoref{fig:timeline:generic}.
+
+\begin{figure}[t]
+  \centering
+  \input{figures/fig_parareal_timeline_revised.tex}
+  \caption[Revised schematic timeline diagram]{%
+    Revised schematic timeline diagram of \julia{ParaReal.jl} implementation for $N$ stages and $K$ refinements.
+    The dotted line is due to the lack of asynchronous data transfer for $n+k \geq N$,
+    \cf~\autoref{sec:impl:pr:sync}.
+    The dashed line indicates early convergence for $k_n < k_{n+1}$,
+    \cf~\autoref{sec:impl:pr:conv}.
+  }
+  \label{fig:timeline:revised}
+\end{figure}
 
 \subsection{Advanced Scheduling Strategies}
 
