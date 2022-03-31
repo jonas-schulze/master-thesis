@@ -256,7 +256,7 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
     The actual runtime is denoted by $\tpar$.
     $t_F$ and $t_G$ are estimated as the median,
     $\twarmup$ as the maximum of their respective runtimes.
-    $\trampup$ is taken as the mean delay between adjacent $G(U_n^0)$.
+    $\trampup$ is taken as the mean delay between adjacent $G(U_n^0)$ minus $t_G$.
     All timings are in seconds.
   }
   \label{tab:impl:warmup}
@@ -332,7 +332,7 @@ taking 1 step ($\tau=\SI{45}{\second}/N$) and 10 steps ($\tau=\SI{45}{\second}/1
 The (signed) relative error in the final column show that the assumptions on \autopageref{item:impl:assumption:tU} are reasonable in this context.
 Note that $K=N-1$, which is due to \autoref{thm:pr:conv}.
 
-In the case of no warm-up, $\twarmup=0$, the overall compilation overhead caused by $G$ scales linearly in $N$.
+In the case of no warm-up, $\twarmup=0$, the overall compilation overhead caused by~$G$ scales linearly in~$N$.
 If $G$ is instead being warmed up,
 that overhead is constant and depends only on the underlying problem and solver.
 $\trampup$ is significantly reduced in this case.
@@ -346,8 +346,9 @@ and to establish a connection between adjacent pipeline stages.\footnote{%
   have been created.
 }
 This still leaves a linear overhead in the number of stages $N$
-and potential for further improvements.
-For the remainder of the thesis, we will always warm-up $G$ and $G$ only.
+and potential for further improvements,
+as ideally $\trampup=0$.
+For the remainder of the thesis, $G$ will always be warmed up.
 
 \subsection{Lack of Asynchronous Data Transfer}
 \label{sec:impl:pr:sync}
@@ -369,43 +370,80 @@ which internally call \code{LAPACK}.
 The solution described in the previous paragraph is not yet implemented,
 \ie all data transfers are synchronous.
 This causes gaps visible in \autoref{fig:impl:warmup} after $G$ and before $F$,
-whose ends roughly align with the beginnings of calls to $G$ on the next stage.
+where the processor is essentially idle.
+In general, a~gap ends shortly before $G$ starts on the next stage.\footnote{%
+  There is one exception to this for $N=4$ and no warm-up.
+  The last yellow box on stage $n=2$ in the top-right plot, $F(U_1^1)$,
+  starts \enquote{too early} because $G(U_1^1)$ happens to finish before $G(U_2^0)$,
+  and the Julia runtime has been able to schedule the receiving code one gap earlier.
+}
 
-Another effect is that the iterations $(n,k)$ for which $n+k \geq N$ do not show this gap.
+Another effect is that the iterations $(n,k)$ for which $n+k \geq N$ show noticeably smaller gaps.
 The reason is twofold.
-The last stage $N$ doesn't need to send any data, therefore has no \ac{JIT} warm-up delay for the first iteration $k=0$ and no gap in the diagram.
-This causes the next refinement $k=1$ of the previous stage $N-1$ to have a noticeably smaller gap,
+The last stage $N$ doesn't need to send any data,
+therefore has no \ac{JIT} warm-up delay for the first iteration $k=0$ and almost no gap in the diagram.
+This causes the next refinement $k=1$ of the previous stage $N-1$ to have a noticeably smaller gap as well,
 since its transmission code has already been compiled.
 This effect propagates back-to-front through the still running pipeline stages.
 
-The exact size of the gap between the computations of $G(U_{n-1}^k)$ and $F(U_{n-1}^k)$ of stage $n$ is determined by
-\begin{enumerate}
-  \item\label{item:impl:gapsize:1}
-    the execution time of the transfer of $U_n^k$ to stage $n+1$, and
-  \item\label{item:impl:gapsize:2}
-    the overhead included in the computation of $G(U_n^{k-1})$,
-    \ie the previous iterate $k-1$ on the next stage $n+1$.
-\end{enumerate}
-For $k=0$, \ref{item:impl:gapsize:2} is zero.
-For $k=1$ and no warm-up, \ref{item:impl:gapsize:2} includes compilation time and dominates \ref{item:impl:gapsize:1},
-which shadows the effect described in the previous paragraph for the first row of \autoref{fig:impl:warmup}.
-For $k\geq 2$, \ref{item:impl:gapsize:2} is essentially zero.\footnote{%
-  If due to user code the data types of $U_n^*$ changes, recompilation might be necessary.
+The exact size of the gap between the computations of~$G(U_{n-1}^k)$ and~$F(U_{n-1}^k)$ of stage~$n$ is determined by
+how much the stages are out-of-sync.
+Assuming that\footnote{%
+  Note how this assumption is false for the hardware used in $N=4$,
+  which causes the outlier described in the previous footnote.
 }
+\begin{equation}
+  t_F > t_G + t_{\JIT(G)}
+\end{equation}
+this includes for $n+k < N$
+\begin{enumerate}
+  \item\label{item:impl:comm:1}
+    the overhead $t_\text{other}$,
+    which includes \eg the compilation time of any transmission code,
+    and
+  \item\label{item:impl:comm:2}
+    for $k\geq 1$ and no warm-up
+    the overhead $t_{\JIT(G)}$ that,
+    depending on the perspective,
+    $G(U_n^{k-1})$ on the next stage finishes late,
+    or $G(U_{n-1}^k)$ on the current stage finished early.
+  %\item the time to compute the actual parareal value $U_n^k$.
+\end{enumerate}
+The last point causes the current stage to then \enquote{finish late} as well,
+from the perspective of the previous stage.
+For the first row of \autoref{fig:impl:warmup} effect~\ref{item:impl:comm:2} shadows~\ref{item:impl:comm:1},
+while for the remaining rows effect~\ref{item:impl:comm:2} is essentially zero.
 
 \subsection{Early Convergence}
 \label{sec:impl:pr:conv}
 
-Also considering \autoref{thm:pr:conv}, ...
+Due to \autoref{thm:basics:dre-limit-are},
+later parareal stages are expected to require fewer Newton refinements than earlier stages to reach convergence.
+Therefore, each stage $n$ may defer the computation of a refinement $k$,
+until the previous stage $n-1$ finished computing its refinement $k+1$.
+That is, the number of refinements computed may differ by at most one from stage to stage,
+\ie $k_{n+1} \geq k_n -1$ where $k_n$ denotes the last refinement computed by stage $n$.
+This effect is best to be seen in \autoref{fig:impl:restart},
+which consists of the first couple of stages corresponding to \autoref{fig:results:timeline:reference}.
+The latter figure will be described in \autoref{sec:results:parareal}.
 
-To summarize, the revised timeline plot is shown in \autoref{fig:timeline:revised},
-\cf~\autoref{fig:timeline:generic}.
+To summarize all effects described so far,
+the revised schematic timeline plot is shown in \autoref{fig:timeline:revised},
+\cf \autoref{fig:timeline:generic} for the expected schematic timeline.
+With respect to \autoref{fig:impl:warmup},
+the faces $k=K$ and therefore early convergence are not visible.
+The face $n+K \geq N$ is most pronounced in the top left diagram.
+For large $N$, $N \gg K$, that effect will be negligible for the overall runtime of the parareal algorithm.
 
-\todo[inline]{
-  Relate \autoref{fig:impl:warmup} and \autoref{fig:timeline:revised}:
-  $k=K$ and thus early convergence not visible.
-  $n+K\geq N$ most pronounced in top left diagram.
-}
+\begin{figure}[t]
+  \centering
+  \missingfigure{timeline}
+  \caption[Restarted parareal computation]{
+    Restarted parareal computations to maintain $k_{n+1} \geq k_n - 1$.
+    The timeline corresponds to the first 20 stages seen in \autoref{fig:results:timeline:reference}.
+  }
+  \label{fig:impl:restart}
+\end{figure}
 
 \begin{figure}[t]
   \centering
@@ -420,9 +458,19 @@ To summarize, the revised timeline plot is shown in \autoref{fig:timeline:revise
   \label{fig:timeline:revised}
 \end{figure}
 
-\subsection{Advanced Scheduling Strategies}
+\subsection{Scheduling Strategies}
 
 \begin{itemize}
+  \item
+    parallel efficiency
+    \begin{equation}
+      \frac{\tseq}{P\cdot \tpar}
+    \end{equation}
+    Due to the one-to-one mapping between stages $n$ and processes, it is $P = N$.
+    This yields very bad parallel efficiencies, \cf table corresponding to \autoref{fig:results:parareal:rail}.
+
+    For defense: post-mortem scheduling (\eg naive round-robin) to obtain a minimum $\hat P$ necessary to obtain the \emph{same} timeline.
+    Use that to compute hypothetical parallel efficiencies.
   \item
     Early stages $n=0,1,2$ become idle even before later stages receive their first $U^0_n$.
     Maybe they could be reused: measure runtime of $F$ and $G$ to compute optimum number $N$ for given number of processors.
@@ -467,15 +515,3 @@ This leaves potential to better utilize given hardware.
     \url{https://github.com/JuliaLang/julia/pull/44671}
 \end{itemize}
 
-\subsection{Where should I put this?}
-
-\begin{itemize}
-  \item
-    Due to \autoref{thm:basics:dre-limit-are},
-    I expect later parareal stages to require fewer Newton refinements to reach convergence.
-    Therefore, each stage $n$ may defer the computation of a refinement $k$,
-    until the previous stage $n-1$ finished computing its refinement $k+1$.
-    That is, the number of refinements computed may differ by at most one from stage to stage.
-
-    This effect is visible in the timeline diagram of \eg the reference solution of \autoref{fig:results:parareal:rail}.
-\end{itemize}
