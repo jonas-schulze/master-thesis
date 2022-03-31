@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH -J seq
+#SBATCH -o %x-%j.out
+#SBATCH -e %x-%j.err
+#
+#SBATCH -n 1
+#SBATCH -c 16
+#
+#SBATCH --time=00-1:00:00
+#SBATCH --partition=short
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=jschulze@mpi-magdeburg.mpg.de
+
+set -eu
+
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
+export MKL_ENABLE_INSTRUCTIONS=AVX2
+export JULIA_PROJECT=@.
+
+# number of steps
+export MY_N=${MY_N:-1}
+
+# order of solver:
+export MY_O=${MY_O:-1}
+
+# specify from outside: MY_KIND=dense|lowrank
+
+module load apps/julia/1.6
+
+julia compute_seq.jl

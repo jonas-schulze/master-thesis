@@ -23,6 +23,7 @@ function _alg(order)
     error("unknown order: ", order)
 end
 
+algorithms(c::SequentialConfig) = _alg(c.order)
 algorithms(c::ParallelConfig) = _alg(c.oc), _alg(c.of)
 
 function Δt(prob, nsteps)
