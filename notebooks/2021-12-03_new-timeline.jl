@@ -94,6 +94,9 @@ end
 # ╔═╡ 2ac964d3-cc44-4754-9416-afd8c689fc64
 timeline(wide)
 
+# ╔═╡ 4fb1ec7a-6358-4905-8961-b5352474913c
+timeline(filter(:n => in(0:20), wide))
+
 # ╔═╡ 2b8dfcad-70ac-4a5e-a5c9-f0d959ecca73
 md"""
 ## Ramp-up delay
@@ -326,8 +329,9 @@ end
 # ╔═╡ b27e4f95-fc29-4bed-a712-aed66c3cfa41
 let
 	df = _filter(long; n=N, tag=:ComputingF, type=:stop)
+	k_N = nrow(df)
 	df[!, :estimate] = [
-		t_warmup + N*(t_rampup + t_G) + k*(t_F + t_G) + t_F for k in 0:K
+		t_warmup + N*(t_rampup + t_G) + k*(t_F + t_G) + t_F for k in 0:min(K, k_N-1)
 	]
 	df
 end
@@ -347,6 +351,7 @@ TableOfContents()
 # ╠═33159e26-d481-4f9e-9a0a-f615259165cb
 # ╠═1115cd97-ed84-4793-b97c-598dcd5b600a
 # ╠═2ac964d3-cc44-4754-9416-afd8c689fc64
+# ╠═4fb1ec7a-6358-4905-8961-b5352474913c
 # ╟─2b8dfcad-70ac-4a5e-a5c9-f0d959ecca73
 # ╠═e34b4e67-e1ea-4166-80fc-e2001e9b52f8
 # ╠═a12610eb-b6ae-4eba-8dad-a4c8b9d9ccf9
