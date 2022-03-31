@@ -82,7 +82,7 @@ Their errors look similar to~\cite[Fig.~1]{Lang2015}.
     bottom: relative error compared to reference solution
     (dense parareal scheme of order 4/4).
     Left: global time span $[\SI{0}{\second}, \SI{45}{\second}]$,
-    right: zoom to $[\SI{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
+    right: zoom to $[\SI[round-mode=off]{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
   }
   \label{fig:results:parareal:rail}
 \end{figure}
@@ -113,3 +113,75 @@ Due to the problem with the low-rank \Ros{2} solver mentioned in the previous pa
 Replicate \cite[Table~6.2]{Lang2017},
 Estimate parallel efficiency based on timeline data,
 }
+
+\begin{table}[p]
+  \centering
+  \begin{tabular}{%
+    l
+    S[table-format=2] % k
+    S[table-format=2.2] % warm-up
+    S[table-format=-1.2] % ramp-up
+    S[table-format=1.2] % G
+    S[table-format=3.2] % F
+    S[table-format=4.2] % par
+    S[table-format=4.2] % par est
+    S[round-precision=3, round-minimum=0.001, table-format=<1.3, scientific-notation=fixed, fixed-exponent=0] % err
+  }
+    \toprule
+    Solver &
+    {$k_N$} &
+    {$\twarmup$} &
+    {$\trampup$} &
+    {$t_G$} &
+    {$t_F$} &
+    {$\tpar$} &
+    {$\hattpar$} &
+    {$\abs*{\frac{\hattpar-\tpar}{\tpar}}$} \\
+    \midrule
+    %TODO: Add uncertainties for low-rank t_F and t_G?
+    \input{tables/warmup450_lr.tex}
+    \midrule
+    \input{tables/warmup450_de.tex}
+    \midrule
+    \input{tables/warmup450_ref.tex}
+    \bottomrule
+  \end{tabular}
+  \caption[Timeline measurements for parareal algorithm, $N=450$, $K=10$]{%
+    Timeline measurements for parareal algorithm, $N=450$, $K=10$.
+    All measurements and estimates are as in \autoref{tab:impl:warmup}.
+    The first column denotes the parareal scheme (coarse/fine order).
+  }
+  \label{tab:results:warmup}
+\end{table}
+
+\begin{table}[p]
+  \centering
+  \begin{tabular}{%
+    l
+    S[table-format=4.2] % par
+    S[table-format=6.2] % seq est
+    S[table-format=2.2] % speedup
+    S[round-precision=3, round-minimum=0.001, table-format=1.3, scientific-notation=fixed, fixed-exponent=0] % efficiency
+  }
+    \toprule
+    Solver &
+    {$\tpar$} &
+    {$\hattseq$} &
+    {$\frac{\hattseq}{\tpar}$} &
+    {$\frac{\hattseq}{N\cdot\tpar}$} \\
+    \midrule
+    \input{tables/speedup450_lr.tex}
+    \midrule
+    \input{tables/speedup450_de.tex}
+    \midrule
+    \input{tables/speedup450_ref.tex}
+    \bottomrule
+  \end{tabular}
+  \caption[Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$]{%
+    Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$.
+    This table complements \autoref{tab:results:warmup}.
+    The sequential runtime $\hattseq$ is estimated as $\sum_{n=1}^N t_F(n, k_n-1)$,
+    \ie the total runtime of the last $F(U_{n-1}^*)$ computed.
+    The parallel efficiency is evaluated for $N$ processors.
+  }
+\end{table}

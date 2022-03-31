@@ -1,10 +1,12 @@
 BUILDDIR = output
 DIRS = tables $(BUILDDIR) $(BUILDDIR)/content $(BUILDDIR)/appendix
 DEPS = Makefile *.bib *.tex */*.tex
-DEPS += tables/warmup4.tex tables/warmup8.tex
+TABLES_CSV = $(wildcard tables/*.csv)
+TABLES_TEX = $(TABLES_CSV:.csv=.tex)
+DEPS += $(TABLES_TEX)
 
 .PHONY: update
-update: | $(DIRS)
+update: $(TABLES_TEX) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 
 .PHONY: all

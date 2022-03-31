@@ -189,6 +189,7 @@ The runtime may then be estimated using
   }}
   + \underbrace{
     \strut
+%TODO: Maybe k_N or (K-1) are more descriptive ...
     K \cdot (t_F + t_G)
   }_{\substack{
     \vphantom{\text{stage}}
@@ -231,7 +232,7 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
     S[table-format=2.2]
     S[table-format=3.2]
     S[table-format=3.2]
-    S[table-format=-1.1e-1, round-precision=1, scientific-notation=engineering]
+    S[round-precision=3, round-minimum=0.001, table-format=<1.3, scientific-notation=fixed, fixed-exponent=0] % err
   }
     \toprule
     {warm-up} &
@@ -243,7 +244,7 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
     {$t_F$} &
     {$\tpar$} &
     {$\hattpar$} &
-    {$\frac{\hattpar-\tpar}{\tpar}$} \\
+    {$\abs*{\frac{\hattpar-\tpar}{\tpar}}$} \\
     \midrule
     \input{tables/warmup8.tex}
     \midrule

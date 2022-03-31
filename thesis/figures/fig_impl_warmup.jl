@@ -196,7 +196,7 @@ begin
 		df.N*(df.t_rampup + df.t_G) +
 		df.K*(df.t_F + df.t_G) +
 		df.t_F
-	df[!, :err] = @. (df.t̂_par - df.t_par) / df.t_par
+	df[!, :err] = @. abs(df.t̂_par - df.t_par) / df.t_par
 	df
 end
 
