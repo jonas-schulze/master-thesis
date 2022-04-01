@@ -93,6 +93,7 @@ The same holds for the solution $X(\optional{})$ of a \ac{DRE},
 which is motivated by the following example.
 
 \begin{example}[Low-Rank Solution of Steel Profile]
+\label{thm:lowrank:rail}
   The solution of the steel profile benchmark \cite{morwiki_steel} is given by the generalized \ac{DRE}~\eqref{eq:basics:DRE},
   \begin{equation*}
   \left\{
@@ -183,8 +184,43 @@ This factorization does not require up- and downdate to be handled separately,
   \end{bmatrix}
 \end{equation}
 for $A, B, C, D$ of compatible dimensions.
-The inner dimension $r$ is in this thesis sometimes referred to as the rank of the factorization,
+The inner dimension $r$ is sometimes referred to as the rank of the factorization,
 even though it's only an upper bound to which.
+If all matrices have full rank,
+\ie $\rank ABA^\T = r_1$ and $\rank CDC^\T = r_2$ equal their respective inner dimensions,
+the resulting object $GSG^\T := ABA^\T + CDC^\T$ has inner dimension $r_1 + r_2$
+but $\rank GSG^\T \leq r_1 + r_2$.
+If the overall result is expected to have a low rank,
+\eg
+\begin{equation}
+  LDL^\T + LDL^\T + LDL^\T
+  = \begin{bmatrix}
+    L & L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    D \\
+    & D \\
+    && D
+  \end{bmatrix}
+  \begin{bmatrix}
+    L^\T \\
+    L^\T \\
+    L^\T
+  \end{bmatrix}
+\end{equation}
+that inner dimension must not grow arbitrarily.
+\autoref{alg:lowrank:compression} shows how to compress a \ac{LRSIF}
+based on the most significant eigenvalues,
+without imposing a maximum-rank condition,
+\cf~\cite[Section~6.3.3]{Lang2017}.
+The resulting factorization has a diagonal $D$ and (potentially) a lower inner dimension.
+
+\begin{remark}
+  It is worth to emphasize that $LDL^\T$ may even represent a full rank matrix~$X$,
+  albeit very inefficiently.
+  In this case $L$ and $D$ are both square, \ie~$r=n$,
+  such that they take twice as much memory as~$X$.
+\end{remark}
 
 \begin{remark}
   Despite its name, $L$ does not need to be (lower) triangular.
@@ -193,17 +229,7 @@ even though it's only an upper bound to which.
   and are repeated in \autoref{sec:ros}.
 \end{remark}
 
-If all matrices have full rank $\rank ABA^\T = r_1$ and $\rank CDC^\T = r_2$,
-the resulting object $GSG^\T$ has inner dimension $r_1 + r_2$ but $\rank GSG^\T \leq r_1 + r_2$.
-If the overall result is expected to have a low rank,
-that inner dimension must not grow arbitrarily.
-\autoref{alg:lowrank:compression} shows how to compress a \ac{LRSIF}
-based on the most significant eigenvalues,
-without imposing a maximum-rank condition,
-\cf~\cite[Section~6.3.3]{Lang2017}.
-The resulting factorization has a diagonal $D$ and (potentially) a lower inner dimension.
-
-\begin{algorithm}[h]
+\begin{algorithm}[t]
   \caption{Column Compression for LRSIF}
   \label{alg:lowrank:compression}
   \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$, tolerance $0 < \epsilon \ll 1$}

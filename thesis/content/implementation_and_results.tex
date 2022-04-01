@@ -141,9 +141,9 @@ Estimate parallel efficiency based on timeline data,
     \midrule
     %TODO: Add uncertainties for low-rank t_F and t_G?
     \input{tables/warmup450_lr.tex}
-    \midrule
+    \addlinespace
     \input{tables/warmup450_de.tex}
-    \midrule
+    \addlinespace
     \input{tables/warmup450_ref.tex}
     \bottomrule
   \end{tabular}
@@ -172,9 +172,9 @@ Estimate parallel efficiency based on timeline data,
     {$\frac{\hattseq}{N\cdot\tpar}$} \\
     \midrule
     \input{tables/speedup450_lr.tex}
-    \midrule
+    \addlinespace
     \input{tables/speedup450_de.tex}
-    \midrule
+    \addlinespace
     \input{tables/speedup450_ref.tex}
     \bottomrule
   \end{tabular}
@@ -186,3 +186,49 @@ Estimate parallel efficiency based on timeline data,
     The parallel efficiency is evaluated for $N$ processors.
   }
 \end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{%
+    lc
+    % tau
+    S[table-format=3]
+    % runtime
+    S[table-format=4]
+    S[table-format=4]
+    % size
+    S[table-format=2.3, round-precision=3]
+    S[table-format=2.3, round-precision=3]
+  }
+    \toprule
+    &&&
+    \multicolumn{2}{c}{Runtime [\si{\second}]} &
+    \multicolumn{2}{c}{Size [\si{\gibi\byte}]} \\
+    \cmidrule(rl){4-5}
+    \cmidrule(rl){6-7}
+    Solver & Order & {Resolution [\si{\milli\second}]} &
+    {Dense} & {LRSIF} &
+    {Dense} & {LRSIF} \\
+    \midrule % jobid dense, lowrank
+    Sequential & 1 & 100 & 217 & 599 & 0.483 & 0.169 \\ % 351941, 351939
+    Sequential & 2 & 100 & 602 & 708 & 0.483 & 0.236 \\ % 351942, 351940
+    \addlinespace
+    Parareal & 1/1 & 1 & 4724 & 2366 & 48.177 & 16.354 \\ % 351236, 351158
+    Parareal & 1/2 & 1 & 5057 & 2775 & 48.177 & 19.542 \\ % 351235, 351167
+    Parareal & 2/2 & 1 & 4730 & 5519 & 48.177 & 36.004 \\ % 351290, 351160
+    \addlinespace
+    Sequential & 4 & 50 & 1785 & {--} & 0.977 & {--} \\ % 351965
+    Parareal & 4/4 & 1 & 4512 & {--} & 48.177 & {--} \\ % 351270
+    \bottomrule
+  \end{tabular}
+  \caption[Runtime and storage requirements]{%
+    Overall runtime (as reported by Slurm)
+    including time to write results to disk,
+    and storage requirements of solutions to Rail benchmark~\cite{morwiki_steel}.
+    The resolution is the step size $\tau$ of the (fine) solver.
+    The storage size includes both $X$ and $K$ trajectories,
+    storing only $K$ would result in substantially smaller files.
+  }
+\end{table}
+
+Storage ratio for parareal order 2/2 fits well to the estimated 1/3 of \autoref{thm:lowrank:rail}.

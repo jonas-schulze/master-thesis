@@ -213,7 +213,7 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
   \includegraphics[width=\textwidth]{figures/fig_impl_warmup2.pdf}
   \caption[Timeline diagrams comparing the effect of JIT compiler warm-up]{%
     Timeline diagrams comparing the effect of \acs{JIT} compiler warm-up.
-    Left: $N=8$ processes running on two compute nodes,
+    Left: $N=8$ processes running on two compute nodes (4 threads/process),
     right: $N=4$ processes running on a laptop.
     Top: no warm-up,
     middle: warming up coarse solver $G$ (\julia{csolve}),
@@ -247,7 +247,7 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
     {$\abs*{\frac{\hattpar-\tpar}{\tpar}}$} \\
     \midrule
     \input{tables/warmup8.tex}
-    \midrule
+    \addlinespace
     \input{tables/warmup4.tex}
     \bottomrule
   \end{tabular}
