@@ -7,11 +7,11 @@ using InteractiveUtils
 # ╔═╡ beb66898-a474-11ec-3dbb-41f087ae87c7
 using DrWatson
 
-# ╔═╡ 3bc5994e-27a8-4b62-942b-dd1add954e42
-@quickactivate
-
 # ╔═╡ 956151fd-d3be-40d3-97bd-b1c6a556d853
 using Stuff
+
+# ╔═╡ 3bc5994e-27a8-4b62-942b-dd1add954e42
+@quickactivate
 
 # ╔═╡ d376571e-997f-444c-9038-498ba614624e
 using CairoMakie
@@ -184,17 +184,33 @@ end
 # ╔═╡ 29f163f8-5d4d-416e-89f0-e7b9b517e418
 sum(interface_ts)
 
+# ╔═╡ 834a8ce9-d268-454f-9ad8-b93d90996af3
+seq_files = map(1:2) do o
+	conf = SequentialConfig{:lowrank}(ncpus=1, nsteps=450, order=o)
+	datadir("lowrank-seq", savename(conf, "h5"))
+end
+
 # ╔═╡ c1ddc795-c1d8-4701-92e0-4ff0fa32cf47
 begin
 	ranks = DataFrame(t=interface_ts)
+	# parareal
 	for (ds, f) in lr_files
 		isnothing(f) && continue
 		h5open(f) do h5
 			ranks[!, ds] = [size(h5["X/t=$t/D"], 1) for t in ranks.t]
 		end
 	end
+	# sequential
+	for (o, f) in enumerate(seq_files)
+		h5open(f) do h5
+			ranks[!, "lr$o"] = [size(h5["X/t=$t/D"], 1) for t in ranks.t]
+		end
+	end
 	ranks
 end
+
+# ╔═╡ 56111739-a63a-452f-9c21-2ce5ee02dba1
+@assert all(isfile, seq_files)
 
 # ╔═╡ 3480579f-fc30-4fa6-9769-275383a033e3
 md"""
@@ -403,6 +419,17 @@ fig_rank = let
 		xlabel="",
 	)
 
+	# sequential
+	for o in 1:2
+		lines!(
+			ax,
+			ranks.t,
+			ranks[!, "lr$o"];
+			color=:gray90,
+		)
+	end
+
+	# parareal
 	for (ds, c, m, _) in zip(
 		datasets,
 		color,
@@ -477,6 +504,8 @@ TableOfContents()
 # ╠═3f9063dd-8a58-4720-9ec3-b707658aa36e
 # ╠═fa041705-d648-43da-8095-e48b84cfeb2c
 # ╠═c1ddc795-c1d8-4701-92e0-4ff0fa32cf47
+# ╠═834a8ce9-d268-454f-9ad8-b93d90996af3
+# ╠═56111739-a63a-452f-9c21-2ce5ee02dba1
 # ╠═3480579f-fc30-4fa6-9769-275383a033e3
 # ╠═77ff08e8-447b-44d6-88cb-ad82d8af1a47
 # ╠═58ea6ecf-d819-4b4e-a028-a3ed1ef4e3c4
