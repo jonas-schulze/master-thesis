@@ -426,6 +426,10 @@ That is, the number of refinements computed may differ by at most one from stage
 \ie $k_{n+1} \geq k_n -1$ where $k_n$ denotes the last refinement computed by stage $n$.
 These effects are best to be seen in \autoref{fig:impl:restart},
 which corresponds to the reference solution of \autoref{fig:results:parareal:rail} to be described in \autoref{sec:results:parareal}.
+This timeline also shows when the stages~$n$ are waiting for input,
+which may be a new initial value~$U_{n-1}^k$ or the signal that the previous stage finished.
+In that case, stage~$n$ may safely finish as well,
+since~$k_{n-1}$ won't increase any further.
 
 To summarize all effects described so far,
 the revised schematic timeline plot is shown in \autoref{fig:timeline:revised},

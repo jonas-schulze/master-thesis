@@ -287,6 +287,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
 \end{remark}
 
 \begin{example}[Parameters of Steel Profile]
+\label{thm:rail:parameters}
   The steel profile benchmark \cite{morwiki_steel} goes back to \cite{Benner2005}.
   It is a generalized system that has $m=7$ controls and $q=6$ outputs.
   We'll use the variant having $n=371$ state variables.
@@ -419,6 +420,26 @@ the notation $A, B, C, X$ is used for both in this thesis.
   Follows from \autoref{thm:basics:dre-limit-are:backwards} with the direction of time reversed,
   $\lim \tilde X(t_f) = \lim X(t_0; t_f) = \bar X + C^\T S C$ for $t_f\to\infty$.
 \end{proof}
+
+\begin{example}[Independence of Initial Value of Steel Profile]
+\label{thm:rail:limit}
+  For the Rail benchmark~\cite{morwiki_steel} it is
+  \begin{equation*}
+    \frac{
+      \norm*{\tfrac{1}{100} \tilde C^\T \tilde C}_F
+    }{
+      \norm*{\bar X + \tfrac{1}{100} \tilde C^\T \tilde C}_F
+    } < 0.001701
+  \end{equation*}
+  where $\tilde C := C E^{-1}$,
+  \ie $X(t)$ converges to a value that barely depends on its initial value.
+  % julia> using MatrixEquations
+  % Ad = collect(A);
+  % Ed = collect(E);
+  % G = collect(B*B');
+  % Q = collect(C'C);
+  % X = garec(Ad, Ed, G, Q);
+\end{example}
 
 \section{Solution of the \texorpdfstring{\act{DRE}}{DRE}}
 \label{sec:basics:matrixeqs}
