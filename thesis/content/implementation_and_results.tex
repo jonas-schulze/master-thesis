@@ -35,14 +35,34 @@ The problem's time span $[0,4500]$ corresponds to a resolution of \SI{10}{\milli
 \subsection{Sequential Solvers}
 
 \begin{figure}[t]
-  \missingfigure{Replicate \cite[Figure~6.1]{Lang2017}, $\tau=\SI{112.5}{\milli\second}$}
-  \caption{Low-Rank Rosenbrock methods applied to Rail problem}
+  \includegraphics[width=\textwidth]{figures/fig_results_sequential.pdf}
+  \caption[Rosenbrock method applied to Rail problem]{%
+    Several Rosenbrock schemes applied to the problem of \autoref{thm:results:rail}.
+    Each scheme performs 450 steps ($\tau = \SI{100}{\milli\second}$).
+    Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
+    % same as Lang2015, Fig. 1
+    % Lang2017, Fig 6.1 used K_{1,71} instead
+    bottom: relative error compared to reference solution
+    (900 steps of dense Rosenbrock scheme of order 4).
+    Left: global time span $[\SI{0}{\second}, \SI{45}{\second}]$,
+    right: zoom to $[\SI[round-mode=off]{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
+  }
   \label{fig:results:sequential:rail}
 \end{figure}
 
-\begin{figure}[t]
-  \missingfigure{Replicate \cite[Figure~6.6b]{Lang2017}}
-  \caption{Numerical rank of low-rank sequential solutions to Rail problem}
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_rank.pdf}
+  \caption[Numerical rank of low-rank sequential solutions to Rail problem]{%
+    Numerical rank of low-rank sequential solutions to Rail problem,
+    \cf~\cite[Figure~6.6b]{Lang2017}.
+  }
+\end{figure}
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_err.pdf}
+  \caption{Relative Error in $K$ between low-rank and dense solvers}
 \end{figure}
 
 \subsection{Parareal Solvers}
