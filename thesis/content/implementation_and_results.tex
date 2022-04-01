@@ -120,8 +120,15 @@ Due to the problem with the low-rank \Ros{2} solver mentioned in the previous pa
 \end{figure}
 
 \begin{figure}[t]
-  \missingfigure{Replicate \cite[Figure~6.6b]{Lang2017}}
-  \caption{Numerical rank of low-rank parareal solutions to Rail problem}
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/fig_results_parareal_rank.pdf}
+  \caption[Numerical rank of low-rank parareal solutions to Rail problem]{%
+    Numerical rank of low-rank parareal solutions to Rail problem,
+    \cf~\cite[Figure~6.6b]{Lang2017}.
+    Only values at parareal interfaces $t_n$ are shown,
+    which coincide with the time steps of the sequential solutions.
+    The numerical ranks of \autoref{fig:results:sequential:rail} are shown in the background.
+  }
 \end{figure}
 
 \todo[inline]{
