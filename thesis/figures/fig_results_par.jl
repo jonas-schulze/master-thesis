@@ -7,17 +7,20 @@ using InteractiveUtils
 # ╔═╡ beb66898-a474-11ec-3dbb-41f087ae87c7
 using DrWatson
 
-# ╔═╡ 956151fd-d3be-40d3-97bd-b1c6a556d853
-using Stuff
-
 # ╔═╡ 3bc5994e-27a8-4b62-942b-dd1add954e42
 @quickactivate
+
+# ╔═╡ 956151fd-d3be-40d3-97bd-b1c6a556d853
+using Stuff
 
 # ╔═╡ d376571e-997f-444c-9038-498ba614624e
 using CairoMakie
 
 # ╔═╡ 315e7622-4659-4073-80f5-5bfb9fec2989
 using DataFrames
+
+# ╔═╡ 760f6998-be31-4ec2-b21d-b366a953f531
+using PlutoUI
 
 # ╔═╡ 96a5a545-4990-4cbc-983b-0978a16b27b5
 md"""
@@ -74,9 +77,6 @@ ref = something(
 # ╔═╡ bb185a25-30a5-4f22-9ff4-ed4636e61f30
 τ = 0.1
 
-# ╔═╡ 8ee748d2-5e86-450b-a941-1ef85a0ad820
-err(r, s) = norm(r-s) / norm(r)
-
 # ╔═╡ 0a52e188-5653-478b-8edc-4ef7f4ff5914
 begin
 	df = DataFrame(t = 0:τ:4500)
@@ -129,6 +129,71 @@ function alternating_scatter!(ax, x, y, scatter_x; kwargs...)
 		kwargs...,
 		#color = :white, # overwrite line color
 	)
+end
+
+# ╔═╡ 9ab3149d-63ae-45bc-98a0-90e45a5b5cd4
+md"""
+# Error LRSIF vs Dense
+
+Only show errors at stage interfaces.
+"""
+
+# ╔═╡ 27d60730-8141-4d6f-9540-e8f168e5c733
+function err(x, ref)
+	haskey(x, "L") || return δ(x, ref)
+	L, D = read(x["L"]), read(x["D"])
+	X = L*D*L'
+	Ref = read(ref)
+	δ(X, Ref)
+end
+
+# ╔═╡ e6f67f58-1a04-42bf-90a9-11f32afacbc4
+md"""
+# Rank
+
+Only show ranks at stage interfaces.
+"""
+
+# ╔═╡ ba766fc2-0c66-4c3e-9fa0-fe27dba940b2
+interface_ts = 0.0:10:4500
+
+# ╔═╡ 727e6ec0-e4e4-4081-a5db-98ed681530f3
+begin
+	# skip zero error at end
+	lowrank_vs_dense = DataFrame(t=interface_ts[1:end-1])
+	for ((lr_ds, lr_f), (de_ds, de_f)) in zip(lr_files, de_files)
+		isnothing(lr_f) && continue
+		isnothing(de_f) && continue
+		
+		lr = h5open(lr_f)
+		de = h5open(de_f)
+
+		for mat in ("X", "K")
+			lowrank_vs_dense[!, "$(lr_ds)_$mat"] = [
+				err(lr["$mat/t=$t"], de["$mat/t=$t"])
+				for t in lowrank_vs_dense.t
+			]
+		end
+
+		close(lr)
+		close(de)
+	end
+	lowrank_vs_dense
+end
+
+# ╔═╡ 29f163f8-5d4d-416e-89f0-e7b9b517e418
+sum(interface_ts)
+
+# ╔═╡ c1ddc795-c1d8-4701-92e0-4ff0fa32cf47
+begin
+	ranks = DataFrame(t=interface_ts)
+	for (ds, f) in lr_files
+		isnothing(f) && continue
+		h5open(f) do h5
+			ranks[!, ds] = [size(h5["X/t=$t/D"], 1) for t in ranks.t]
+		end
+	end
+	ranks
 end
 
 # ╔═╡ 3480579f-fc30-4fa6-9769-275383a033e3
@@ -258,7 +323,127 @@ fig = let
 end
 
 # ╔═╡ 0bd8a706-7056-41e1-b9ba-a8cbb52b806a
-save(projectdir("thesis", "figures", "fig_results_rail.pdf"), fig)
+save(projectdir("thesis", "figures", "fig_results_parareal.pdf"), fig)
+
+# ╔═╡ b6a19027-b5a9-4e2a-831c-c488a632edb4
+function plot_err(mat)
+	fig = Figure(
+		resolution=(550,300), # half
+		font=utopia_regular,
+	)
+
+	ax = Axis(
+		fig[1,1];
+		title="Relative Error LRSIF vs Dense",
+		yscale=log10,
+		xtime...,
+		xlabel="",
+	)
+
+	for ((ds, f), (_, fd), c, m) in zip(
+		lr_files,
+		de_files,
+		color,
+		marker,
+	)
+		isnothing(f) && continue
+		isnothing(fd) && continue
+
+		kwargs = (;
+			label=label[ds],
+			color=c,
+			marker=m,
+			strokecolor=c,
+			strokewidth=1,
+		)
+
+		lines!(
+			ax,
+			lowrank_vs_dense.t,
+			lowrank_vs_dense[!, "$(ds)_$mat"];
+			kwargs...
+		)
+		ids = 1:100:450
+		scatter!(
+			ax,
+			lowrank_vs_dense.t[ids],
+			lowrank_vs_dense[ids, "$(ds)_$mat"];
+			kwargs...
+		)
+	end
+
+	#axislegend("Scheme", position=:rc, merge=true)
+	Legend(fig[1,2], ax, "Scheme", merge=true)
+
+	fig
+end
+
+# ╔═╡ f1887c71-d985-49a5-aa21-e232126f0ded
+fig_err = plot_err("K")
+
+# ╔═╡ 707ea66f-97df-48b8-afc0-02db36542b33
+save(projectdir("thesis", "figures", "fig_results_parareal_err.pdf"), fig_err)
+
+# ╔═╡ 7dd6431e-e1bb-4f7b-858c-c363c2439186
+fig_err_X = plot_err("X")
+
+# ╔═╡ 559e47bc-7c2b-426d-97f8-14297e3fe0cb
+save(projectdir("thesis", "figures", "fig_results_parareal_err_X.pdf"), fig_err_X)
+
+# ╔═╡ 3f9063dd-8a58-4720-9ec3-b707658aa36e
+fig_rank = let
+	fig = Figure(
+		resolution=(550,300),
+		font=utopia_regular,
+	)
+	ax = Axis(
+		fig[1,1];
+		title="Rank",
+		xtime...,
+		xlabel="",
+	)
+
+	for (ds, c, m, _) in zip(
+		datasets,
+		color,
+		marker,
+		lr_files,
+	)
+		
+		kwargs = (;
+			label=label[ds],
+			color=c,
+			marker=m,
+			strokecolor=c,
+			strokewidth=1,
+		)
+
+		lines!(
+			ax,
+			ranks.t,
+			ranks[!, ds];
+			kwargs...
+		)
+		ids = 1:100:450
+		scatter!(
+			ax,
+			ranks.t[ids],
+			ranks[ids, ds];
+			kwargs...
+		)
+	end
+
+	#axislegend("Scheme", position=:lb, merge=true)
+	Legend(fig[1,2], ax, "Scheme", merge=true)
+
+	fig
+end
+
+# ╔═╡ fa041705-d648-43da-8095-e48b84cfeb2c
+save(projectdir("thesis", "figures", "fig_results_parareal_rank.pdf"), fig_rank)
+
+# ╔═╡ 9d669fe2-a4a2-48f7-af22-1d0907856d2a
+TableOfContents()
 
 # ╔═╡ Cell order:
 # ╠═96a5a545-4990-4cbc-983b-0978a16b27b5
@@ -272,13 +457,26 @@ save(projectdir("thesis", "figures", "fig_results_rail.pdf"), fig)
 # ╠═a0699076-bd42-4d4b-9209-82e94c76d15f
 # ╠═d926301d-2182-4f3c-9c6b-5fd263da4606
 # ╠═bb185a25-30a5-4f22-9ff4-ed4636e61f30
-# ╠═8ee748d2-5e86-450b-a941-1ef85a0ad820
 # ╠═0a52e188-5653-478b-8edc-4ef7f4ff5914
 # ╠═2297866e-4681-4ff5-8d10-0d909e4b3a18
 # ╠═c70ae8c4-3958-4593-a261-c407034c9903
 # ╠═760d7dc8-75c7-4c1a-bc2b-aeaa492aa689
 # ╠═0bd8a706-7056-41e1-b9ba-a8cbb52b806a
 # ╠═b434a321-4c1d-4d49-88a2-1000505bdac9
+# ╟─9ab3149d-63ae-45bc-98a0-90e45a5b5cd4
+# ╠═f1887c71-d985-49a5-aa21-e232126f0ded
+# ╠═7dd6431e-e1bb-4f7b-858c-c363c2439186
+# ╠═b6a19027-b5a9-4e2a-831c-c488a632edb4
+# ╠═707ea66f-97df-48b8-afc0-02db36542b33
+# ╠═559e47bc-7c2b-426d-97f8-14297e3fe0cb
+# ╠═727e6ec0-e4e4-4081-a5db-98ed681530f3
+# ╠═27d60730-8141-4d6f-9540-e8f168e5c733
+# ╟─e6f67f58-1a04-42bf-90a9-11f32afacbc4
+# ╠═ba766fc2-0c66-4c3e-9fa0-fe27dba940b2
+# ╠═29f163f8-5d4d-416e-89f0-e7b9b517e418
+# ╠═3f9063dd-8a58-4720-9ec3-b707658aa36e
+# ╠═fa041705-d648-43da-8095-e48b84cfeb2c
+# ╠═c1ddc795-c1d8-4701-92e0-4ff0fa32cf47
 # ╠═3480579f-fc30-4fa6-9769-275383a033e3
 # ╠═77ff08e8-447b-44d6-88cb-ad82d8af1a47
 # ╠═58ea6ecf-d819-4b4e-a028-a3ed1ef4e3c4
@@ -294,3 +492,5 @@ save(projectdir("thesis", "figures", "fig_results_rail.pdf"), fig)
 # ╠═d376571e-997f-444c-9038-498ba614624e
 # ╠═315e7622-4659-4073-80f5-5bfb9fec2989
 # ╠═add0543d-31ab-42c1-bd21-d896f20b4422
+# ╠═760f6998-be31-4ec2-b21d-b366a953f531
+# ╠═9d669fe2-a4a2-48f7-af22-1d0907856d2a
