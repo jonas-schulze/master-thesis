@@ -222,7 +222,10 @@ utopia_regular = "/usr/local/texlive/2018/texmf-dist/fonts/type1/adobe/utopia/pu
 
 # ╔═╡ 920265f1-ffc6-4c06-81c6-3fecbf4e8f0d
 function fig_impl_warmup(cols...)
-	fig = Figure(font=utopia_regular)
+	fig = Figure(
+		figure_padding = 1,
+		font = utopia_regular,
+	)
 
 	# Color events by tag:
 	colors = to_colormap(:sun, length(tags))
@@ -268,7 +271,7 @@ function fig_impl_warmup(cols...)
 		labels,
 		nothing;
 		orientation = :horizontal,
-		nbanks = 2,
+		#nbanks = 2,
 	)
 
 	# Add y label:

@@ -20,4 +20,9 @@ xstepsize = (
     xtickformat = ticks -> _scaled_maybe_integer(ticks, 10, "ms")
 )
 
-export unit_space, xtime, xstepsize
+xwalltime = (
+    xlabel = "Wallclock Time",
+    xtickformat = string("{:d}", unit_space, 's'),
+)
+
+export unit_space, xtime, xstepsize, xwalltime

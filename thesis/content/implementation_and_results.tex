@@ -91,8 +91,8 @@ Their errors look similar to~\cite[Fig.~1]{Lang2015}.
 \autoref{fig:results:parareal:timeline} shows the timeline diagrams corresponding to the solvers
 Due to the problem with the low-rank \Ros{2} solver mentioned in the previous paragraph explains
 
-\begin{figure}[t]
-  \missingfigure{}
+\begin{figure}[tp]
+  \includegraphics[width=\textwidth]{figures/fig_timeline_all.pdf}
   \caption[Timeline diagrams for parareal method applied to Rail problem]{%
     Timeline diagrams for the solutions described in \autoref{fig:results:parareal:rail}.
   }
@@ -102,12 +102,6 @@ Due to the problem with the low-rank \Ros{2} solver mentioned in the previous pa
 \begin{figure}[t]
   \missingfigure{Replicate \cite[Figure~6.6b]{Lang2017}}
   \caption{Numerical rank of low-rank parareal solutions to Rail problem}
-\end{figure}
-
-\begin{figure}[t]
-  \missingfigure{}
-  \caption{timeline of reference solution corresponding to \autoref{fig:results:parareal:rail}}
-  \label{fig:results:timeline:reference}
 \end{figure}
 
 \todo[inline]{
@@ -151,6 +145,7 @@ Estimate parallel efficiency based on timeline data,
     Timeline measurements for parareal algorithm, $N=450$, $K=10$.
     All measurements and estimates are as in \autoref{tab:impl:warmup}.
     The first column denotes the parareal scheme (coarse/fine order).
+    Refer to Figures \ref{fig:results:parareal:timeline} and \ref{fig:impl:restart} for the corresponding timelines.
   }
   \label{tab:results:warmup}
 \end{table}

@@ -424,9 +424,8 @@ Therefore, each stage $n$ may defer the computation of a refinement $k$,
 until the previous stage $n-1$ finished computing its refinement $k+1$.
 That is, the number of refinements computed may differ by at most one from stage to stage,
 \ie $k_{n+1} \geq k_n -1$ where $k_n$ denotes the last refinement computed by stage $n$.
-This effect is best to be seen in \autoref{fig:impl:restart},
-which consists of the first couple of stages corresponding to \autoref{fig:results:timeline:reference}.
-The latter figure will be described in \autoref{sec:results:parareal}.
+These effects are best to be seen in \autoref{fig:impl:restart},
+which corresponds to the reference solution of \autoref{fig:results:parareal:rail} to be described in \autoref{sec:results:parareal}.
 
 To summarize all effects described so far,
 the revised schematic timeline plot is shown in \autoref{fig:timeline:revised},
@@ -436,12 +435,13 @@ the faces $k=K$ and therefore early convergence are not visible.
 The face $n+K \geq N$ is most pronounced in the top left diagram.
 For large $N$, $N \gg K$, that effect will be negligible for the overall runtime of the parareal algorithm.
 
-\begin{figure}[t]
+\begin{figure}[tp]
   \centering
-  \missingfigure{timeline}
+  \includegraphics[width=\textwidth]{figures/fig_timeline_ref.pdf}
   \caption[Restarted parareal computation]{
     Restarted parareal computations to maintain $k_{n+1} \geq k_n - 1$.
-    The timeline corresponds to the first 20 stages seen in \autoref{fig:results:timeline:reference}.
+    Top: full timeline of parareal algorithm applied to Rail benchmark~\cite{morwiki_steel}, $N=450$.
+    Bottom: zoom to first stages $1 \leq n \leq 20$.
   }
   \label{fig:impl:restart}
 \end{figure}
