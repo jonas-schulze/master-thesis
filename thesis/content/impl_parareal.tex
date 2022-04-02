@@ -459,9 +459,11 @@ For large $N$, $N \gg K$, that effect will be negligible for the overall runtime
   \input{figures/fig_parareal_timeline_revised.tex}
   \caption[Revised schematic timeline diagram]{%
     Revised schematic timeline diagram of \julia{ParaReal.jl} implementation for $N$ stages and $K$ refinements.
+    The warm-up block is to increase the slope of the $k=0$ face,
+    \cf~\autoref{sec:impl:pr:warmup}.
     The dotted line is due to the lack of asynchronous data transfer for $n+k \geq N$,
     \cf~\autoref{sec:impl:pr:sync}.
-    The dashed line indicates early convergence for $k_n < k_{n+1}$,
+    The dashed line indicates early convergence for $k_{n+1} < k_n$,
     \cf~\autoref{sec:impl:pr:conv}.
   }
   \label{fig:timeline:revised}
@@ -522,26 +524,66 @@ Refer to \eg \cite{Nielsen2018} for a more advanced scheduling strategy to bette
 
 \subsection{Parallel Programming Pitfalls}
 
-\begin{itemize}
-  \item
-    \julia{@sync} may block\footnote{\url{https://github.com/JuliaLang/julia/issues/32677}}
-    There is an experimental eager version,\footnote{\url{https://github.com/JuliaLang/julia/pull/34198}} but it doesn't support cancellation.
-    In general, as of the time of writing this thesis,
-    there is no recommended way to handle cancellation using the standard library,
-    especially (and frustratingly) in a distributed environment.
-  \item
-    By default, unhandled concurrent errors are transient.\footnote{%
-      \url{https://github.com/JuliaLang/julia/issues/10405}}
-    That means that if a background task fails, not only does the program keep running, it doesn't even print an error.\footnote{%
-      \url{https://github.com/JuliaLang/julia/pull/27722}}
-    It is not easy to let unhandled concurrent errors crash the whole program.
-    More severly, in a distributed environment, a failed task on one machine may easily cause a different machine to deadlock,
-    \cf the previous paragraph.
-    It is the user's (or the library developer's) responsibility to make errors observable,\footnote{%
-      \url{https://github.com/JuliaLang/julia/pull/39518}}
-    and to make sure that whole computation is properly cancelled.
-  \item
-    \url{https://github.com/JuliaLang/julia/issues/38931},
-    \url{https://github.com/JuliaLang/julia/pull/44671}
-\end{itemize}
+This subsection consists more of my personal opinions than a scientific discussion.
+
+Julia provides the \julia{@sync} macro to wait for tasks launched in the enclosed block.
+Internally, it waits for the tasks to complete,
+collects any errors and re-throws them in a grouped exception if any.
+However, it does so sequentially,
+by which the first task waited for may shadow the failure of the next task,
+such that the whole block enclosed by \julia{@sync} reached a deadlocked.\footnote{%
+  \url{https://github.com/JuliaLang/julia/issues/32677}}
+There is an experimental eager version,\footnote{%
+  \url{https://github.com/JuliaLang/julia/pull/34198}}
+that waits concurrently,
+but it only reports the first failure without cancelling the remaining tasks.
+Also, it doesn't provide a handle on the tasks still running,
+such that the user has to do the bookkeeping.
+In general, as of the time of writing this thesis,
+there doesn't seem to be a recommended way to handle cancellation using the standard library,
+especially (and frustratingly) in a distributed environment.
+
+By default, unhandled concurrent errors are transient,
+\cf \autoref{lst:impl:transient_errors}.\footnote{%
+  \url{https://github.com/JuliaLang/julia/issues/10405}}
+That means that if a background task fails,
+not only does the program keep running,
+it doesn't even print an error.\footnote{%
+  \url{https://github.com/JuliaLang/julia/pull/27722}}
+It is not easy to let unhandled concurrent errors crash the whole program.
+More severely, in a distributed environment,
+a failed task on one machine may easily cause a different machine to reach a deadlock,
+\cf the previous paragraph.
+It is the user's (or the library developer's) responsibility to make errors observable,\footnote{%
+  \url{https://github.com/JuliaLang/julia/pull/39518}}
+and to make sure that whole computation is properly cancelled.
+
+It would be very handy, if users could configure Julia to crash on unhandled exceptions.
+Golang for example does this by default.\footnote{%
+  \url{https://go.dev/blog/defer-panic-and-recover}}
+In a distributed environment,
+it would be nice if users could configure Julia to crash all processes (workers and manager),
+if a single crashed process is unhandled.
+Also, if a process fails, it should be easy to obtain the stack traces of all running tasks.
+Golang for example supports this via the environment variable \code{GOTRACEBACK=all}.\footnote{%
+  \url{https://pkg.go.dev/runtime\#hdr-Environment_Variables}}
+\julia{ParaReal.jl} cancels the whole pipeline if a stage fails.
+
+\lstinputlisting[%
+  float=t,
+  label={lst:impl:transient_errors},
+  caption={Transient concurrent errors},
+]{code/transient_errors.txt}
+
+Sometimes, the Julia internal code fails to issue a command on a worker process.\footnote{%
+  \url{https://discourse.julialang.org/t/77864}}
+It would be very handy if Julia would be able to discover when this happens and just try again.
+\julia{ParaReal.jl} tries 3 times to start a stage, if it didn't fail from user error.
+
+There is a overhead in loading packages on workers that scales with the number of workers,
+similar to $\trampup$ described in \autoref{sec:impl:pr:warmup}.
+This issue, however, is being worked on.\footnote{%
+  \url{https://github.com/JuliaLang/julia/pull/44671}}
+
+% https://github.com/JuliaLang/julia/issues/38931
 
