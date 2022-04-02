@@ -1,47 +1,92 @@
 \chapter{Implementation and Experimental Results}
 
+This chapter first covers the general properties of the two packages created during the work on this thesis.
+Both have an automated test suite with a coverage of well over \SI{90}{\percent},
+and their user interfaces are inspired by \julia{DifferentialRiccatiEquations.jl}~\cite{DifferentialEquations}.
+Lastly, the packages are applied to
+the Rail benchmark~\cite{morwiki_steel}.
+
 \input{content/impl_diffricceq}
 \input{content/impl_parareal}
 
 \section{Numerical Results}
 
-\todo[inline]{separate results by sequential/parareal?}
-
-\begin{example}[LTI Rail Profile]
-The steel profile benchmark \cite{morwiki_steel} originating from \cite{Benner2005}:
-\label{thm:results:rail}
+This section summarizes the results of applying the aforementioned methods to
+the Rail benchmark~\cite{morwiki_steel} of size $n=371$
+described in \eg~\autoref{thm:rail:parameters}.
+Note that the algorithms are formulated for the problem stated in forwards time,
 \begin{equation}
 \left\{
 \begin{aligned}
   E^\T \dot X E &= C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E \\
-  E^\T X(t_f) E &= \tfrac{1}{100} C^\T C
+  E^\T X(t_0) E &= \tfrac{1}{100} C^\T C
 \end{aligned}
 \right.
 \end{equation}
-where
+but it's common practice to plot results in the time corresponding to the underlying \ac{OCP},
+\ie $E^\T \tilde X(t_f) E = C^\T C/100$.
+
+As described in \autoref{sec:HJT},
+one is mainly interested in the accuracy of the feedback matrix
+$
+  K := B^\T X E \in \R^{7 \times n}
+$.
+For this purpose, the trajectory $K_{1,77}$ is very characteristic,
+as it has been used in \cite[Fig.~1]{Lang2015} as well.
+Furthermore, the (global) relative error
 \begin{equation}
-  E, A \in \Rnn,
-  \enspace
-  B \in \R^{n \times 7},
-  \enspace
-  C \in \R^{6 \times n}
+\label{eq:results:err:ref}
+  \frac{\norm{K(t) - K_\text{ref}(t)}_F}{\norm{K_\text{ref}(t)}_F}
 \end{equation}
-and $n=371$.
-The problem's time span $[0,4500]$ corresponds to a resolution of \SI{10}{\milli\second},
-\ie $t_f = \SI{45}{\second}$.
-\end{example}
+is analyzed \wrt a reference solution computed with the dense 4th order method described in \cite[Appendix~A]{Lang2017}.
+Any error at $t=\SI{45}{\second}$ is not shown,
+as it is zero due to the boundary condition of the \ac{DRE},
+which would distort the remaining measurements.
 
 \subsection{Sequential Solvers}
 
-\begin{figure}[t]
+\autoref{fig:results:sequential:rail} shows the results of the Rosenbrock schemes described in \autoref{sec:ros},
+both in a dense and a \ac{LRSIF} formulation.
+The low-rank variants are expected to perform identically to their dense counterparts,
+which for \Ros{1} is ok.
+However, there is a small difference between the second order methods for $t\leq\SI{44}{\second}$,
+which destroys the order of \ac{LRSIF}~2 for about $t\leq\SI{35}{\second}$.
+Note that due to \autoref{thm:rail:limit} the error should decrease as $t$ approaches \SI{0}{\second}.
+As this is the case for Dense~2, there must be a problem with \ac{LRSIF}~2.
+
+This can be confirmed using \autoref{fig:results:sequential:err}
+which shows the (global) relative error
+\begin{equation}
+\label{eq:results:err:lr_v_dense}
+  \frac{\norm{K_\text{\ac{LRSIF}}(t) - K_\text{Dense}(t)}_F}{\norm{K_\text{Dense}(t)}_F}
+\end{equation}
+between low-rank and dense variants of the same algorithm.
+For \Ros{1} this value is within margin,
+$n \cdot \umach \approx 10^{-13}$.
+However, for \Ros{2} there is a significant error from the very first iteration at $t=\SI[round-precision=1]{44.9}{\second}$.
+This error stays constant for the remainder of the time span.
+
+As mentioned in \autoref{thm:lowrank:rail},
+the rank of $X$ should not get much larger than 113 along its trajectory.
+\ac{LRSIF}~1 fulfills that expectation, as shown in \autoref{fig:results:sequential:rank}.
+However, the rank of the solution yielded from \ac{LRSIF}~2 is too big.
+
+\begin{remark}
+  \citeauthor{Lang2015}~\cite[63]{Lang2015} noted a problem with the low-rank version of \Ros{2} as well.
+  The error behavior here looks similar to \cite[Fig~1]{Lang2015},
+  keeping in mind that here the step size is $100\times$ larger
+  and that the results are compared to dense solvers instead of \ac{LRCF} ones.
+\end{remark}
+
+\begin{figure}[tp]
   \includegraphics[width=\textwidth]{figures/fig_results_sequential.pdf}
   \caption[Rosenbrock method applied to Rail problem]{%
-    Several Rosenbrock schemes applied to the problem of \autoref{thm:results:rail}.
+    Several Rosenbrock schemes applied to the problem of \autoref{thm:rail:parameters}.
     Each scheme performs 450 steps ($\tau = \SI{100}{\milli\second}$).
     Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
     % same as Lang2015, Fig. 1
     % Lang2017, Fig 6.1 used K_{1,71} instead
-    bottom: relative error compared to reference solution
+    bottom: relative error \eqref{eq:results:err:ref} compared to reference solution
     (900 steps of dense Rosenbrock scheme of order 4).
     Left: global time span $[\SI{0}{\second}, \SI{45}{\second}]$,
     right: zoom to $[\SI[round-mode=off]{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
@@ -51,23 +96,30 @@ The problem's time span $[0,4500]$ corresponds to a resolution of \SI{10}{\milli
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_rank.pdf}
-  \caption[Numerical rank of low-rank sequential solutions to Rail problem]{%
-    Numerical rank of low-rank sequential solutions to Rail problem,
-    \cf~\cite[Figure~6.6b]{Lang2017}.
-  }
+  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_err.pdf}
+  \caption{Relative Error \eqref{eq:results:err:lr_v_dense} in $K$ between low-rank and dense solvers}
+  \label{fig:results:sequential:err}
 \end{figure}
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_err.pdf}
-  \caption{Relative Error in $K$ between low-rank and dense solvers}
+  \includegraphics[width=0.75\textwidth]{figures/fig_results_sequential_rank.pdf}
+  \caption[Numerical rank of low-rank sequential solutions to Rail problem]{%
+    Numerical rank of low-rank sequential solutions $X$ to Rail problem,
+    \cf~\cite[Figure~6.6b]{Lang2017}.
+  }
+  \label{fig:results:sequential:rank}
 \end{figure}
 
 \subsection{Parareal Solvers}
 \label{sec:results:parareal}
 
-Looking at \autoref{fig:results:parareal:rail},
+\autoref{fig:results:parareal:rail} shows the results of the parareal method described in \autoref{sec:pr}
+for dense and \ac{LRSIF} algorithms and several order combinations.
+Again, the low-rank variants should perform identically to their dense counterparts,
+which is the case only for coarse and fine solvers of order 1.
+
+
 there clearly is a problem with the low-rank version of \Ros{2}.
 While the sample trajectory $K_{1,77}$ looks ok,
 the relative error of the whole $K := B^\T X E$
@@ -90,7 +142,7 @@ Their errors look similar to~\cite[Fig.~1]{Lang2015}.
   \includegraphics[width=\textwidth]{figures/fig_results_parareal.pdf}
   \caption[Parareal method applied to Rail problem]{%
     Several parareal schemes (Rosenbrock methods of given coarse/fine order)
-    applied to the problem of \autoref{thm:results:rail},
+    applied to the problem of \autoref{thm:rail:parameters},
     running on $N=450$ cores and
     computing up to $K=10$ refinements.
     Each scheme performs
@@ -99,7 +151,7 @@ Their errors look similar to~\cite[Fig.~1]{Lang2015}.
     Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
     % same as Lang2015, Fig. 1
     % Lang2017, Fig 6.1 used K_{1,71} instead
-    bottom: relative error compared to reference solution
+    bottom: relative error \eqref{eq:results:err:ref} compared to reference solution
     (dense parareal scheme of order 4/4).
     Left: global time span $[\SI{0}{\second}, \SI{45}{\second}]$,
     right: zoom to $[\SI[round-mode=off]{43.2}{\second}, \SI{45}{\second}]$ (highlighted on the left).
@@ -253,3 +305,4 @@ Estimate parallel efficiency based on timeline data,
 \end{table}
 
 Storage ratio for parareal order 2/2 fits well to the estimated 1/3 of \autoref{thm:lowrank:rail}.
+
