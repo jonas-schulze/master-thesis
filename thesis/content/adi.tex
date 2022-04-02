@@ -945,7 +945,7 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
       $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
     }
     $Y_k \gets -2\Re(\alpha_k) S$\;
-    $A^+_k \gets A + \alpha_k E^\T$\;
+    $A^+_k \gets A + \alpha_k E^\T$\; \nllabel{alg:ADI:smw}
     \eIf{$\alpha_k \in\R$}{%
       %TODO: Change me once autorefname of subsection is capitalized.
       \Comment{Perform single step, \cf subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
