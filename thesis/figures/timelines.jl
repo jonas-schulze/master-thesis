@@ -178,7 +178,7 @@ fig_ref = let
 
 	#rowsize!(fig.layout, 1, Relative(2/3))
 	Label(fig[3,1], "Wallclock Time", tellwidth=false)
-	Label(fig[:,0], "Parareal Stage", rotation=pi/2)
+	Label(fig[1:2,0], "Parareal Stage", rotation=pi/2)
 
 	# Legend
 	elements = [PolyElement(polycolor=colormap[t]) for t in tags]
