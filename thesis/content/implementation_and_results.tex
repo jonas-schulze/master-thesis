@@ -1,5 +1,4 @@
 \chapter{Implementation and Experimental Results}
-\label{sec:results}
 
 \input{content/impl_diffricceq}
 \input{content/impl_parareal}
@@ -203,10 +202,10 @@ Estimate parallel efficiency based on timeline data,
   \caption[Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$]{%
     Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$.
     This table complements \autoref{tab:results:warmup}.
-    The sequential runtime $\hattseq$ is estimated as $\sum_{n=1}^N t_F(n, k_n-1)$,
-    \ie the total runtime of the last $F(U_{n-1}^*)$ computed.
+    The sequential runtime $\hattseq$ is estimated according to~\eqref{eq:impl:tseq}.
     The parallel efficiency is evaluated for $N$ processors.
   }
+  \label{tab:impl:pr:speedup}
 \end{table}
 
 \begin{table}

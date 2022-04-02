@@ -144,18 +144,6 @@ end
 # ╔═╡ 587dbbdb-3095-4150-8d99-747033322081
 t_par(long) = maximum(long.time)
 
-# ╔═╡ 5c39d0ba-cdc3-41e3-bffb-7559b720f04a
-function t̂_seq(wide)
-	# collect last fine solutions
-	Fs = filter(:tag => ==(:ComputingF), wide)
-	k_n = combine(
-		groupby(Fs, :n),
-		:k => maximum => :k,
-	)
-	F_n = innerjoin(Fs, k_n, on=names(k_n))
-	sum(F_n.duration)
-end
-
 # ╔═╡ 5ac3b672-f057-4bc6-851d-552cc11f52ca
 function k_N(wide)
 	_N = N(wide)
@@ -186,6 +174,23 @@ begin
 	df
 end
 
+# ╔═╡ 1d04f4e1-bed3-4395-a03d-f5fe0b017605
+function k_n(wide)
+	# collect last fine solutions, which are computed after the last refinements
+	Fs = filter(:tag => ==(:ComputingF), wide)
+	k_n = combine(
+		groupby(Fs, :n),
+		:k => maximum => :k,
+	)
+end
+
+# ╔═╡ 5c39d0ba-cdc3-41e3-bffb-7559b720f04a
+function t̂_seq(wide)
+	k_n_ = k_n(wide)
+	F_n = innerjoin(Fs, k_n_, on=names(k_n_))
+	sum(F_n.duration)
+end
+
 # ╔═╡ 36ff357f-cc58-453d-8d9e-5d9414813d80
 begin
 	df_seq = DataFrame(
@@ -199,6 +204,9 @@ begin
 	df_seq[!, :efficiency] = @. df_seq.t̂_seq / (df_seq.N * df_seq.t_par)
 	df_seq
 end
+
+# ╔═╡ 80446c83-bb05-45b0-9a34-af314d74243f
+k_n(wide[1])
 
 # ╔═╡ d4efa64f-bae3-4cba-bd24-6adaf82a2c99
 md"## Save Tables"
@@ -265,6 +273,8 @@ TableOfContents()
 # ╠═587dbbdb-3095-4150-8d99-747033322081
 # ╠═5c39d0ba-cdc3-41e3-bffb-7559b720f04a
 # ╠═5ac3b672-f057-4bc6-851d-552cc11f52ca
+# ╠═1d04f4e1-bed3-4395-a03d-f5fe0b017605
+# ╠═80446c83-bb05-45b0-9a34-af314d74243f
 # ╟─d4efa64f-bae3-4cba-bd24-6adaf82a2c99
 # ╠═5ae47ec1-b937-4087-a51e-07f0a4800480
 # ╠═55a50d60-45c1-46ef-9d7d-d9d432097b7f

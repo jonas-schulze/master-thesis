@@ -1,4 +1,5 @@
 \section{ParaReal.jl}
+\label{sec:impl:pr}
 
 This section describes the general properties of the \julia{ParaReal.jl} package.
 It has been designed with the following requirements in mind:
@@ -142,6 +143,7 @@ via \julia{ParaReal.fetch\_from\_owner()}.
 ]{code/parareal_store.jl}
 
 \subsection{JIT Compilation and Warm-Up}
+\label{sec:impl:pr:warmup}
 
 Julia is a \ac{JIT} compiled language~\cite{Julia},
 which means that code is compiled just before it is first executed,
@@ -163,6 +165,7 @@ and $\twarmup$ be a general global overhead.
 Further, we make the following assumptions:
 \begin{enumerate}
   \item
+    \label{item:impl:assumption:tF}
     $t_F$ and $t_G$ are constant, \ie do not depend on $n, k$.
   \item
     \label{item:impl:assumption:tU}
@@ -330,7 +333,7 @@ Exploiting this is highly non-trivial and out of the scope of this thesis.\footn
 Refer to \autoref{tab:impl:warmup} for the measurements corresponding to \autoref{fig:impl:warmup}.
 They are based on dense first-order Rosenbrock methods $G$ and $F$ applied to the Rail benchmark~\cite{morwiki_steel},
 taking 1 step ($\tau=\SI{45}{\second}/N$) and 10 steps ($\tau=\SI{45}{\second}/10N$), respectively.
-The (signed) relative error in the final column show that the assumptions on \autopageref{item:impl:assumption:tU} are reasonable in this context.
+The relative errors in the final column show that the assumptions on \autopageref{item:impl:assumption:tU} are reasonable in this context.
 Note that $K=N-1$, which is due to \autoref{thm:pr:conv}.
 
 In the case of no warm-up, $\twarmup=0$, the overall compilation overhead caused by~$G$ scales linearly in~$N$.
@@ -389,11 +392,9 @@ This effect propagates back-to-front through the still running pipeline stages.
 
 The exact size of the gap between the computations of~$G(U_{n-1}^k)$ and~$F(U_{n-1}^k)$ of stage~$n$ is determined by
 how much the stages are out-of-sync.
-Assuming that\footnote{%
-  Note how this assumption is false for the hardware used in $N=4$,
-  which causes the outlier described in the previous footnote.
-}
+Assuming that
 \begin{equation}
+\label{eq:impl:assumption}
   t_F > t_G + t_{\JIT(G)}
 \end{equation}
 this includes for $n+k < N$
@@ -407,7 +408,10 @@ this includes for $n+k < N$
     the overhead $t_{\JIT(G)}$ that,
     depending on the perspective,
     $G(U_n^{k-1})$ on the next stage finishes late,
-    or $G(U_{n-1}^k)$ on the current stage finished early.
+    or $G(U_{n-1}^k)$ on the current stage finished early.\footnote{%
+      Note how assumption~\eqref{eq:impl:assumption} is false for the hardware used in $N=4$,
+      which causes the outlier described in the previous footnote.
+    }
   %\item the time to compute the actual parareal value $U_n^k$.
 \end{enumerate}
 The last point causes the current stage to then \enquote{finish late} as well,
@@ -463,37 +467,58 @@ For large $N$, $N \gg K$, that effect will be negligible for the overall runtime
   \label{fig:timeline:revised}
 \end{figure}
 
-\subsection{Scheduling Strategies}
+\subsection{Parallel Scaling}
 
-\begin{itemize}
-  \item
-    parallel efficiency
-    \begin{equation}
-      \frac{\tseq}{P\cdot \tpar}
-    \end{equation}
-    Due to the one-to-one mapping between stages $n$ and processes, it is $P = N$.
-    This yields very bad parallel efficiencies, \cf table corresponding to \autoref{fig:results:parareal:rail}.
+Common metrics to compare parallel codes with are \emph{speedup}~$\tseq/\tpar$
+and \emph{parallel efficiency}~$\tseq/P\cdot\tpar$
+where $\tseq$ denotes the runtime of the fastest sequential algorithm,
+$\tpar$ the runtime of a parallel algorithm solving the same problem,
+and $P\in\N$ denotes the number of processors the parallel code is executed on.
+These timings, and therefore the metrics as well, depend on the size of the problem.
+Usually, $\tseq$ is not available and therefore estimated as the sequential runtime of the parallel algorithm.
 
-    For defense: post-mortem scheduling (\eg naive round-robin) to obtain a minimum $\hat P$ necessary to obtain the \emph{same} timeline.
-    Use that to compute hypothetical parallel efficiencies.
-  \item
-    Early stages $n=0,1,2$ become idle even before later stages receive their first $U^0_n$.
-    Maybe they could be reused: measure runtime of $F$ and $G$ to compute optimum number $N$ for given number of processors.
-    Alternatively, one could adjust the local time slices, \cf \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/2}
-  \item
-    If $X$ trajectories shall not be saved, solving the \ac{DRE} isn't that memory heavy.
-    Creating a connection between workers in a cluster shouldn't be that expensive (they are initialized lazily, but cost should pay off).
-    It might be worth it to send $U^{k+1}_n$ as well as $G(U^k_n)$ and $F(U^k_n)$ over the network in order to recycle processors.
-    However, this requires a lazy DAG scheduling like \texttt{DAGGER.jl}.
-  \item
-    \cite[493]{Nielsen2018} relevant?
-  \item
-    Distributed processes vs local threads vs GPU?
-\end{itemize}
+In the context of the parareal method,
+the size of the problem refers to the number of steps of the fine solver or the resolution of the output trajectory.
+Instead of estimating $\tseq$ as the sum of all $F$ and $G$ evaluated,
+a more relevant comparison is the theoretical runtime of the fine solver $F$ over the whole time span.
+Therefore, let $\hattseq$ be the total duration of the most recent fine solutions computed,
+\begin{equation}
+\label{eq:impl:tseq}
+  \hattseq = \sum_{n=1}^N t_F(n, k_n)
+\end{equation}
+where $k_n$ is the latest refinement $k$ computed on stage $n$,
+and $t_F(n,k)$ denotes the runtime of $F(U_{n-1}^k)$.
+In \autoref{sec:impl:pr:warmup},
+$t_F(n,k)$ had been assumed to be constant,
+\cf~assumption~\ref{item:impl:assumption:tF} on \autopageref{item:impl:assumption:tF}.
+However, as will be described in the next section,
+for the \ac{LRSIF} methods this is not true.
 
-Furthermore, due to the one-to-one mapping between stages $n$ and processes,
-some processes will finish earlier than others.
-This leaves potential to better utilize given hardware.
+As mentioned at the beginning of \autoref{sec:impl:pr},
+there is a one-to-one mapping between stages $n$ and processes.
+This means that the parallel efficiency has to be evaluated for $P=N$,
+which yields very low parallel efficiencies.
+Despite that, the speedups are quite good from a user's/engineer's perspective for larger $N$.
+Refer to \autoref{tab:impl:pr:speedup} for the measurements corresponding to the numerical results
+to be discussed in the next section.
+
+% TODO: for defense
+% post-mortem scheduling (\eg naive round-robin) to obtain a minimum $\hat P$ necessary to obtain the \emph{same} timeline.
+% Use that to compute hypothetical parallel efficiencies.
+
+As early stages $n \leq K$ only compute $k=n$ refinements,\footnote{%
+  Technically, they only compute $k=n-1$ refinements and then directly take the fine solution $F(U_{n-1}^{n-1})$,
+  which had already been evaluated for $U_n^{n-1}$,
+  \cf \autoref{thm:pr:conv}.
+}
+their processes become idle even before late stages receive their first $U^0_n$,
+\cf \eg left column of \autoref{fig:impl:warmup}.
+These processes may easily be reused,
+resulting in fewer processors being necessary, $P < N$,
+to obtain the same timeline.
+However, these processes must be warmed up only once,
+since the warm-up calls to $G$ would not be executed in parallel.
+Refer to \eg \cite{Nielsen2018} for a more advanced scheduling strategy to better utilize given hardware.
 
 \subsection{Parallel Programming Pitfalls}
 
