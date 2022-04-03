@@ -104,7 +104,7 @@ which is motivated by the following example.
   \end{aligned}
   \right.
   \end{equation*}
-  Following \autoref{thm:basics:dre-limit-are},
+  Following \autoref{thm:basics:dre-limit-are:backwards},
   $X(\optional{})$ converges to $\bar X + \tilde C^\T \tilde C / 100$,
   $\tilde C = C E^{-1}$,
   where $\bar X$ is the (stabilizing) solution of the generalized \ac{ARE}
@@ -230,40 +230,26 @@ The resulting factorization has a diagonal $D$ and (potentially) a lower inner d
 \end{remark}
 
 \begin{algorithm}[t]
-  \caption{Column Compression for LRSIF}
+  \caption[Column compression for \aclp*{LRSIF}]{%
+    Column compression for \ac{LRSIF}
+  }
   \label{alg:lowrank:compression}
-  \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$, tolerance $0 < \epsilon \ll 1$}
+  \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$}%, tolerance $0 < \epsilon \ll 1$}
   \KwOut{$G_r\in\Rnr$, $S_r\in\R^{r\times r}$ such that $G_r S_r G_r^\T \approx GSG^\T$ and $r \leq k$}
   Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$\;
   Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
   and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$\;
+  \Comment{Let $\umach$ denote the machine precision.}
+  $\epsilon \gets k \umach$\;
   % FIXME: this should be max{1, lambda_1}. Currently, it shouldn't do any harm as any X is psd,
   % and the RHS of the ALE should be as well. Check first stage of Ros2, though!
   % https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl/-/issues/7
   Select $r \leq k$ such that $\abs{\lambda_r} \geq \epsilon\max\Set{1, \lambda_1} \geq \abs{\lambda_{r+1}}$\;
+  \Comment{%
+    Let $V_r$ denote the first $r$ columns of $V$
+    and $\Lambda_r$ the first diagonal block of $\Lambda$.
+  }
   $G_r \gets Q V_r$\;
   $S_r \gets \Lambda_r$\;
-  \Comment{%
-    $V_r$ consists of the first $r$ columns of $V$ and $\Lambda_r$ of the first diagonal block of $\Lambda$
-  }
 \end{algorithm}
 
-\section{Model Order Reduction}
-\label{sec:mor}
-
-The goal of model order reduction is to find a so-called \ac{ROM}
-\begin{equation}
-\left\{
-\begin{aligned}
-  \hat E \dot{\hat x} &= \hat A \hat x + \hat B u \\
-  \hat y &= \hat C \hat x
-\end{aligned}
-\right.
-\end{equation}
-to the \ac{FOM}~\eqref{eq:basics:system:generalized},
-where the \ac{ROM} has fewer internal states $\hat x(t) \in\R^{\hat n}$
-than the \ac{FOM} $x(t) \in\R^n$, $\hat n \ll n$.
-The details are beyond the scope of this thesis,
-refer to \eg~\cite{Antoulas2005,BennerMehrmannSorensen2005,Benner2021} for an introduction to the topic.
-\todo{Does it, though? Is the solution of a DRE based on a ROM even low-rank? If the ROM has less than \eg 100 states, that's less than the rank of the ARE solution.}
-In the end, computing the optimal control for the \ac{ROM} requires the same techniques as presented in this thesis.

@@ -667,17 +667,18 @@ Using the well-known inequality
   \leq \norm{X}_F
   \leq \sqrt{r} \norm{X}_2
 \end{equation}
-for any matrix $X\in\Rnn$ where $r:=\rank X\leq n_G$,
+for any matrix $X\in\Rnn$ where $r:=\rank X$,
 we may replace the spectral norm in \eqref{eq:adi:residual} and \cite[Algorithm~2.2]{Lang2017}
 by the Frobenius norm.
 This leads to the stopping criterion
 \begin{equation}
+\label{eq:adi:lrstop}
   \norm[\big]{R_k^\HT R_k S}_F
   \leq
   \epsilon \norm[\big]{G^\HT G S}_F
 \end{equation}
 for a user-specified threshold $0<\epsilon \ll 1$.
-This relation implies
+Since $r \leq n_G$, this relation implies
 \begin{equation}
   \norm[\big]{R_k^\HT R_k S}_2
   \leq
@@ -824,6 +825,7 @@ In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}, choose
   \in \R^{n\times u n_G}
   .
 \end{equation}
+The overall procedure is summarized in \autoref{alg:ADI}.
 
 \begin{remark}
   Due to the low-rank structure, we only consider the part of the iteration mapping \eqref{eq:adi:cayley}
@@ -904,7 +906,7 @@ It is therefore advised to only consider the first $d \leq r$ eigen-values
 \begin{equation}
   \lambda_* \geq \epsilon \lambda_1
 \end{equation}
-for some $0 < \epsilon \ll 1$, \eg $r$ times the machine precision.
+for some $0 < \epsilon \ll 1$, \eg $n$ times the machine precision.
 This corresponds to replacing
 $\hat N$ by its first $d$ columns,
 $\hat D$ by its leading diagonal block of size $d$,
@@ -912,7 +914,7 @@ and $\colspan N$ by $\colspan(\hat N \diag(\lambda_1, \ldots, \lambda_d, 0, \ldo
 while the overall formula \eqref{eq:adi:param:Q} remains unchanged.
 Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
 
-\begin{algorithm}[t]
+\begin{algorithm}[tp]
   \caption{Low-Rank Alternating-Directions Implicit Method}
   \label{alg:ADI}
   \KwIn{%

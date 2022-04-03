@@ -63,6 +63,8 @@
 \pdfbookmark{\listtheoremname}{loe}
 \listoftheorems[ignore=remark]
 
+\printglossaries
+
 \listoftodos
 \markboth{TODO LIST}{TODO LIST}
 \todototoc
@@ -76,8 +78,7 @@
 \include{content/adi}
 \include{content/parareal}
 \include{content/implementation_and_results}
-
-\chapter{Conclusion}
+\include{content/conclusion}
 
 % -----------------------------------------------------------------------------
 \appendix
@@ -89,8 +90,6 @@
 
 % -----------------------------------------------------------------------------
 \backmatter
-\glsaddallunused
-\printglossaries
 \printbibliography
 
 \end{document}

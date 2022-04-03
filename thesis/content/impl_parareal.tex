@@ -423,9 +423,25 @@ while for the remaining rows effect~\ref{item:impl:comm:2} is essentially zero.
 \subsection{Early Convergence}
 \label{sec:impl:pr:conv}
 
-Due to \autoref{thm:basics:dre-limit-are},
+Due to \autoref{thm:basics:dre-limit-are:backwards},
 later parareal stages are expected to require fewer Newton refinements than earlier stages to reach convergence.
-Therefore, each stage $n$ may defer the computation of a refinement $k$,
+Each stage determines whether it has converged locally based on
+\begin{equation}
+\label{eq:impl:pr:conv}
+  \norm{U_n^k - U_n^{k-1}} \leq \epsilon \max\Set*{ \norm[\big]{U_n^k}, \norm[\big]{U_n^{k-1}} }
+\end{equation}
+for a user-specified threshold $0 < \epsilon \ll 1$
+and number of successive $k$.
+In the case of the \ac{LRSIF} $U_n^k = LDL^\T$,
+the norm is evaluated as $\norm{L^\T L D}_F$,
+\cf~\autoref{sec:adi:lrstop},
+while the distance $\norm{\optional{} - \optional{}}$ uses the low-rank update formula,
+\cf~\autoref{sec:lowrank}.
+For other user-defined data structures,
+define methods for the \julia{ParaReal.dist()} and \julia{LinearAlgebra.norm()} functions.
+
+Therefore, if stage $n$ has converged (locally),
+it may defer the computation of a refinement $k$
 until the previous stage $n-1$ finished computing its refinement $k+1$.
 That is, the number of refinements computed may differ by at most one from stage to stage,
 \ie $k_{n+1} \geq k_n -1$ where $k_n$ denotes the last refinement computed by stage $n$.
@@ -435,6 +451,9 @@ This timeline also shows when the stages~$n$ are waiting for input,
 which may be a new initial value~$U_{n-1}^k$ or the signal that the previous stage finished.
 In that case, stage~$n$ may safely finish as well,
 since~$k_{n-1}$ won't increase any further.
+If none of the stages reached the maximum number of iterations,
+\ie $k_n < K$ for all $n$,
+this situation is referred to as global convergence.
 
 To summarize all effects described so far,
 the revised schematic timeline plot is shown in \autoref{fig:timeline:revised},

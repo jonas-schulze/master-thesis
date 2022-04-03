@@ -57,7 +57,7 @@ where $x$ is determined by $\dot x = f(t, x, u^*)$ and $x(t_0) = x_0$,
 
 In the remainder of the section,
 we apply this theory to the \ac{LQR} tracking problem
-consisting of a linear system and quadratic cost functions.
+consisting of a linear \ac{ODE} and quadratic cost functions.
 We only give a very brief outline of the ideas leading to a \ac{DRE}
 following \cite[Remarks~3.3 and~3.6]{Locatelli2011} and \cite[Section~3.2.2]{Lang2017},
 to which the reader may refer to for further details.
@@ -236,7 +236,6 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
 \todo{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
 
 \begin{remark}
-  \todo{generalized \emph{descriptor system}?}
   A \emph{generalized} linear state-space system
   \begin{equation}
   \label{eq:basics:system:generalized}
@@ -289,9 +288,9 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
 
 \begin{example}[Parameters of Steel Profile]
 \label{thm:rail:parameters}
-  The steel profile benchmark \cite{morwiki_steel} goes back to \cite{Benner2005}.
-  It is a generalized system that has $m=7$ controls and $q=6$ outputs.
-  We'll use the variant having $n=371$ state variables.
+  The steel profile benchmark \cite{morwiki_steel} goes back to~\cite{Benner2005}.
+  It is a generalized state-space system that has $m=7$ controls and $q=6$ outputs.
+  The variant used in this thesis has $n=371$ state variables.
   Furthermore, the \ac{LQR} weights are
   \begin{equation*}
     Q = I_q,
@@ -351,20 +350,20 @@ To summarize:
 
 \begin{proposition}[LQR over Infinite Time Horizon]
 \label{thm:basics:dre-limit-are:backwards}
-  The value $X(t_0; t_f)$ of the solution $X(\optional{}; t_f)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
-  having the boundary value $X(t_f; t_f) = C^\T S C =: X_f$
-  converges to
+  Let $X$ denote the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}.
+  Then, for any fixed $t < t_f$, the solution value converges to
   \begin{equation}
-    \lim_{t_f\to\infty} X(t_0; t_f) = \bar X + X_f
+    \lim_{t_f\to\infty} X(t) = \bar X + C^\T S C
   \end{equation}
   where $\bar X$ is the solution to \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
 \end{proposition}
 \begin{proof}
-  Define $\hat X(t) := X(t; t_f) - X_f$,
-  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} having boundary value $\hat X(t_f) = 0$.
+  Let $X_f := X(t_f) = C^\T S C$ and
+  define $\hat X(t) := X(t) - X_f$,
+  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} having homogeneous boundary data $\hat X(t_f) = 0$.
   Following the proof of \cite[Theorem~3.3]{Locatelli2011},
-  $\hat X(t_0)$ converges to $\bar X$ for $t_f\to\infty$.
-  Therefore, $X(t_0, t_f) = \hat X(t_0) + X_f \to \bar X + X_f$.
+  $\hat X(t_0)$ converges to $\bar X$ for $t_f\to\infty$,
+  such that~\mbox{$X(t) = \hat X(t) + X_f$} converges to~\mbox{$\bar X + X_f$}.
 \end{proof}
 
 \section{Reformulating Problems Forward in Time}
@@ -406,41 +405,6 @@ As both variants of the \ac{DRE},
 \eqref{eq:basics:LQR:DRE:forwards},
 may easily be transformed into one another,
 the notation $A, B, C, X$ is used for both in this thesis.
-
-\begin{corollary}[LQR over Infinite Time Horizon]
-\label{thm:basics:dre-limit-are}
-  The solution $\tilde X(t)$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:forwards}
-  converges to
-  \begin{equation}
-    \lim_{t\to\infty} \tilde X(t) = \bar X + C^\T S C
-    ,
-  \end{equation}
-  where $\bar X$ is the solution to \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
-\end{corollary}
-\begin{proof}
-  Follows from \autoref{thm:basics:dre-limit-are:backwards} with the direction of time reversed,
-  $\lim \tilde X(t_f) = \lim X(t_0; t_f) = \bar X + C^\T S C$ for $t_f\to\infty$.
-\end{proof}
-
-\begin{example}[Independence of Initial Value of Steel Profile]
-\label{thm:rail:limit}
-  For the Rail benchmark~\cite{morwiki_steel} it is
-  \begin{equation*}
-    \frac{
-      \norm*{\tfrac{1}{100} \tilde C^\T \tilde C}_F
-    }{
-      \norm*{\bar X + \tfrac{1}{100} \tilde C^\T \tilde C}_F
-    } < 0.001701
-  \end{equation*}
-  where $\tilde C := C E^{-1}$,
-  \ie $X(t)$ converges to a value that barely depends on its initial value.
-  % julia> using MatrixEquations
-  % Ad = collect(A);
-  % Ed = collect(E);
-  % G = collect(B*B');
-  % Q = collect(C'C);
-  % X = garec(Ad, Ed, G, Q);
-\end{example}
 
 \section{Solution of the \texorpdfstring{\act{DRE}}{DRE}}
 \label{sec:basics:matrixeqs}

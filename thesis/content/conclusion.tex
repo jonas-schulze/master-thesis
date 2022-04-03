@@ -1,0 +1,10 @@
+\chapter{Conclusion}
+
+In hindsight, performing a \ac{LRSIF} compression if $r \geq \onehalf n$ is a bad idea.
+This lead to a compression performed after every \ac{ADI} iteration.
+A better default would have been \eg $r \geq \frac{3}{4} n$,
+which (for the Steel Profile) would allow for at least two \ac{ADI} iterations without compression.
+Also, the focus has been too much on \code{ParaReal.jl},
+such that the introspection allowed by \code{DifferentialEquations.jl} is quite poor:
+it does not track the actual rank of the \ac{ALE} right-hand sides,
+nor the number of \ac{ADI} iterations or number of compressions performed.
