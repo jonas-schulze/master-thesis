@@ -350,20 +350,19 @@ To summarize:
 
 \begin{proposition}[LQR over Infinite Time Horizon]
 \label{thm:basics:dre-limit-are:backwards}
-  Let $X$ denote the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}.
-  Then, for any fixed $t < t_f$, the solution value converges to
-  \begin{equation}
-    \lim_{t_f\to\infty} X(t) = \bar X + C^\T S C
-  \end{equation}
-  where $\bar X$ is the solution to \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
+  The solution $X(\optional{})$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
+  converges at any fixed $t<t_f$ to a solution of an \ac{ARE} for $t_f \to\infty$.
 \end{proposition}
 \begin{proof}
-  Let $X_f := X(t_f) = C^\T S C$ and
-  define $\hat X(t) := X(t) - X_f$,
-  which is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} having homogeneous boundary data $\hat X(t_f) = 0$.
-  Following the proof of \cite[Theorem~3.3]{Locatelli2011},
-  $\hat X(t_0)$ converges to $\bar X$ for $t_f\to\infty$,
-  such that~\mbox{$X(t) = \hat X(t) + X_f$} converges to~\mbox{$\bar X + X_f$}.
+  Let $X_f := C^\T S C$.
+  The translation $\hat X(t) := X(t) - X_f$ leads to a \ac{DRE} in $\hat X$
+  having different absolute term,
+  different coefficients for the linear term in $\hat X$,
+  and homogeneous boundary data $\hat X(t_f) = 0$.
+  Then, by~\cite[Theorem~3.3]{Locatelli2011} for any fixed $t<t_f$ and $t_f\to\infty$,
+  $\hat X(\optional{})$ converges to a solution $\bar X$ of its corresponding \ac{ARE}.
+  Therefore, \mbox{$X(t) = \hat X(t) + X_f$} converges to~\mbox{$\bar X + X_f$},
+  which is itself a solution to an \ac{ARE}.
 \end{proof}
 
 \section{Reformulating Problems Forward in Time}
