@@ -457,16 +457,16 @@ which will be covered in \autoref{sec:ADI}.
   for $W = C^\T C \succeq 0$, $S=BB^\T \succeq 0$.
 \end{proof}
 
-\begin{theorem}[Solvability of ARE]
-  Let $S, W \succeq 0$ and $(E, A, S, W)$ be a stabilizable and detectable system.
-  Then there exists a unique symmetric stabilizing solution $X_*$ of the generalized \ac{ARE}~\eqref{eq:basics:ARE}
-  such that $\Lambda(A - SX_*E, E) \subseteq \Cneg$.
-  If in addition the system $(E, A, S, W)$ is observable, then $X_* \succ 0$.
-\end{theorem}
-\begin{proof}
-  Compare \cite[Theorem~2.9]{Lang2017}.
-  For a proof, refer to \cite{Lancaster1995}.
-\end{proof}
+%\begin{theorem}[Solvability of ARE]
+%  Let $S, W \succeq 0$ and $(E, A, S, W)$ be a stabilizable and detectable system.
+%  Then there exists a unique symmetric stabilizing solution $X_*$ of the generalized \ac{ARE}~\eqref{eq:basics:ARE}
+%  such that $\Lambda(A - SX_*E, E) \subseteq \Cneg$.
+%  If in addition the system $(E, A, S, W)$ is observable, then $X_* \succ 0$.
+%\end{theorem}
+%\begin{proof}
+%  Compare \cite[Theorem~2.9]{Lang2017}.
+%  For a proof, refer to \cite{Lancaster1995}.
+%\end{proof}
 
 \begin{theorem}[Solvability of ALE]
   Let $\lambda_j \neq -\lambda_k$ for any $\lambda_j, \lambda_k \in\Lambda(A, E)$.
@@ -478,7 +478,7 @@ which will be covered in \autoref{sec:ADI}.
 
 \begin{example}[Regularity of Steel Profile]
   For the steel profile benchmark \cite{morwiki_steel} it is
-  $E \succ 0$ and $A \prec 0$, hence the system is stable.
+  $E \succ 0$ and $A \prec 0$, \ie the system is \emph{stable}.
   As $E^\T X_0 E = C^\T C / 100 \succeq 0$,
   the associated generalized \ac{DRE} has a unique solution.
   \todo{Do all \ac{ALE} appearing in this thesis have a unique solution as well?}
