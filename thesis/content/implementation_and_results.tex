@@ -239,16 +239,27 @@ which is for the following reasons:
     Dense~2/2 does not fulfill the assumption that all stages $n$ compute the same number of refinements,
     \ie $k_n$ is not constant.
     Due to early convergence, \cf~\autoref{sec:impl:pr:conv},
-    the last stage $N$ for example computes fewer refinements, $k_N = 7 < 10 = K$.
-    This causes the runtime model~\eqref{eq:impl:tpar} to over-estimate the actual runtime $\tpar$.
+    the last stage $n=N$ for example computes fewer refinements, $k_N = 7 < 10 = K$.
+    This causes the runtime model~\eqref{eq:impl:tpar} to over-estimate the actual runtime,
+    $\hattpar > \tpar$,
+    as seen by the large error in \autoref{tab:results:warmup}.
   \item
     For \ac{LRSIF}~2/2 both runtimes $t_G(n, k)$ and $t_F(n, k)$ are monotonic in both $n$ (due to the growing rank) and $k$,
     while also having a big deviation from their median.
     The monotonicity in $k$ causes its timeline diagram to fan out,
     while the monotonicity in $n$ causes each \enquote{feathers} $k$ of the timeline diagram to be bent backwards.
-    This causes the runtime model~\eqref{eq:impl:tpar} to under-estimate the actual runtime $\tpar$.
+    The resulting gaps between successive refinements $k$ on the final stage $n=N$ are not considered
+    by the schematic timeline, \cf~\autoref{fig:timeline:revised}.
+    Furthermore, the median over all $t_G(\optional{},\optional{})$ is much larger than,
+    and therefore not a representative for $t_G(\optional{}, 0)$,
+    which determines the slope of the $k=0$ face of the timeline.
+    This causes the estimated ramp-up delay $\trampup$ to become negative.
+    Both effects, the gaps on stage $n=N$ as well as $\trampup<0$,
+    attribute to the runtime model~\eqref{eq:impl:tpar} under-estimating the actual runtime,
+    $\hattpar < \tpar$,
+    as seen by the large error in \autoref{tab:results:warmup}.
 \end{enumerate}
-The timeline diagram of the reference solution is shown in \autoref{fig:impl:restart},
+The timeline diagram of the Dense~4/4 reference solution is shown in \autoref{fig:impl:restart},
 which doesn't fulfill all the assumptions due to early convergence.
 
 \begin{figure}[tp]
