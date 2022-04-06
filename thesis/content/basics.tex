@@ -348,21 +348,19 @@ Compare this to the feedback law \eqref{eq:basics:LQR:u*} for a finite time hori
 where $X(t)$ is time-dependent.
 To summarize:
 
-\begin{proposition}[LQR over Infinite Time Horizon]
+\begin{theorem}[LQR over Infinite Time Horizon]
 \label{thm:basics:dre-limit-are:backwards}
   The solution $X(\optional{})$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
   converges at any fixed $t<t_f$ to a solution of an \ac{ARE} for $t_f \to\infty$.
-\end{proposition}
+\end{theorem}
 \begin{proof}
   Let $X_f := C^\T S C$.
-  The translation $\hat X(t) := X(t) - X_f$ leads to a \ac{DRE} in $\hat X$
-  having different absolute term,
-  different coefficients for the linear term in $\hat X$,
-  and homogeneous boundary data $\hat X(t_f) = 0$.
+  The translation $Y(t) := X(t) - X_f$ leads to a \ac{DRE} in $Y$
+  having homogeneous boundary data $Y(t_f) = 0$.
   Then, by~\cite[Theorem~3.3]{Locatelli2011} for any fixed $t<t_f$ and $t_f\to\infty$,
-  $\hat X(\optional{})$ converges to a solution $\bar X$ of its corresponding \ac{ARE}.
-  Therefore, \mbox{$X(t) = \hat X(t) + X_f$} converges to~\mbox{$\bar X + X_f$},
-  which is itself a solution to an \ac{ARE}.
+  $Y(\optional{})$ converges to a solution $\bar Y$ of its corresponding \ac{ARE}.
+  Therefore, \mbox{$X(t) = Y(t) + X_f$} converges to \mbox{$\bar X := \bar Y + X_f$},
+  which happens to be a solution to the \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
 \end{proof}
 
 \section{Reformulating Problems Forward in Time}

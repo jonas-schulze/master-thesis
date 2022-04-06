@@ -114,13 +114,28 @@ which is motivated by the following example.
   \end{equation*}
   \cf \eqref{eq:basics:ARE} having $S = BB^\T$ and $W = C^\T C$.
   That is, on one end of the time span $X$ has rank $q=6$
-  while on the other end it converges to a matrix of numerical rank $113$.
+  while past the other end it converges to a matrix of numerical rank $\approx 113$.
   As the corresponding optimal control has some form of minimal energy,
   one can expect the numerical rank of the solution $X(\optional{})$ to depend on the ranks of initial and limit value,
   and to be not much larger in between.
   For this particular example that's about $\frac{1}{3}n$,
   which means the storage requirement of a single matrix can ideally be reduced by about $\frac{2}{3}$.
 \end{example}
+
+% using MatrixEquations
+%
+% julia> Ed = collect(E);
+%
+% julia> Ad = collect(A);
+%
+% julia> Gd = collect(B*B');
+%
+% julia> Qd = collect(C'C);
+%
+% julia> X, EVAL, Z = garec(Ad, Ed, Gd, Qd);
+%
+% julia> rank(X)
+% 113
 
 \paragraph{Classical Formulation}
 
