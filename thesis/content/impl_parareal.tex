@@ -92,6 +92,9 @@ Any custom implementation of the parareal update formula must follow the interfa
 The remainder of this section is devoted to a complete example of a user-defined problem type ($N=3$, $K=2$).
 The problem type will be a mere placeholder that forwards its initial value,
 while the solver functions will count the applications of $F$ and $G$ a particular solution is composed of.
+
+\pagebreak
+
 Start by launching some worker processes and loading the necessary packages:
 \lstinputlisting[%
   %caption={User-defined problem type for \code{ParaReal.jl}},
@@ -163,6 +166,11 @@ Let $N$ be the number of stages $1 \leq n \leq N$,
 and $K$ be the number of refinements $0 \leq k \leq K$.
 Let $\trampup$ be the overhead imposed on each computing the first coarse solution $G(U_n^0)$,
 and $\twarmup$ be a general global overhead.
+
+% This paragraph is to control page break and indentation.
+% If it is removed, join he paragraphs surrounding it.
+\paragraph{Assumptions}
+
 Further, we make the following assumptions:
 \begin{enumerate}
   \item
@@ -468,7 +476,8 @@ For large $N$, $N \gg K$, that effect will be negligible for the overall runtime
   \includegraphics[width=\textwidth]{figures/fig_timeline_ref.pdf}
   \caption[Restarted parareal computation]{
     Restarted parareal computations to maintain $k_{n+1} \geq k_n - 1$.
-    Top: full timeline of parareal algorithm applied to Rail benchmark~\cite{morwiki_steel}, $N=450$.
+    Top: full timeline of dense parareal algorithm of order 4 coarse and fine solvers applied to Rail benchmark~\cite{morwiki_steel}, $N=450$.
+    This corresponds to the reference solution mentioned in \autoref{fig:results:parareal:rail}.
     Bottom: zoom to first stages $1 \leq n \leq 20$.
   }
   \label{fig:impl:restart}
