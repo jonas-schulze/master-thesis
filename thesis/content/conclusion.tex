@@ -1,11 +1,76 @@
 \chapter{Conclusion}
 \label{sec:conclusion}
 
-In hindsight, performing a \ac{LRSIF} compression if $r \geq \onehalf n$ is a bad idea.
-This lead to a compression performed after every \ac{ADI} iteration.
-A better default would have been \eg $r \geq \frac{3}{4} n$,
-which (for the Steel Profile) would allow for at least two \ac{ADI} iterations without compression.
+\sisetup{round-precision=1}
+
+This thesis has given a brief overview on the \ac{DRE} arising in optimal control in \autoref{sec:HJT},
+and how to handle large-scale problems in general in \autoref{sec:matrixeq}.
+Then, \autoref{sec:ros} has shown that
+applying the classical Rosenbrock method to the matrix-valued \ac{DRE}
+results in the stage equations being \acp{ALE}
+having absolute terms in \ac{LRSIF}.
+When solving these equations with the \ac{ADI} method,
+the solution's low-rank structure causes the \ac{ADI} sub-steps to operate on different low-rank factors.
+Due to the symmetry of the solution,
+and the particular choice of \ac{ADI} parameters,
+these low-rank factors remain identical for every \ac{ADI} iteration.
+Therefore, effectively only one of two \ac{ADI} sub-steps has to be performed every iteration.
+It was further shown how the general structure of the \ac{ADI} allows to efficiently iterate the low-rank residual alongside the solution,
+how to evaluate its norm without assembling the full residual matrix,
+and how to handle complex parameters using real arithmetic for the iterates.
+Lastly, \autoref{sec:ADI} described how to choose \ac{ADI} parameters based on quantities computed during the \ac{ADI},
+\ie independent from user input.
+
+\autoref{sec:pr} and parts of \autoref{sec:impl} addressed the parareal method.
+It was shown how to apply the method to \acp{LRSIF}.
+When using the parareal method from a \ac{JIT} compiled language like Julia,
+it is crucial that the coarse solver is already compiled before the parareal iteration starts.
+Otherwise, the overhead of compilation scales with the number of parareal stages~$N$,
+rendering the method infeasible for practical use.
+Still, there is another linear overhead of about $\trampup \approx \SI{1.8}{\second}$ per stage,
+caused by the compilation of communication code.
+Overall, the efficiency is very low,
+less than \SI{2}{\percent} for the low-rank algorithms and
+\SIrange{4.6}{7.6}{\percent} for the dense algorithms,
+yet the speed-up is very noticeable,
+\eg more than \num{34} for the most expensive dense algorithm,
+\cf~\autoref{tab:impl:pr:speedup}.
+These metrics would be larger for finer temporal resolutions,
+a lower ramp-up delay~$\trampup$,
+or more advanced scheduling strategies.
+The latter would especially benefit the low-rank algorithms.
+
+Numerically, the \ac{LRSIF} version of \Ros{1} performed just like its dense counterpart.
+The problems with the \ac{LRSIF} version of \Ros{2} as noted by \citeauthor*{Lang2015}~\cite{Lang2015,Lang2017} have been reproduced in Julia.
+They are especially severe in a parareal context,
+which makes the comparison of runtime and derived metrics involving this method basically pointless.
+This is in part caused by the rank of the solution obtained from \Ros{2} being too large,
+which increases the number of \ac{LRSIF} compressions performed per Rosenbrock step.
+In hindsight, performing a compression if the rank $r$ of a \ac{LRSIF} reaches \SI{50}{\percent} of the problem's dimension $n$,
+\ie $r \geq \onehalf n$,
+may have been too restrictive.
 Also, the focus has been too much on \code{ParaReal.jl},
-such that the introspection allowed by \code{DifferentialEquations.jl} is quite poor:
+such that the introspection currently allowed by \code{DifferentialRicccatiEquations.jl} is quite poor:
 it does not track the actual rank of the \ac{ALE} right-hand sides,
-nor the number of \ac{ADI} iterations or number of compressions performed.
+nor the number of \ac{ADI} iterations or number of \ac{LRSIF} compressions performed.
+These insights would be necessary to assess the extend of the rank problem.
+
+Julia allows for user-friendly abstractions while still providing good performance.
+In particular, dynamic dispatch and extendable standard operators like \julia{(+)} are very useful.
+It was mostly fun to work with, but could be improved in the following aspects.
+%The tooling around the language isn't as mature.
+First, the runtime is too forgiving when errors occur,
+especially in a distributed environment.
+There is no simple way to make it more strict, \eg to crash all worker processes on a single unhandled error.
+Second, the thread-safety of the standard library could be improved.
+This would allow \code{ParaReal.jl} to perform communication asynchronously.
+Third, Julia determines a suitable text representation of an object (\eg \julia{display()}) based on the number of terminal rows available.
+This applies to errors as well, causing \eg grouped errors due to a pipeline failure to only print the first error,
+which may not be the root cause of the problem.
+Subsequent errors are lost in an ellipsis (\enquote{\ldots{} and 41 more exceptions}).
+In a truly headless setting,
+\eg inside a job executed by a job scheduling system like Slurm\footnote{\url{https://slurm.schedmd.com/overview.html}},
+all errors should be printed by default (or \enquote{\ldots{} and 41 identical exceptions more}).
+Having these issues in mind,
+and considering that Julia is still a very young language compared to the ones dominant in high-performance computing,
+Julia is a worthy option for future projects in science and engineering.

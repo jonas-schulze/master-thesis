@@ -12,14 +12,15 @@ which describe the behavior of an underlying system in space and time.
 A common strategy is to solve these equations \emph{parallel-in-space},
 \ie to distribute the spatial domain onto several CPUs,
 which are then usually worked on in lockstep along the time dimension.
-This strategy only scales so far, as the local problems don't become too small,
+This strategy only scales as far as the local problems don't become too small,
 due to the communication necessary along the interfaces of spatial sub-domains.
 Another strategy is to (also) solve the problem \emph{parallel-in-time},
 %\ie to solve the temporal dynamics of the system in parallel.
 \ie to distribute the temporal domain onto several CPUs.
-One algorithm of the latter family is the so-called parareal method~\cite{Lions2001},
+One algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
 which is the focus of this thesis.
-From a pure energy-consumed or efficiency perspective,
+%From a pure energy-consumed or efficiency perspective,
+From a pure efficiency perspective in terms of energy-consumed,
 the parareal method is not worth pursuing.
 However, as engineering demands fast cycle times,
 this method can lead to large speed-ups.
@@ -30,12 +31,12 @@ Practical applications quickly lead to large-scale systems,
 for which the solution matrices easily reach thousands of rows and columns.
 In order to handle them efficiently,
 one uses the problem's inherent rapid decay of singular values
-to represent the solution matrices in a low-rank factorization.
+to represent the solution matrices in a low-rank factorization, see \eg~\cite{Penzl2000,Kuerschner2016,Lang2017}.
 As the rank of the solution is not constant for all the interfaces of the temporal sub-domains,
 implementation is somewhat difficult in well-established frameworks like OpenMPI\footnote{%
   \url{https://www.open-mpi.org/}
 }.
-Therefore, since Julia~\cite{Julia} promises to provide a fresh look on the problems of high-performance computing,
+Therefore, since Julia~\cite{Julia} promises to provide a fresh perspective on the problems of high-performance computing,
 this thesis serves as a test project for just that.
 
 The thesis is structured as follows.
@@ -46,7 +47,7 @@ Every step of the Rosenbrock method requires the solution of an \ac{ALE},
 which may be done using \eg the \ac{ADI} method described in \autoref{sec:ADI}.
 This completes the general building blocks of a \ac{DRE} solver.
 To speed-up this solver,
-\autoref{sec:pr} shows how apply the parareal method to the particular low-rank factorization used in this thesis.
+\autoref{sec:pr} shows how to apply the parareal method to the particular low-rank factorization used in this thesis.
 \autoref{sec:impl} describes the implementation of aforementioned algorithms in the form of two Julia packages
 as well as the numerical results of applying sequential and parareal solvers to
 a small configuration of the Steel Profile benchmark problem~\cite{morwiki_steel},
@@ -70,3 +71,13 @@ The dense \ac{DRE} solvers are built on top of \julia{MatrixEquations.jl}~\cite{
 \julia{DifferentialEquations.jl}~\cite{DifferentialEquations} was used for \autoref{example:parareal}.
 The figures in this thesis were created with
 \julia{Makie.jl}~\cite{Makie} or Ti\emph{k}Z~\cite{TikZ}.
+
+\section*{Sources to this Document}
+
+\todo{Rename repo to \code{master-thesis}}
+The \LaTeX{} and Julia source codes for this thesis may be found at:
+\begin{center}
+  \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/playground}
+\end{center}
+\todo{write git hash to file (via Makefile) and \code{\\input\{\}} that file here.}
+The present version of the document corresponds to git hash ..
