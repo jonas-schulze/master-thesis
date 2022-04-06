@@ -428,7 +428,7 @@ later parareal stages are expected to require fewer Newton refinements than earl
 Each stage determines whether it has converged locally based on
 \begin{equation}
 \label{eq:impl:pr:conv}
-  \norm{U_n^k - U_n^{k-1}} \leq \epsilon \max\Set*{ \norm[\big]{U_n^k}, \norm[\big]{U_n^{k-1}} }
+  \norm[\big]{U_n^k - U_n^{k-1}} \leq \epsilon \max\Set*{ \norm[\big]{U_n^k}, \norm[\big]{U_n^{k-1}} }
 \end{equation}
 for a user-specified threshold $0 < \epsilon \ll 1$
 and number of successive $k$.
