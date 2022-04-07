@@ -1,7 +1,7 @@
 \chapter{Hamilton-Jacobi Theory}
 \label{sec:HJT}
 
-This chapter gives an overview on the \Riccati equations arising in optimal control
+This chapter gives an overview on the \Riccati equations arising in the optimal control
 of linear dynamical systems following~\cite{Locatelli2011},
 as well as the \Lyapunov equation to be seen in this thesis.
 For a more general overview on matrix equations refer to \eg~\cite{Simoncini2016}.
@@ -22,7 +22,7 @@ using \emph{state}~$x(t)\in\R^n$, system \emph{input} or \emph{control}~$u(t)\in
 and scalar cost functions~$\ell$ and~$m$.
 Following \cite{Locatelli2011},
 a sufficient condition for
-an optimal control $u^*$ solving \eqref{eq:basics:OCP} may be stated by means of a
+an optimal control $u^*$ solving problem~\eqref{eq:basics:OCP} may be stated by means of a
 continuously differentiable
 \emph{value function}~$V:\R\times\R^n\to\R$ satisfying the \ac{HJE}
 \begin{equation}
@@ -51,14 +51,16 @@ Namely, a control $u^*$ is optimal if it fulfills the feedback law
 \begin{equation}
 \label{eq:basics:HJ:feedback}
   u^*(t) = u^h\big(t, x(t), V_z(t,z)^\T |_{z=x(t)} \big)
+  ,
 \end{equation}
 where $x$ is determined by $\dot x = f(t, x, u^*)$ and $x(t_0) = x_0$,
 \cf~\cite[Corollary~2.1]{Locatelli2011}.
 
-In the remainder of the section,
-we apply this theory to the \ac{LQR} tracking problem
-consisting of a linear \ac{ODE} and quadratic cost functions.
-We only give a very brief outline of the ideas leading to a \ac{DRE}
+In the remainder of this section,
+this theory is applied to the \ac{LQR} tracking problem
+consisting of a linear \ac{ODE} and quadratic cost functions,
+which aim to steer a system close to a desired trajectory.
+Only a very brief outline of the ideas leading to a \ac{DRE} is given here,
 following \cite[Remarks~3.3 and~3.6]{Locatelli2011} and \cite[Section~3.2.2]{Lang2017},
 to which the reader may refer to for further details.
 
@@ -101,7 +103,6 @@ The system~\eqref{eq:basics:system:standard} is referred to as \ac{LTI}
 if the \emph{system matrices} $A(t), B(t), C(t)$ are constant for $t\in [t_0,t_f]$,
 and \ac{LTV} otherwise.
 We restrict ourselves to \ac{LTI} and \emph{controllable} systems,
-\todo{Is this notion of \enquote{controllable} correct?}
 \ie for any given $(t_0, x_0)$ and $(t_1, x_1)$, $t_1 > t_0$,
 there exists a bounded control $u(\optional{})$ such that $x(t_1; t_0, x_0, u(\optional{})) = x_1$.
 
@@ -147,7 +148,7 @@ its partial derivates read
   .
 \end{aligned}
 \end{equation}
-Substituting the above, $u^h(t, z, V_z^\T)$ based on \eqref{eq:basics:LQR:uh},
+Substituting the above, $u^h(t, z, V_z^\T)$ based on Equation~\eqref{eq:basics:LQR:uh},
 as well as the scalar identity
 \begin{equation}
   z^T X A z = \onehalf \Big( z^T X A z + \big( z^\T X A z \big)^\T \Big)
@@ -233,7 +234,7 @@ The overall cost to compute $u^*$ is dominated by solving the \ac{DRE}~\eqref{eq
 Furthermore, the full solution $X(t)\in\Rnn$ is not needed.
 Rather, it suffices to store the so-called \emph{gain-} or \emph{feedback matrix} $K(t) \in\R^{m\times n}$.
 Since typically $m \ll n$, this has a major impact on the storage requirements.
-\todo{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
+%\todo{Maybe discuss uniqueness of $u^*$. It should be possible to adapt \cite[Remark~3.2]{Locatelli2011} to this case.}
 
 \begin{remark}
   A \emph{generalized} linear state-space system
@@ -312,7 +313,7 @@ Therefore, $Q$ and $R$ are assumed to be identity matrices of appropriate size.
 \section{Infinite Control Horizon}
 % cf \cite[Remark~3.13, Theorem~3.3]{Locatelli2011}
 
-Consider the \ac{OCP} for \ac{LQR} over an infinite time horizon,
+Consider the \ac{OCP} for a \ac{LQR} over an infinite time horizon,
 \begin{equation}
 \label{eq:basics:OCP'}
   \everymath{\displaystyle}
@@ -334,8 +335,8 @@ the optimal control is given by
 \end{equation}
 for some $\bar w(t)$,
 where $\bar X(t) := \lim_{t_f \to\infty} X(t; t_f)$
-and $X(\optional{};t_f)$ is the solution to \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
-having homogeneous boundary value $X(t_f; t_f) = 0$. % t_f < \infty
+and $X(\optional{};t_f)$ is a solution to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
+having homogeneous boundary data $X(t_f; t_f) = 0$. % t_f < \infty
 By \cite[Theorem~3.3]{Locatelli2011},
 $\bar X(t) \equiv \bar X$ is constant.
 Hence, its derivative is zero such that $\bar X$ is a solution to the \ac{ARE}
@@ -367,7 +368,7 @@ To summarize:
 \label{sec:basics:tdir}
 
 As mentioned previously, the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} has to be solved backwards in time.
-It is common practice to instead formulate it forward in time by defining
+It is common practice to formulate it forward in time instead by defining
 \begin{equation}
   \tilde X(t) := X(t_f - t + t_0)
 \end{equation}
@@ -386,6 +387,7 @@ such that
 \end{equation}
 and still $t \in [t_0, t_f]$.
 Overall,
+the \ac{DRE} formulated forwards in time reads
 \begin{equation}
 %\tag{\ref*{eq:basics:LQR:DRE:backwards}'}
 \label{eq:basics:LQR:DRE:forwards}
@@ -433,7 +435,7 @@ only require a generalized \ac{ALE}
 \end{equation}
 to be solved at every step,
 which is a special case of the \ac{ARE}.
-\ac{ALE} may be solved \eg using the \ac{ADI} method,
+\acp{ALE} may be solved \eg using the \ac{ADI} method,
 which will be covered in \autoref{sec:ADI}.
 
 \begin{remark}
@@ -481,5 +483,4 @@ which will be covered in \autoref{sec:ADI}.
   $E \succ 0$ and $A \prec 0$, \ie the system is \emph{stable}.
   As $E^\T X_0 E = C^\T C / 100 \succeq 0$,
   the associated generalized \ac{DRE} has a unique solution.
-  \todo{Do all \ac{ALE} appearing in this thesis have a unique solution as well?}
 \end{example}
