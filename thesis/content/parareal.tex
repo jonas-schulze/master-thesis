@@ -303,9 +303,9 @@ A Taylor expansion of $G(U^{k+1}_n) \approx u_n(t_{n+1}, U^{k+1}_n)$ around $G(U
 Let the \acp{LRSIF}
 \begin{equation}
 \begin{aligned}
-  G(X^{k+1}_n) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
-  F(X^k_n)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
-  G(X^k_n)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
+  G(U^{k+1}_n) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
+  F(U^k_n)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
+  G(U^k_n)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
 \end{aligned}
 \end{equation}
 be given.
@@ -331,7 +331,7 @@ the parareal update \eqref{eq:pr:method} reads
   .
 \end{equation}
 Note the downdate in the last block component.
-The actual low-rank representation of $X^{k+1}_{n+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
+The actual low-rank representation of~$U^{k+1}_{n+1}$ is set to a column compression of~$\hat L \hat D \hat L^\T$
 using \autoref{alg:lowrank:compression}.
 
 %\section{Alternative Parallel-in-Time Solvers}
