@@ -4,13 +4,12 @@
 This chapter will give a very brief overview on common strategies necessary to solve large-scale matrix equations.
 First, \autoref{sec:matrixeq:sparse} is concerned with suitable representations of matrices having only very few non-zero entries.
 \autoref{sec:basics:smw} then shows an efficient strategy to solve shifted linear systems.
-\autoref{sec:lowrank} presents a memory-efficient representations of matrices having a low (numerical) rank.
-Finally, \autoref{sec:mor} hints at strategies to reduce the dimension of the matrices involved.
+Finally, \autoref{sec:lowrank} presents a memory-efficient representations of matrices having a low (numerical) rank.
 
 \section{Sparse Matrices}
 \label{sec:matrixeq:sparse}
 
-Many matrices arising in applications are sparse.
+Many matrices arising in practical applications are sparse.
 For example, the shape regularity of the space triangulation of a \ac{PDE}
 implies that each node has about the same number of neighbors,
 and that number mainly depends on the space dimension of the problem.
@@ -18,8 +17,8 @@ For the matrix corresponding to that triangulation,
 this number of neighbors determines the number of non-zero entries in the column or row corresponding a particular node.
 
 \begin{example}[Sparsity of Steel Profile]
-  The system matrices of the steel profile benchmark \cite{morwiki_steel} of size $n=371$ are sparse.
-  Their spy plots are shown in \autoref{fig:spy} the number of non-zero entries $\nnz(\optional{})$ per matrix.
+  The system matrices of the steel profile benchmark~\cite{morwiki_steel} of size $n=371$ are sparse.
+  Their patterns are shown in \autoref{fig:spy}, as well as the number of non-zero entries $\nnz(\optional{})$ per matrix.
   $E$ has 4 to 11 entries per row, $A$ has 3 to 11, both having about \num{6.3} entries per row on average.
   For a uniform mesh of equilaterals covering~$\R^2$ that number would be \num{6}.
 \end{example}
@@ -32,7 +31,7 @@ and Julia\footnote{\url{https://docs.julialang.org/en/v1.6/stdlib/SparseArrays/}
 
 \begin{figure}[t]
   \centering
-  \begin{minipage}[c]{0.5\textwidth}
+  \begin{minipage}[c]{0.6\textwidth}
     \includegraphics[width=\textwidth]{figures/spy_ABC.pdf}
   \end{minipage}
   \begin{minipage}[c]{0.25\textwidth}
@@ -60,26 +59,28 @@ and Julia\footnote{\url{https://docs.julialang.org/en/v1.6/stdlib/SparseArrays/}
 \label{sec:basics:smw}
 
 Anticipating the coming chapters,
-the \ac{ADI} method has to perform a number of linear system solves
+the \ac{ADI} method has to solve a number of linear systems of the form
 \begin{equation}
-  \big(A + \alpha^{-1} UV \big) x = b
+  \big(A + \alpha^{-1} UV \big) X = B
+  ,
 \end{equation}
 where the system matrix has the structure of a low-rank update.
 $A\in\Rnn$ is usually sparse,
-\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
+%\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
 $\alpha\in\C$ is a scalar,
-and $U, V^\T \in\R^{n\times k}$ are dense and have a low numerical rank $k\ll n$.
+and $U, V^\T \in\R^{n\times k}$ are dense and have a low rank $k\ll n$.
 Therefore, the product $UV \in\Rnn$ is dense,
 which makes assembling the system matrix infeasible for many applications.
-Still, the solution $x$ to that shifted system is itself a shift of the solution $\hat x$ to $A\hat x = b$,
+Still, the solution $X$ to that updated system is itself a rank-$k$ update of the solution to the non-updated system $A \hat X = B$,
 see \eg \cite{Strang2016, Golub2013}.
 This is summarized by the Sherman-Morrison-Woodbury formula:
 \begin{equation}
   \big( A + \alpha^{-1}UV \big)^{-1} =
   A^{-1} - A^{-1} U (\alpha I_k + V A^{-1} U)^{-1} V A^{-1}
 \end{equation}
-That is, instead of inverting the dense $A + \alpha^{-1} UV \in\Rnn$,
-one only has to invert the sparse $A \in \Rnn$ as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
+That is, instead of performing a dense solve \wrt $A + \alpha^{-1} UV \in\Rnn$,
+one only has to solve systems involving the sparse $A \in \Rnn$
+as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
 
 \section{Low-Rank Representations}
 \label{sec:lowrank}
@@ -106,17 +107,17 @@ which is motivated by the following example.
   \right.
   \end{equation*}
   Following \autoref{thm:basics:dre-limit-are:backwards},
-  $X(\optional{})$ converges to $\bar X + \tilde C^\T \tilde C / 100$,
-  $\tilde C = C E^{-1}$,
-  where $\bar X$ is the (stabilizing) solution of the generalized \ac{ARE}
+  $X(t)$ converges to $\bar X$ as $t\to\infty$,
+  where $\bar X$ is a solution of the generalized \ac{ARE}
+  %$\tilde C = C E^{-1}$,
   \begin{equation*}
     0 = C^\T C + A^\T \bar X E + E^\T \bar X A - E^\T \bar X BB^\T \bar X E
   \end{equation*}
-  \cf \eqref{eq:basics:ARE} having $S = BB^\T$ and $W = C^\T C$.
-  That is, on one end of the time span $X$ has rank $q=6$
-  while past the other end it converges to a matrix of numerical rank $\approx 113$.
+  \cf Equation~\eqref{eq:basics:ARE} having $S = BB^\T$ and $W = C^\T C$.
+  That is, on one end of the time span it is $\rank X(t_0) = \rank C = q = 6$,
+  while past the other end $X$ converges to a matrix having $\rank \bar X \approx 113$.
   As the corresponding optimal control has some form of minimal energy,
-  one can expect the numerical rank of the solution $X(\optional{})$ to depend on the ranks of initial and limit value,
+  one can expect the numerical rank of the solution $X(\optional{})$ to depend on the ranks of its initial and limit value,
   and to be not much larger in between.
   For this particular example that's about $\frac{1}{3}n$,
   which means the storage requirement of a single matrix can ideally be reduced by about $\frac{2}{3}$.
@@ -201,11 +202,7 @@ This factorization does not require up- and downdate to be handled separately,
 \end{equation}
 for $A, B, C, D$ of compatible dimensions.
 The inner dimension $r$ is sometimes referred to as the rank of the factorization,
-even though it's only an upper bound to which.
-If all matrices have full rank,
-\ie $\rank ABA^\T = r_1$ and $\rank CDC^\T = r_2$ equal their respective inner dimensions,
-the resulting object $GSG^\T := ABA^\T + CDC^\T$ has inner dimension $r_1 + r_2$
-but $\rank GSG^\T \leq r_1 + r_2$.
+even though $\rank LDL^\T \leq r$.
 If the overall result is expected to have a low rank,
 \eg
 \begin{equation}
@@ -223,6 +220,7 @@ If the overall result is expected to have a low rank,
     L^\T \\
     L^\T
   \end{bmatrix}
+  ,
 \end{equation}
 that inner dimension must not grow arbitrarily.
 \autoref{alg:lowrank:compression} shows how to compress a \ac{LRSIF}
@@ -246,8 +244,8 @@ The resulting factorization has a diagonal $D$ and (potentially) a lower inner d
 \end{remark}
 
 \begin{algorithm}[t]
-  \caption[Column compression for \aclp*{LRSIF}]{%
-    Column compression for \ac{LRSIF}
+  \caption[Column Compression for Low-Rank Symmetric Indefinite Factorizations]{%
+    Column Compression for \acp{LRSIF}
   }
   \label{alg:lowrank:compression}
   \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$}%, tolerance $0 < \epsilon \ll 1$}
