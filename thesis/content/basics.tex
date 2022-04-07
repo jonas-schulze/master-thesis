@@ -287,10 +287,10 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   \end{equation}
 \end{remark}
 
-\begin{example}[Parameters of Steel Profile]
+\begin{example}[Parameters of Rail Problem]
 \label{thm:rail:parameters}
-  The steel profile benchmark \cite{morwiki_steel} goes back to \citeauthor{Benner2005}~\cite{Benner2005}.
-  It is a generalized state-space system that has $m=7$ controls and $q=6$ outputs.
+  The Rail benchmark problem \cite{morwiki_steel}
+  is a generalized state-space system that has $m=7$ controls and $q=6$ outputs.
   The variant used in this thesis has $n=371$ state variables.
   Furthermore, the \ac{LQR} weights are
   \begin{equation*}
@@ -478,8 +478,8 @@ which will be covered in \autoref{sec:ADI}.
   Compare \cite[Theorem~2.10]{Lang2017}, \cite[Corollary~1.1.4]{Abou2003}.
 \end{proof}
 
-\begin{example}[Regularity of Steel Profile]
-  For the steel profile benchmark \cite{morwiki_steel} it is
+\begin{example}[Regularity of Rail Problem]
+  For the Rail benchmark \cite{morwiki_steel} it is
   $E \succ 0$ and $A \prec 0$, \ie the system is \emph{stable}.
   As $E^\T X_0 E = C^\T C / 100 \succeq 0$,
   the associated generalized \ac{DRE} has a unique solution.

@@ -16,8 +16,8 @@ and that number mainly depends on the space dimension of the problem.
 For the matrix corresponding to that triangulation,
 this number of neighbors determines the number of non-zero entries in the column or row corresponding a particular node.
 
-\begin{example}[Sparsity of Steel Profile]
-  The system matrices of the steel profile benchmark~\cite{morwiki_steel} of size $n=371$ are sparse.
+\begin{example}[Sparsity of Rail Problem]
+  The system matrices of the Rail benchmark~\cite{morwiki_steel} of size $n=371$ are sparse.
   Their patterns are shown in \autoref{fig:spy}, as well as the number of non-zero entries $\nnz(\optional{})$ per matrix.
   $E$ has 4 to 11 entries per row, $A$ has 3 to 11, both having about \num{6.3} entries per row on average.
   For a uniform mesh of equilaterals covering~$\R^2$ that number would be \num{6}.
@@ -94,9 +94,9 @@ and the references therein.
 The same holds for the solution $X(\optional{})$ of a \ac{DRE},
 which is motivated by the following example.
 
-\begin{example}[Low-Rank Solution of Steel Profile]
+\begin{example}[Low-Rank Solution of Rail Problem]
 \label{thm:lowrank:rail}
-  The solution of the steel profile benchmark \cite{morwiki_steel} is given by the generalized \ac{DRE}~\eqref{eq:basics:DRE},
+  The solution of the Rail benchmark \cite{morwiki_steel} is given by the generalized \ac{DRE}~\eqref{eq:basics:DRE},
   \begin{equation*}
   \left\{
   \begin{aligned}
