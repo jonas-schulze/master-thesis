@@ -40,7 +40,7 @@ Then the parareal method to compute $U_n \approx u(t_n)$ reads
   \end{aligned}
   \right.
 \end{equation}
-where $U^0_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$,
+where $U^*_0 := u_0$ and $G(U_n) := G(t_{n+1}, t_n, U_n)$,
 $F(U_n) := F(t_{n+1}, t_n, U_n)$
 integrate from~$t_n$ to~$t_{n+1}$.
 The general data dependencies between the parareal iterates~$U_n^k$
@@ -285,11 +285,11 @@ a coarse propagator $G$ according to
 as well as initial values $ U^0_{n+1} = G(U^0_n) $,
 reveals the parareal method of \citeauthor{Baffico2002}~\cite{Baffico2002},
 \begin{equation}
+  \tag{\ref*{eq:pr:method} revisited}
   \left\{
   \begin{aligned}
-    U^0_{n+1} &= G(U^0_n),
-    \quad
-    U^0_0 = u_0 \\
+    U_0^* &= u_0 \\
+    U^0_{n+1} &= G(U^0_n) \\
     U^{k+1}_{n+1} &= F(U^k_n) + G(U^{k+1}_n) - G(U^k_n)
     .
   \end{aligned}
