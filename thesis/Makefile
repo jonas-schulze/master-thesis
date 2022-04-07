@@ -1,12 +1,12 @@
 BUILDDIR = output
 DIRS = tables $(BUILDDIR) $(BUILDDIR)/content $(BUILDDIR)/appendix
-DEPS = Makefile *.bib *.tex */*.tex
+DEPS = Makefile *.bib *.tex */*.tex githash.txt
 TABLES_CSV = $(wildcard tables/*.csv)
 TABLES_TEX = $(TABLES_CSV:.csv=.tex)
 DEPS += $(TABLES_TEX)
 
 .PHONY: update
-update: $(TABLES_TEX) | $(DIRS)
+update: githash.txt $(TABLES_TEX) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 
 .PHONY: all
@@ -28,3 +28,7 @@ clean:
 
 tables/%.tex: tables/%.csv
 	sed -e 's/,/ \& /g' -e 's/$$/ \\\\/' < $< > $@
+
+.PHONY: githash.txt
+githash.txt:
+	git rev-parse --short HEAD > $@

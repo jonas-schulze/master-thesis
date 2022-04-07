@@ -1,13 +1,13 @@
 \chapter{Introduction}
 
-Engineering requires fast iteration on (intermediate) designs,
-which therefore demands highly performant algorithms.
-Efficiency may be a secondary concern only.
+Current challenges in science and engineering require a fast iteration on (intermediate) ideas and designs,
+which in turn demands highly performant algorithms.
+In this context, efficiency may only be a secondary concern.
 Meanwhile, modern computer architectures are dominated by parallelism:
 multiple cores per CPU,
 multiple CPUs per node,
 multiple nodes per cluster.
-Almost every real-world application can be described by means of \acp{PDE} or \acp{ODE},
+Many real-world application cans be described by means of \acp{PDE} or \acp{ODE},
 which describe the behavior of an underlying system in space and time.
 A common strategy is to solve these equations \emph{parallel-in-space},
 \ie to distribute the spatial domain onto several CPUs,
@@ -20,7 +20,7 @@ Another strategy is to (also) solve the problem \emph{parallel-in-time},
 One algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
 which is the focus of this thesis.
 %From a pure energy-consumed or efficiency perspective,
-From a pure efficiency perspective in terms of energy-consumed,
+From a pure efficiency perspective in terms of energy consumed,
 the parareal method is not worth pursuing.
 However, as engineering demands fast cycle times,
 this method can lead to large speed-ups.
@@ -71,13 +71,17 @@ The dense \ac{DRE} solvers are built on top of \julia{MatrixEquations.jl}~\cite{
 \julia{DifferentialEquations.jl}~\cite{DifferentialEquations} was used for \autoref{example:parareal}.
 The figures in this thesis were created with
 \julia{Makie.jl}~\cite{Makie} or Ti\emph{k}Z~\cite{TikZ}.
+Julia was used in version 1.6.1 on Mechthild and 1.6.2 on the laptop.
 
 \section*{Sources to this Document}
 
-\todo{Rename repo to \code{master-thesis}}
 The \LaTeX{} and Julia source codes for this thesis may be found at:
 \begin{center}
-  \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/playground}
+\begin{tabular}{r}
+  \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/master-thesis} \\
+  \href{https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl}{\ttfamily .../DifferentialRiccatiEquations.jl} \\
+  \href{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl}{\ttfamily .../ParaReal.jl}
+\end{tabular}
 \end{center}
-\todo{write git hash to file (via Makefile) and \code{\\input\{\}} that file here.}
-The present version of the document corresponds to git hash ..
+The present version of the document corresponds to git hash
+\code{\input{githash.txt}}\unskip.
