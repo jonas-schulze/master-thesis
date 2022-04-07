@@ -101,7 +101,7 @@ Within the \ac{ADI}, these matrices are updated by another sparse matrix,
 Overall, taking \Ros{1} as an example,
 the system to be solved with is
 \begin{equation}
-  \big(\big( A_n - \tfrac{1}{2\tau} E \big) + \alpha_k E^\T \big) - B K_n
+  \big(\big( A_n - \tfrac{1}{2\tau} E \big)^\T + \alpha_k E \big) - K_n^\T B^\T
   .
 \end{equation}
 This structure, however, is completely hidden from the \ac{ADI} code via
@@ -115,7 +115,11 @@ R = %\LDLt%(G, S)
 lyap = GALEProblem(E, %\~A%, R)
 solve(lyap, ADI())
 \end{lstlisting}
-where the \ac{ADI} adds the sparse $\alpha_k E^\T$ via \julia{(+)} without losing the \julia{LowRankUpdate} structure.
+where the \ac{ADI} transposes $\tilde A$ via \julia{adjoint()},\footnote{%
+  In Julia, \julia{A'} is syntactic sugar for \julia{adjoint(A)},
+  \cf \url{https://docs.julialang.org/en/v1.6/manual/functions/\#Operators-With-Special-Names}
+}
+and adds the sparse $\alpha_k E$ via \julia{(+)} without losing the \julia{LowRankUpdate} structure.
 Its main feature, however, is solving the corresponding linear system via \julia{(\textbackslash)}
 using the Sherman-Morrison-Woodbury formula,
 \cf \autoref{sec:basics:smw}.
@@ -141,6 +145,11 @@ struct LowRankUpdate{TA,T,TU,TV}
     %$\alpha$%::T
     U::TU
     V::TV
+end
+
+function Base.adjoint(AUV::LowRankUpdate)
+    A, %$\alpha$%, U, V = AUV
+    LowRankUpdate(A', %$\alpha$%', V', U')
 end
 
 function Base.:(+)(AUV::LowRankUpdate, E::AbstractMatrix)

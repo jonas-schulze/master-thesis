@@ -352,6 +352,7 @@ Consider the \ac{ALE}
   \Lyap(X) := AX + XA^\HT = -W
 \end{equation}
 where $W = W^\T$.\footnote{%
+\label{footnote:adi:transpose}
   Note that the position of the transpose differs from the usage in~\autoref{sec:ros},
   \eg~\eqref{eq:ros:gen:ros1} and~\eqref{eq:ros:gen:ros2}.
   Both variants are common and we hope that no confusion will arise.
@@ -819,7 +820,10 @@ In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}, choose
   \in \R^{n\times u n_G}
   .
 \end{equation}
-The overall procedure is summarized in \autoref{alg:ADI}.
+The overall procedure is summarized in \autoref{alg:ADI}.\footnote{%
+  \autoref{alg:ADI} positions the transposes as the previous chapter does,
+  \cf~\autoref{footnote:adi:transpose} on \autopageref{footnote:adi:transpose}.
+}
 
 \begin{remark}
   Due to the low-rank structure, we only consider the part of the iteration mapping \eqref{eq:adi:cayley}
@@ -941,7 +945,7 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
       $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
     }
     $Y_k \gets -2\Re(\alpha_k) S$\;
-    $A^+_k \gets A + \alpha_k E^\T$\; \nllabel{alg:ADI:smw}
+    $A^+_k \gets A^\T + \alpha_k E$\; \nllabel{alg:ADI:smw}
     \eIf{$\alpha_k \in\R$}{%
       \Comment{Perform single step, \cf Subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
       Solve $A^+_k V_k = R_k$ for $V_k$\;
@@ -953,7 +957,7 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
         D_{k-1} \\
         & Y_k
       \end{bmatrix}$\;
-      $R_k \gets R_{k-1} - 2\alpha_k E^\T V_k$\;
+      $R_k \gets R_{k-1} - 2\alpha_k E V_k$\;
       $k \gets k+1$\;
     }{%
       \Comment{Perform double-step, \cf \autoref{sec:adi:lr2step}:}
@@ -971,7 +975,7 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
         & Y_k \\
         && Y_k
       \end{bmatrix}$\;
-      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E^\T \big( \Re(V) + \delta_k \Im(V) \big)$\;
+      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E \big( \Re(V) + \delta_k \Im(V) \big)$\;
       $ k \gets k + 2$\;
     }
     Compress $L_{k-1}, D_{k-1}$ if necessary, \cf~\autoref{alg:lowrank:compression}\;
