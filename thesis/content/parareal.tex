@@ -210,7 +210,6 @@ the slope of the $k=0$ face depends on the runtime of $G$.
 \section{Parareal as a Multiple Shooting Method}
 \label{sec:pr:newton}
 
-\todo{Replace all $i$ by $n$ in this section}
 The following construction is based on \citeauthor{Gander2007}~\cite{Gander2007}.
 Consider again the autonomous \ac{IVP}
 \begin{equation}
@@ -228,17 +227,17 @@ define the local problems
 \begin{equation}
   \left\{
   \begin{aligned}
-    \dot u_i &= f(u_i) \\
-    u_i(t_i) &= U_i
+    \dot u_n &= f(u_n) \\
+    u_n(t_n) &= U_n
   \end{aligned}
   \right.
 \end{equation}
-for $i \in \Set{0,\ldots,N-1}$
-and determine suitable initial values $U_i$.
+for $n \in \Set{0,\ldots,N-1}$
+and determine suitable initial values $U_n$.
 Watch the slight abuse of notation in $u_0$
 for the initial value $u_0 \in V$
 and the solution $u_0 : [t_0,t_1] \to V$ to the first local problem.
-The local solutions $u_i : [t_i,t_{i+1}] \to V$ represent a global solution to the \ac{IVP}~\eqref{eq:IVP} if
+The local solutions $u_n : [t_n,t_{n+1}] \to V$ represent a global solution to the \ac{IVP}~\eqref{eq:IVP} if
 \begin{equation}
   F(U_0, \ldots, U_{N-1}) :=
   \left(
@@ -271,32 +270,32 @@ Writing the above in separate equations yields
   \left\{
   \begin{aligned}
     U^{k+1}_0 &= u_0 \\
-    U^{k+1}_i &= u_i(t_{i+1}, U^k_n) + \pdiff{U^k_i}{u_i}(t_{i+1}, U^k_i) (U^{k+1}_i - U^k_i).
+    U^{k+1}_n &= u_n(t_{n+1}, U^k_n) + \pdiff{U^k_n}{u_n}(t_{n+1}, U^k_n) (U^{k+1}_n - U^k_n).
   \end{aligned}
   \right.
 \end{equation}
-Lastly, choosing a fine propagator $F(U^k_i) := F(t_{i+1}; t_i, U^k_i) \approx u_i(t_{i+1}, U^k_i)$,
+Lastly, choosing a fine propagator $F(U^k_n) := F(t_{n+1}; t_n, U^k_n) \approx u_n(t_{n+1}, U^k_n)$,
 a coarse propagator $G$ according to
 \begin{equation}
   \label{eq:pr:G}
-  G(U^{k+1}_i) - G(U^k_i)
+  G(U^{k+1}_n) - G(U^k_n)
   \approx
-  \pdiff{U^k_i}{u_i}(t_{i+1}, U^k_i) (U^{k+1}_i - U^k_i)
+  \pdiff{U^k_n}{u_n}(t_{n+1}, U^k_n) (U^{k+1}_n - U^k_n)
 \end{equation}
-as well as initial values $ U^0_{i+1} = G(U^0_i) $,
+as well as initial values $ U^0_{n+1} = G(U^0_n) $,
 reveals the parareal method of \citeauthor{Baffico2002}~\cite{Baffico2002},
 \begin{equation}
   \left\{
   \begin{aligned}
-    U^0_{i+1} &= G(U^0_i),
+    U^0_{n+1} &= G(U^0_n),
     \quad
     U^0_0 = u_0 \\
-    U^{k+1}_{i+1} &= F(U^k_i) + G(U^{k+1}_i) - G(U^k_i)
+    U^{k+1}_{n+1} &= F(U^k_n) + G(U^{k+1}_n) - G(U^k_n)
     .
   \end{aligned}
   \right.
 \end{equation}
-A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U^k_i)$ justifies Equation~\eqref{eq:pr:G}.
+A Taylor expansion of $G(U^{k+1}_n) \approx u_n(t_{n+1}, U^{k+1}_n)$ around $G(U^k_n)$ justifies Equation~\eqref{eq:pr:G}.
 
 \section{Application to \texorpdfstring{\act{LRSIF}s}{LRSIFs}}
 \label{sec:pr:DRE}
@@ -304,9 +303,9 @@ A Taylor expansion of $G(U^{k+1}_i) \approx u_i(t_{i+1}, U^{k+1}_i)$ around $G(U
 Let the \acp{LRSIF}
 \begin{equation}
 \begin{aligned}
-  G(X^{k+1}_i) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
-  F(X^k_i)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
-  G(X^k_i)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
+  G(X^{k+1}_n) &= \mathop{L_{G,k+1}} \mathop{D_{G,k+1}} \mathop{L_{G,k+1}^\T} \\
+  F(X^k_n)     &= \mathop{L_{F,k}}   \mathop{D_{F,k}}   \mathop{L_{F,k}^\T} \\
+  G(X^k_n)     &= \mathop{L_{G,k}}   \mathop{D_{G,k}}   \mathop{L_{G,k}^\T}
 \end{aligned}
 \end{equation}
 be given.
@@ -332,7 +331,7 @@ the parareal update \eqref{eq:pr:method} reads
   .
 \end{equation}
 Note the downdate in the last block component.
-The actual low-rank representation of $X^{k+1}_{i+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
+The actual low-rank representation of $X^{k+1}_{n+1}$ is set to a column compression of $\hat L \hat D \hat L^\T$
 using \autoref{alg:lowrank:compression}.
 
 %\section{Alternative Parallel-in-Time Solvers}
