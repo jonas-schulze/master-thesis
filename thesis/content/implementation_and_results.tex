@@ -145,17 +145,10 @@ The rank of the solution $X(t_n)$ has a major effect on the runtime of the next 
 Recall that \Ros{1} leads to an \ac{ALE} whose right-hand is (a compression of) a \ac{LRSIF} of rank $q+r$
 where $r := \rank X(t_n)$ denotes the rank of the previous Rosenbrock iterate.
 Similarly, the right-hand side of the first stage of \Ros{2} is (a compression) of rank $q + 2r$.
-\todo{%
-  Remove usage of $\LandauO$; remove estimate on $r$.
-  Instead: based on \autoref{fig:results:parareal:timeline},
-  the number of compressions is more likely the cause that \ac{LRSIF}~2/2 fans out at about $n\geq 120$.
-}
-The rank of the \ac{ADI} iterate thus grows by $\LandauO(r)$ every iteration.
-For $r \geq n/4 = 371/4 > 90$,
-which is the case for about $t \leq \SI{40}{\second}$ for \Ros{1}
-or about $t \leq \SI{42}{\second}$ for \Ros{2},
-\cf~\autoref{fig:results:sequential:rank},
-this means that a compression is (likely) performed after every iteration of the \ac{ADI}.
+The rank of the \ac{ADI} iterate thus grows by about that amount.
+In the worst case, this causes a compression to be performed after every iteration of the \ac{ADI}.
+
+\pagebreak
 
 \subsection{Parareal Solvers}
 \label{sec:results:parareal}
