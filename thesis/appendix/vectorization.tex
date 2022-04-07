@@ -1,7 +1,7 @@
 \chapter{Kronecker Product and Vectorization}
 \label{sec:vectorization}
 
-In this chapter we'll give some more details on how to apply the concept's presented in \autoref{sec:adi:1step} to \ac{ALE},
+In this chapter we'll give some more details on how to apply the concept's presented in \autoref{sec:adi:1step} to \acp{ALE},
 in particular how right-multiplication $X \mapsto XA^\HT$ can be described as a left-multiplication.
 The key ingredients for this are \emph{vectorization} $\vec : \R^{m\times n} \to \R^{mn}$,
 \eg for $X=(x_1,\ldots, x_n)$ with $x_i\in\R^m$
@@ -31,19 +31,18 @@ Then, without a proof, the following holds:
   \end{equation*}
 \end{proposition}
 
-In particular, in the context of \autoref{sec:adi:ale},
-$AX + XA^\HT = -W$:
+In particular, in the context of \autoref{sec:adi:ale}
+and the \ac{ALE}~\eqref{eq:adi:ale}, it is
 \begin{gather}
-  L_L : \vec(X) \mapsto \vec(AX) = (I \otimes A) \vec(X) \\
-  L_R : \vec(X) \mapsto \vec(XA^\HT) = (\conj A \otimes I) \vec(X)
+  \Lyap_L \cong \vec(X) \mapsto \vec(AX) = (I \otimes A) \vec(X) \\
+  \Lyap_R \cong \vec(X) \mapsto \vec(XA^\HT) = (\conj A \otimes I) \vec(X)
 \end{gather}
-
-The following justifies the application of \autoref{thm:adi:convergence} to $L_R$:
-
-\begin{proposition}[Stability of Kronecker Product]
-  \todo{Rephrase in terms of eigenvalues}
-  Let $A\in\Rnn$ be c-stable. Then $A \otimes I$ is c-stable as well.
-\end{proposition}
-\begin{remark}
-  In the context of control theory, above proposition claims that $A \otimes I$ is c-stable whenever $A$ is c-stable.
-\end{remark}
+such that the \ac{ALE}
+\begin{equation}
+  \Lyap(X) = \Lyap_L(X) + \Lyap_R(X) = -W
+\end{equation}
+is equivalent to
+\begin{equation}
+  (I \otimes A + \conj A \otimes I) \vec(X) = -\vec(W)
+  .
+\end{equation}
