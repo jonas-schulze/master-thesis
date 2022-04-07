@@ -10,6 +10,7 @@
 %
 % https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl/-/issues/6#note_13652
 
+This package is concerned with sequential \ac{DRE} solvers only.
 The general user interface has been inspired by \code{DifferentialEquations.jl}~\cite{DifferentialEquations},
 and looks like this:
 \begin{lstlisting}[
@@ -28,13 +29,8 @@ by which the proper \ac{ALE} solver is selected via runtime dispatch on \julia{s
 Dense initial values are represented by the built-in \julia{Matrix} type,\footnote{%
   \url{https://docs.julialang.org/en/v1.6/stdlib/LinearAlgebra/}}
 and lead to a direct \ac{ALE} solver from \code{MatrixEquations.jl}~\cite{MatrixEquations}.
-Initial values in \ac{LRSIF} are represented by the \julia{\LDLt} type,\footnote{%
-  There are extensions for many editors to obtain \julia{\LDLt} via
-  \julia{LDL\textbackslash\textasciicircum T} and then hitting the Tab key,
-  \eg Vim, Emacs and VS Code.
-  \cf \url{https://julialang.org/}
-}
-and lead to the iterative \ac{ALE} solver described in \autoref{sec:ADI}.
+Initial values in \ac{LRSIF} are represented by the \julia{\LDLt} type,
+and lead to the iterative \ac{ADI} solver described in \autoref{sec:ADI}.
 
 \paragraph{Representation of Low-Rank Matrices}
 
@@ -46,8 +42,12 @@ such that updates may be performed lazily by merely collecting all the summands,
 Compression of~\julia{X} is performed once these lists contain 10 elements or more,
 or if the equivalent inner dimension is too large, $r \geq \onehalf n$.
 This causes a compression every 10 iterations of the \ac{ADI} or earlier.
-Currently, this is not configurable,
-\cf \autoref{lst:impl:LDLt}.
+This is not configurable yet,
+\cf~\autoref{lst:impl:LDLt}.
+Note that line~\ref{line:impl:LDLt:compression_due} mainly guards the situation
+when a user accesses $L$ and $D$ (via iteration: \mbox{\julia{L, D = X}}),
+compression is not performed twice.
+All internal usages guarantee the assumption in the comment above line~\ref{line:impl:LDLt:compression_due}.
 
 \begin{lstlisting}[
   float=tp,
@@ -77,7 +77,7 @@ end
 
 function compression_due(X::%\LDLt%)
     # If there is only one component, it has likely already been compressed:
-    length(X.Ls) == 1 && return false
+    length(X.Ls) == 1 && return false%\label{line:impl:LDLt:compression_due}%
     # Compression is due every couple of modifications:
     length(X.Ls) >= 10 && return true
     # Compression is due if rank is too large:
@@ -94,13 +94,15 @@ end
 
 \paragraph{Representation of Shifted Matrices}
 
-Recall that the Rosenbrock methods yield \ac{ALE} whose system matrices are sparse matrices shifted by a low-rank matrix,
+Recall that the Rosenbrock methods yield \acp{ALE},
+whose system matrices are sparse matrices shifted by a low-rank matrix,
 \cf $\tilde A_n$ on \autoref{alg:ros1:smw} of \autoref{alg:ros1} and $\hat A_n$ on \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
 Within the \ac{ADI}, these matrices are updated by another sparse matrix,
 \cf $A^+_k$ on \autoref{alg:ADI:smw} of \autoref{alg:ADI}.
 Overall, taking \Ros{1} as an example,
 the system to be solved with is
 \begin{equation}
+  A_k^+ =
   \big(\big( A_n - \tfrac{1}{2\tau} E \big)^\T + \alpha_k E \big) - K_n^\T B^\T
   .
 \end{equation}
@@ -115,12 +117,13 @@ R = %\LDLt%(G, S)
 lyap = GALEProblem(E, %\~A%, R)
 solve(lyap, ADI())
 \end{lstlisting}
-where the \ac{ADI} transposes $\tilde A$ via \julia{adjoint()},\footnote{%
-  In Julia, \julia{A'} is syntactic sugar for \julia{adjoint(A)},
-  \cf \url{https://docs.julialang.org/en/v1.6/manual/functions/\#Operators-With-Special-Names}
-}
+Thereby, the \ac{ADI} transposes $\tilde A$ via \julia{adjoint()},
+%\footnote{%
+%  In Julia, \julia{A'} is syntactic sugar for \julia{adjoint(A)},
+%  \cf \url{https://docs.julialang.org/en/v1.6/manual/functions/\#Operators-With-Special-Names}
+%}
 and adds the sparse $\alpha_k E$ via \julia{(+)} without losing the \julia{LowRankUpdate} structure.
-Its main feature, however, is solving the corresponding linear system via \julia{(\textbackslash)}
+Its main feature, however, is solving the corresponding linear system via the backslash operator~\julia{(\textbackslash)}
 using the Sherman-Morrison-Woodbury formula,
 \cf \autoref{sec:basics:smw}.
 See \autoref{lst:impl:LowRankUpdate} for the basic definition of \julia{LowRankUpdate} and the aforementioned functions.
@@ -161,7 +164,7 @@ end
 function Base.:(\)(AUV::LowRankUpdate, B::AbstractVecOrMat)
     A, %$\alpha$%, U, V = AUV
 
-    FA = _factorize(A)
+    FA = factorize(A)
     A%\mi%B = FA \ B
     A%\mi%U = FA \ U
 
@@ -172,4 +175,10 @@ function Base.:(\)(AUV::LowRankUpdate, B::AbstractVecOrMat)
     return X
 end
 \end{lstlisting}
+
+% Above listing used to contain `_factorize`, which is a custom implementation.
+% It's only purpose was to ensure that if the factorization is a `Diagonal`,
+% its diagonal is a dense vector. In some of my dummy experiments, this was
+% faster to solve with. However, A and E are basically never diagonal, so this
+% function exists for "historical reasons" (TM) only.
 

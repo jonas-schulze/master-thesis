@@ -49,8 +49,8 @@ and~\eqref{eq:impl:pr:conv} in \autoref{sec:impl:pr:conv},
 are chosen to be $\epsilon := n\umach$
 where $\umach$ denotes machine precision
 and $n=371$ refers to the problem dimension.
-The \ac{ADI} may perform up to 100 iterations,
-performing a compression every 10 iterations or earlier,
+The \ac{ADI} may perform up to 100 iterations.
+A \ac{LRSIF} is compressed every 10 iterations or earlier,
 if the inner dimension~$r$ reaches~$\onehalf n$,
 \cf~\autoref{sec:impl:DRE}.
 Furthermore, each of the $N = 450$ parareal stages requires two successive refinements without significant change
@@ -60,7 +60,7 @@ while computing at most $K = 10$ refinements.
 \begin{remark}
   In this subsection,
   $n$ may denote the problem dimension $X \in\Rnn$,
-  or the time stop $t_n$
+  or the time stop $t_n$,
   which is also related to the parareal stage $n$ corresponding to the time span $[t_{n-1}, t_n]$
   where $1 \leq n \leq N$.
   Furthermore,
@@ -121,7 +121,7 @@ As mentioned in \autoref{thm:lowrank:rail},
 the rank of $X$ should not get much larger than 113 along its trajectory.
 \ac{LRSIF}~1 fulfills that expectation, as shown in \autoref{fig:results:sequential:rank}.
 It grows quickly for $t > \SI{44}{\second}$ and seems to trend towards a plateau for $t< \SI{30}{\second}$.
-\ac{LRSIF}~2, however, doesn't seem to stabilize,
+\ac{LRSIF}~2, however, does not seem to stabilize,
 which results in significantly larger ranks for about $t < \SI{40}{\second}$.
 
 \begin{remark}
@@ -208,7 +208,7 @@ Looking closely, the large error of \ac{LRSIF}~2/2 starts to become visible for 
 
 The rank of the solutions $X$ largely depends on the methods used,
 \cf~\autoref{fig:results:parareal:rank}.
-The parareal scheme ac{LRSIF}~1/1 yields about the same ranks as the sequential \ac{LRSIF}~1.
+The parareal scheme \ac{LRSIF}~1/1 yields about the same ranks as the sequential \ac{LRSIF}~1.
 Interestingly, the ranks of \ac{LRSIF}~1/2 are not much larger,
 while showing the same plateau-effect.
 This causes the runtimes $t_F(n, k_n)$ and $t_G(n, k_n)$ to not deviate too much for different $n$.
@@ -223,6 +223,7 @@ it allows some observations to be made for the low-rank methods:
   \item
     \Ros{1} is barely affected by the larger rank,
     which causes \ac{LRSIF}~1/1 and \ac{LRSIF}~1/2 to have about the same ramp-up delay.
+    This delay, however, is about \SI[round-precision=1]{0.2}{\second} larger than the overhead for the dense algorithms.
   \item
     Due to its two stages, \Ros{2} is more affected by the growing rank.
     Therefore, for \ac{LRSIF}~1/2 the runtime $t_F(n, k)$ is monotonic in $n$.
@@ -265,7 +266,7 @@ which is for the following reasons:
     as seen by the large error in \autoref{tab:results:warmup}.
 \end{enumerate}
 The timeline diagram of the Dense~4/4 reference solution is shown in \autoref{fig:impl:restart},
-which doesn't fulfill all the assumptions due to early convergence.
+which does not fulfill all the assumptions due to early convergence.
 
 \begin{figure}[tp]
   \centering
