@@ -257,12 +257,12 @@ Then, Newton's method reads
 \end{equation}
 or, equivalently, avoiding the inversion of the Jacobian,
 \begin{equation}
-  \begin{pmatrix}
+  \begin{bmatrix}
     I \\
     -\pdiff{U_0}{u_0}(t_1, U_0) & I \\
     & \ddots & \ddots \\
     && -\pdiff{U_{N-2}}{u_{N-2}}(t_{N-1}, U_{N-2}) & I
-  \end{pmatrix}
+  \end{bmatrix}
   (U^{k+1} - U^k) = -F(U^k)
 \end{equation}
 Writing the above in separate equations yields
@@ -313,21 +313,21 @@ Using the low-rank update formulas described in \autoref{sec:lowrank},
 the parareal update \eqref{eq:pr:method} reads
 \begin{equation}
   \hat L \hat D \hat L^\T :=
-  \begin{pmatrix}
+  \begin{bmatrix}
     L_{G,k+1} &
     L_{F,k} &
     L_{G,k}
-  \end{pmatrix}
-  \begin{pmatrix}
+  \end{bmatrix}
+  \begin{bmatrix}
     D_{G,k+1} \\
     & D_{F,k} \\
     && -D_{G,k}
-  \end{pmatrix}
-  \begin{pmatrix}
+  \end{bmatrix}
+  \begin{bmatrix}
     L_{G,k+1}^\T \\
     L_{F,k}^\T \\
     L_{G,k}^\T
-  \end{pmatrix}
+  \end{bmatrix}
   .
 \end{equation}
 Note the downdate in the last block component.
