@@ -247,7 +247,7 @@ and convert the above into an iteration scheme
 where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
 
 Obviously, every sub-step is a splitting scheme.
-In fact, the ADI as a whole can be seen as a parametrized splitting scheme.
+In fact, the \ac{ADI} as a whole can be seen as a parametrized splitting scheme.
 Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the full step $x^{k+1}$ leads to
 \begin{equation}
   \Aiip x^{k+1}
@@ -289,7 +289,7 @@ Indeed, $M_k - N_k = A$ since
 \end{equation}
 
 \begin{corollary}[Fully Commuting Splitting Scheme]
-  The ADI is a fully commuting parametrized splitting scheme if $H,V$ commute.
+  The \ac{ADI} is a fully commuting parametrized splitting scheme if $H,V$ commute.
 \end{corollary}
 \begin{proof}
   %Obvious.
@@ -421,9 +421,9 @@ the above becomes Hermitian:
 \begin{remark}
   \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
   right-multiplication $\tilde \Lyap_R :X \mapsto XA^\T$, $\tilde \Lyap_R \neq \Lyap_R$.
-  The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
-  This leads to the impression that the ADI is a single-parameter ADI having $\tilde\beta_k := \tilde\alpha_k$
-  instead of being a true two-parameter ADI where potentially $\alpha_k \neq \beta_k := \conj{\alpha_k}$.
+  The \ac{ADI}~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
+  This leads to the impression that the \ac{ADI} is a single-parameter \ac{ADI} having $\tilde\beta_k := \tilde\alpha_k$
+  instead of being a true two-parameter \ac{ADI} where potentially $\alpha_k \neq \beta_k := \conj{\alpha_k}$.
   The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to Equation~\eqref{eq:adi:ale1step}.
 \end{remark}
 
@@ -447,7 +447,7 @@ and let the low-rank factorizations
 \end{equation}
 for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
 Typically, $n_G \ll n$.
-Then, \eqref{eq:adi:ale1step} reads
+Then, Equation~\eqref{eq:adi:ale1step} reads
 \begin{equation}
   (A_k^+ L_{k+1}) D_{k+1} (A_k^+ L_{k+1})^\HT
   = (A_k^- L_k) D_k (A_k^- L_k)^\HT - 2\Re(\alpha_k) GSG^\HT
@@ -562,7 +562,7 @@ this leads to the low-rank procedure
 \right.
 \end{equation}
 where $V_k \in\R^{n\times n_G}$ has constant dimensions.
-Therefore, only $n_G$ system solves are necessary at any iteration $k$.
+Therefore, only $n_G$ system solves are necessary at any iteration $k$ of the \ac{ADI}.
 This method first appeared in the work of \citeauthor{Benner2009}~\cite[Section~5]{Benner2009}.
 
 \pagebreak
