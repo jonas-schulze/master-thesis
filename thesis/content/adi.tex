@@ -1,13 +1,14 @@
 \chapter{Alternating-Directions Implicit Method}
 \label{sec:ADI}
 
-The \acf{ADI} method goes back to \cite{Peaceman1955}.
+The \acf{ADI} method goes back to \citeauthor{Peaceman1955}~\cite{Peaceman1955}.
 It has originally been designed to solve linear systems
 $Ax=b$
 for symmetric positive-definite $A\in\Rnn$
 and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
-
-\todo[inline]{Chapter Outline}
+This chapter first derives the method as a splitting method.
+\autoref{sec:adi:ale} then applies the \ac{ADI} to \ac{ALE} in \ac{LRSIF} following \cite{Lang2017}.
+Finally, \autoref{sec:adi:parameters} describes how to choose the \ac{ADI} parameters following \cite{Kuerschner2016}.
 
 \section{Parametrized Splitting Schemes}
 
@@ -19,7 +20,8 @@ where $M-N = A$ and systems $Mx = d$ are \enquote{easy} to solve \cite[Section~1
 These methods are \emph{consistent} by construction,
 \ie every solution to $Ax=b$ is a fixpoint of the iteration.
 Conversely, every fixpoint $x^{k+1} = x^k$ is a solution as well.
-The method converges if $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
+Throughout the chapter, assume that $M^{-1}$ exists.
+The method converges if the spectral radius $\rho(G) < 1$ for $G:=M^{-1}N$ \cite[Theorem~11.2.1]{Golub2013}.
 $G$ is called \emph{iteration matrix} of the scheme.
 
 The structure above is called \emph{first normal form} of the method.
@@ -72,7 +74,7 @@ the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied d
   does not depend on the order of the steps.
 \end{proposition}
 \begin{proof}
-  The following is a generalization of the proof of \cite[Theorem~4.1]{Li2002}.
+  The following is a generalization of the proof of \citeauthor{Li2002}~\cite[Theorem~4.1]{Li2002}.
   Let $G_k := M_k^{-1} N_k$ denote the iteration matrix
   and $B_k := M_k^{-1}$ denote the matrix of the second normal form~\eqref{eq:adi:normalform:2}.
   Observe that the matrices $G_i, G_j$ as well as $A, B_i, B_j$ commute for $i,j\in\N$,
@@ -96,25 +98,31 @@ the order in which the steps defined by $(M_0,N_0)$ to $(M_k,N_k)$ are applied d
   \begin{align*}
     G_k B_{k-1} + B_k
     &= (I_n - B_k A) B_{k-1} + B_k \\
-    &= B_{k-1} - B_k (A_1+A_2) B_{k-1} + B_k \\
+    &= B_{k-1} - \underbrace{
+      B_k A B_{k-1}
+    }_{
+      B_{k-1} A B_k
+    } + B_k \\
     &= B_{k-1} + (I_n - B_{k-1} A) B_k \\
     &= B_{k-1} + G_{k-1} B_k
     .
   \end{align*}
   As any permutation may be obtained by exchanging neighboring configurations,
-  $x^k$ does thus not depend on the order of the steps.
+  thus $x^k$ does not depend on the order of the steps.
 \end{proof}
 
 A well known fact is that the iteration matrix $G_k$ determines
 the behavior of the \emph{error} $e^k := x^k - x^*$, where $Ax^* = b$.
 Due to the consistency of the method, $M_k x^* = N_k x^* + b$.
 Subtract this from the first normal form~\eqref{eq:adi:normalform:1} to obtain
-$M_k e^{k+1} = N_k e^k$ or, equivalently:
+$M_k e^{k+1} = N_k e^k$ or, equivalently,
 \begin{equation}
+\label{eq:adi:error-recursion}
   e^{k+1} = G_k e^k
+  .
 \end{equation}
 An interesting observation is that for commuting operator splits,
-the same holds for the residual.
+the same recursion holds for the residual.
 This leads to an alternative formulation of the second normal form.
 
 \begin{proposition}[Recursive Residuals]
@@ -166,15 +174,6 @@ This leads to an alternative formulation of the second normal form.
   where $r^k := Ax^k - b$ denotes the residual.
 \end{corollary}
 
-\begin{remark}
-  The above is a generalization of the \ac{ADI} reordering presented in \cite[Section~4]{Li2002}.
-  Their argument,
-  which relies on \autoref{thm:adi:permutation},
-  is outlined in \autoref{sec:li2002}.
-  Note that the proof below does not require a fully commuting splitting method,
-  and does not restrict the initial value $x^0$.
-\end{remark}
-
 \begin{proof}
   By \autoref{thm:adi:residual} and $M_k N_k = N_k M_k$ it is
   \begin{equation*}
@@ -187,15 +186,34 @@ This leads to an alternative formulation of the second normal form.
   \end{equation*}
 \end{proof}
 
-\todo[inline]{%
-  Prove convergence as a generalization of \cite[Theorem~11.2.1]{Golub2013},
-  maybe only for commuting operator splits.
-}
+\begin{remark}
+  The above is a generalization of the \ac{ADI} reordering for \Lyapunov equations presented by \citeauthor{Li2002}~\cite[Section~4]{Li2002}.
+  Their argument,
+  which relies on \autoref{thm:adi:permutation},
+  is outlined in \autoref{sec:li2002}.
+  Note that \autoref{thm:adi:increment-form} does not require a fully commuting splitting method,
+  and does not restrict the initial value $x^0$.
+\end{remark}
+
+Reasoning about the convergence of parametrized splitting schemes is not as straight-forward as in the classical case.
+To the best knowledge of the author,
+only sufficient criteria and heuristics based on the following trivial theorem are known:
+
+\begin{theorem}[Convergence of Splitting Schemes]
+\label{thm:adi:convergence}
+  Let $A = M_k - N_k$ define a parametrized splitting method~\eqref{eq:adi:normalform}.
+  The method converges to $x = A^{-1} b$ for all starting points $x^0$
+  if and only if $G_k \cdots G_0 \to 0$ where $G_k := M_k^{-1} N_k$.
+\end{theorem}
+\begin{proof}
+  Follows directly from \eqref{eq:adi:error-recursion}.
+\end{proof}
 
 \section{ADI as a Parametrized Splitting Scheme}
 \label{sec:adi:1step}
 
-Suppose $A=H+V$ and $x\in\R^n$ is a solution to $Ax=b$.
+Suppose $A=H+V$ for $A, H, V \in \Rnn$,
+and $x\in\R^n$ is a solution to $Ax=b$.
 Then it is easy to see that
 \begin{equation}
 \begin{aligned}
@@ -222,13 +240,14 @@ and convert the above into an iteration scheme
   \begin{aligned}
     \Aip  x^{k+\frac{1}{2}} &= b - \Aiim x^k \\
     \Aiip x^{k+1}           &= b - \Aim x^{k+\frac{1}{2}}
+    ,
   \end{aligned}
   \right.
 \end{equation}
 where the parameters $\alpha_k, \beta_k \in\C$ are free to choose for every iteration $k\in\N$.
 
 Obviously, every sub-step is a splitting scheme.
-In fact, the ADI as a whole can be seen as a parametrized splitting scheme.
+In fact, the \ac{ADI} as a whole can be seen as a parametrized splitting scheme.
 Substituting the intermediate step $x^{k+\frac{1}{2}}$ into the full step $x^{k+1}$ leads to
 \begin{equation}
   \Aiip x^{k+1}
@@ -270,128 +289,63 @@ Indeed, $M_k - N_k = A$ since
 \end{equation}
 
 \begin{corollary}[Fully Commuting Splitting Scheme]
-  The ADI is a fully commuting parametrized splitting scheme if $H,V$ commute.
+  The \ac{ADI} is a fully commuting parametrized splitting scheme if $H,V$ commute.
 \end{corollary}
 \begin{proof}
-  Obvious.
+  %Obvious.
+  $H$, $V$, $\gamma I_n$ for $\gamma\in\C$, and thus $\Aipm,\Aiipm$ commute $\forall k\in\N$.
 \end{proof}
-
-\section{Old Stuff}
-
-\begin{lemma}[Commuting Matrices]
-\label{thm:adi:commuting-matrices}
-  Let $\alpha, \beta\in\C$ and let $A, B \in\Cnn$ commute.
-  If $A$ is invertible, then $A^{-1}B = BA^{-1}$.
-  If $(A+\alpha I_n)$ is invertible, then
-  \begin{equation*}
-    (A+\alpha I_n)^{-1} (B-\beta I_n)
-    = (B-\beta I_n) (A+\alpha I_n)^{-1}
-    .
-  \end{equation*}
-  Furthermore, for $M\in\Cnn$ it holds
-  \begin{equation*}
-    (A+\alpha M)^{-1} (A-\beta M)
-    = I_n - (\alpha+\beta) (A+\alpha M)^{-1} M
-    .
-  \end{equation*}
-\end{lemma}
-\begin{proof}
-  Multiplying $AB=BA$ with $A^{-1}$ from either side yields $A^{-1}B=BA^{-1}$.
-  Furthermore, $AB=BA$ implies
-  $
-    (A+\alpha I_n) (B-\beta I_n)
-    =
-    (B-\beta I_n) (A+\alpha I_n)
-  $.
-  Applying the first claim yields the desired equality.
-  The last claim follows from noting
-  $A-\beta M = (A+\alpha M) - (\alpha+\beta)M$
-  and multiplying by $(A+\alpha M)^{-1}$.
-\end{proof}
-
-The \ac{ADI} converges iff $\rho(M_k) < 1$, $\forall k\in\N$ \cite[Theorem~11.2.1]{Golub2013}.
-We restrict the analysis to commuting $A_1, A_2$.
-In this case,
-there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
-such that the \ac{ADI} shows
-\todo{Can I show this?}
-superlinear convergence \cite{Beckermann2010}.
 
 \begin{lemma}[Cayley Transformation]
 \label{thm:adi:cayley}
-  Let $A, M\in\Cnn$ and $\alpha, \beta \in\C$ with $-\alpha\notin\Lambda(A, M)$.
-  The \emph{generalized Cayley transformation} of a matrix pair $(A,M)$ is defined by
+  Let $A, E\in\Cnn$ and $\alpha, \beta \in\C$ with $-\alpha\notin\Lambda(A, E)$.
+  The \emph{generalized Cayley transformation} of a matrix pair $(A,E)$ is defined by
   the rational matrix function
   \begin{equation*}
-    \Cayley(A, M, \alpha, \beta) := (A+\alpha M)^{-1} (A-\beta M).
-  \end{equation*}
-  \todo[inline]{
-    Furthermore, $\Lambda(A,M) \subset\C_- \implies \rho(\Cayley(A,M,\alpha,\conj\alpha)) < 1$,
-  }
-\end{lemma}
-\begin{remark}
-  In the context of control theory,
-  the last claim states that
-  $\Cayley(A, M, \alpha, \conj\alpha)$ is d-stable if
-  $(A, M)$ is c-stable.
-\end{remark}
-\begin{proof}
-\end{proof}
-
-\begin{lemma}
-  Let $\alpha_k,\beta_k\in\C$ and $A=H+V$ be given.
-  Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
-  The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
-\end{lemma}
-\begin{proof}
-  For brevity, we omit the subscript $k$.
-  Observe
-  \begin{align*}
-    \Aip\Aiip
-    &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
-    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H + \alpha_k(H+V) \\
-    \Aim\Aiim
-    &= HV + \alpha_k\beta_k I_n - \alpha_k H - \beta_k V \\
-    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H - \beta_k(H+V)
-  \end{align*}
-  such that
-  \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
-  \begin{equation*}
-    M_k^{-1} N_k
-    = (\Aip\Aiip)^{-1}(\Aim\Aiim)
-    = \Cayley(B_k, A, \alpha_k, \beta_k)
-  \end{equation*}
-  for
-  \begin{equation*}
-    B_k := HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H
+    \Cayley(A, E, \alpha, \beta)
+    := (A+\alpha E)^{-1} (A-\beta E)
+    = I_n - (\alpha + \beta) (A+\alpha E)^{-1} E
     .
   \end{equation*}
+  Its eigenvalues are given by
+  $(\lambda + \alpha)^{-1} (\lambda - \beta)$
+  for $\lambda\in\Lambda(A, E)$.
+  If $\Lambda(A, E) \subseteq \Cneg$ and $\alpha\in\Cneg$,
+  then the spectral radius $\rho(\Cayley(A,E,\alpha,\conj\alpha)) < 1$.
+\end{lemma}
+\begin{proof}
+  Compare \cite[Proposition~2.16]{Kuerschner2016}.
 \end{proof}
 
-If $H,V$ commute,
-all the matrices $\Aip,\Aim,\Aiip,\Aiim$ commute.
-By \autoref{thm:adi:commuting-matrices} this extends to their inverses.
-Thus,
-\begin{equation*}
-  G_k =
-  \Aipinv\Aim
-  \Aiipinv\Aiim
-  =:
-  \Cayley(H, I_n, \alpha, \beta)
-  \cdot
-  \Cayley(V, I_n, \beta, \alpha)
-  ,
-\end{equation*}
-\todo{Does this help with $\rho(G)<1$?}
-\ie $G_k$ is even a sequence of Cayley transformations.
+Assuming that $H, V$ commute,
+the iteration matrix $G_k$ for the \ac{ADI} is therefore given as a sequence of Cayley transformations,
+\begin{equation}
+\label{eq:adi:cayley}
+  G_k
+  := M_k^{-1} N_k
+  = \underbrace{
+    \big( \Aipinv\Aim \big)
+  }_{
+    \Cayley(H, I, \alpha_k, \beta_k)
+  } \underbrace{
+    \big( \Aiipinv\Aiim \big)
+  }_{
+    \Cayley(V, I, \beta_k, \alpha_k)
+  }
+  .
+\end{equation}
+As will be motivated in the next section, $\beta_k = \conj{\alpha_k}$.
+In that case, if $\Lambda(H), \Lambda(V) \subseteq \Cneg$
+and $\alpha_k \in \Cneg$ for all $k\in\N$, then $\rho(G_k) < 1$ for all $k$.
+This is a reasonable starting point towards $G_k\cdots G_0 \to 0$,
+\cf~\autoref{thm:adi:convergence},
+but not a necessary condition.
+However, if $H, V$ commute,
+there exist parameters $\Set{(\alpha_k, \beta_k) \given k\in\N}$
+such that the \ac{ADI} shows
+superlinear convergence, see~\cite{Beckermann2010}.
 
-\begin{hypothesis}[Convergence of ADI]
-\label{thm:adi:convergence}
-\todo{Rephrase in terms of eigenvalues}
-  If $H$ and $V$ are stable, then $\rho(M) < 1$.
-\end{hypothesis}
-
-\section{Application to \act{ALE}s}
+\section{Application to \texorpdfstring{\act{ALE}s}{ALEs}}
 \label{sec:adi:ale}
 
 Consider the \ac{ALE}
@@ -400,9 +354,10 @@ Consider the \ac{ALE}
   \Lyap(X) := AX + XA^\HT = -W
 \end{equation}
 where $W = W^\T$.\footnote{%
+\label{footnote:adi:transpose}
   Note that the position of the transpose differs from the usage in~\autoref{sec:ros},
-  \eg~\eqref{eq:ros:gen:ros1} and~\eqref{eq:ros:gen:ros2}.
-  Both variants are common and we hope that no confusion will arise.
+  \eg~Equations~\eqref{eq:ros:DRE:ros1} and~\eqref{eq:ros:DRE:ros2}.
+  Both variants are common and, hopefully, won't cause confusion.
   The notation in~\autoref{sec:ros} is closer to performant implementations using matrices in column-major storage,
   while the notation in this chapter makes the low-rank formulation a little less verbose.
 }
@@ -436,7 +391,7 @@ The one-step formulation in its first normal form~\eqref{eq:adi:general1step} re
   W
 \end{equation}
 Choosing $\beta_k := \conj{\alpha_k}$
-the above becomes Hermitean:
+the above becomes Hermitian:
 \begin{equation}
 \label{eq:adi:ale1step}
   (A + \alpha_k I_n)
@@ -460,16 +415,16 @@ the above becomes Hermitean:
     U A_+^\HT
   $.
   Therefore, the notation is slightly more involved than in the previous section.
-  For more details, refer to \autoref{sec:vectorization}.
+  Refer to \autoref{sec:vectorization} for more details on how to represent the application of a linear operator as the left-multiplication by a matrix.
 \end{remark}
 
 \begin{remark}
   \citeauthor{Lang2017}~\cite{Lang2017} formulates the \ac{ALE}~\eqref{eq:adi:ale} in terms of the
   right-multiplication $\tilde \Lyap_R :X \mapsto XA^\T$, $\tilde \Lyap_R \neq \Lyap_R$.
-  The ADI~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
-  This leads to the impression that the ADI is a one-parameter ADI having $\tilde\beta_k = \tilde\alpha_k$
-  instead of being a true two-parameter ADI using $\beta_k = \conj{\alpha_k}$.
-  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to \eqref{eq:adi:ale1step}.
+  The \ac{ADI}~\cite[Equation~(2.23)]{Lang2017} uses a somewhat inconsistent second step.
+  This leads to the impression that the \ac{ADI} is a single-parameter \ac{ADI} having $\tilde\beta_k := \tilde\alpha_k$
+  instead of being a true two-parameter \ac{ADI} where potentially $\alpha_k \neq \beta_k := \conj{\alpha_k}$.
+  The one-step formulation \cite[Equation~(2.24)]{Lang2017} is equivalent to Equation~\eqref{eq:adi:ale1step}.
 \end{remark}
 
 \subsection{Low-Rank Formulation}
@@ -492,14 +447,14 @@ and let the low-rank factorizations
 \end{equation}
 for $G\in\R^{n\times n_G}$, $S\in\R^{n_G\times n_G}$ be given.
 Typically, $n_G \ll n$.
-Then, \eqref{eq:adi:ale1step} reads
+Then, Equation~\eqref{eq:adi:ale1step} reads
 \begin{equation}
   (A_k^+ L_{k+1}) D_{k+1} (A_k^+ L_{k+1})^\HT
   = (A_k^- L_k) D_k (A_k^- L_k)^\HT - 2\Re(\alpha_k) GSG^\HT
 \end{equation}
 such that
 the \ac{ADI} can be stated in \ac{LRSIF} directly.
-Using the update formulas of \autoref{sec:lr:update},
+Using the update formulas of \autoref{sec:lowrank},
 the iterates are build by successively adding column blocks of size $n_G$:
 \begin{equation}
 \begin{aligned}
@@ -514,11 +469,13 @@ the iterates are build by successively adding column blocks of size $n_G$:
 \end{aligned}
 \end{equation}
 Using an initial value $X^0=0$,
-the $k$-th iterate thus has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
+the $k$-th iterate has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
 As a consequence, computing $L_{k+1}$
 requires $kn_G + n_G$ system solves and
 becomes increasingly expensive.
 This can be remedied by a reformulation according to \autoref{thm:adi:increment-form}.
+
+\pagebreak
 
 In the notation of the previous section,
 \begin{equation}
@@ -528,7 +485,7 @@ In the notation of the previous section,
   N_k &: U \mapsto \big( 2\Re(\alpha_k) \big)^{-1} (A_k^-) U (A_k^-)^\HT
 \end{aligned}
 \end{equation}
-such that \autoref{thm:adi:increment-form} yields the following equivalent formulation of \eqref{eq:adi:ale1step}:
+such that \autoref{thm:adi:increment-form} yields the following equivalent formulation of Equation~\eqref{eq:adi:ale1step}:
 \begin{equation}
 \left\{
 \begin{aligned}
@@ -537,11 +494,13 @@ such that \autoref{thm:adi:increment-form} yields the following equivalent formu
   \quad %FIXME
   A_k^+ \tilde V_k (A_k^+)^\HT
     &= \frac{2\Re(\alpha_k)}{2\Re(\alpha_{k-1})}
-      (A_{k-1}^-) \tilde V_{k-1} (A_{k-1}^-)^\HT \\
+      (A_{k-1}^-) \tilde V_{k-1} (A_{k-1}^-)^\HT
+  ,\\
   X_0
     &= 0, &
   A_0^+ \tilde V_0 (A_0^+)^\HT
     &= -2\Re(\alpha_0) W
+  .
 \end{aligned}
 \right.
 \end{equation}
@@ -598,20 +557,23 @@ this leads to the low-rank procedure
   \end{bmatrix} \\
   A_k^+ V_k &= A_{k-1}^- V_{k-1} \\
   A_0^+ V_0 &= G
+  ,
 \end{aligned}
 \right.
 \end{equation}
 where $V_k \in\R^{n\times n_G}$ has constant dimensions.
-Therefore, only $n_G$ system solves are necessary at any iteration $k$.
-This method first appeared in \cite[Section~5]{Benner2009}.
+Therefore, only $n_G$ system solves are necessary at any iteration $k$ of the \ac{ADI}.
+This method first appeared in the work of \citeauthor{Benner2009}~\cite[Section~5]{Benner2009}.
 
+\pagebreak
+\noindent
 This raises a couple of questions,
-that we aim to answer in the following sections:
+that the following subsections aim to answer:
 \begin{enumerate}
   \item
     How to deal with the growing storage demand of the low-rank factors $L_k$ and $D_k$?
 
-    We may perform a column compression after any iteration using the technique described in \autoref{sec:lr:compression}.
+    One may perform a column compression after any iteration using the technique described in \autoref{sec:lowrank}.
   \item
     When should the iteration stop?
 
@@ -621,7 +583,7 @@ that we aim to answer in the following sections:
     What happens if $\alpha_k\in\C\setminus\R$?
 
     Complex arithmetic is more expensive than real arithmetic.
-    As we will discover later, complex parameters occur in conjugated pairs.
+    As will be discovered later, complex parameters occur in conjugated pairs.
     This allows a reformulation of the combined step,
     that only requires real arithmetic.
 \end{enumerate}
@@ -630,6 +592,7 @@ that we aim to answer in the following sections:
 \label{sec:adi:lrstop}
 
 \begin{theorem}[Low-Rank Lyapunov Residual]
+\label{thm:adi:lowrank-residual}
   The residual of the \ac{ADI},
   with $\beta_k := \conj{\alpha_k}$ and $X_0=0$ applied to the \ac{ALE}~\eqref{eq:adi:ale},
   has a well-defined low-rank factorization compatible to $W = GSG^\HT$,
@@ -667,44 +630,78 @@ that we aim to answer in the following sections:
     = R_k - 2\Re(\alpha_k) (A_k^+)^{-1} R_k
     ,
   \end{equation*}
+  using \autoref{thm:adi:cayley},
   \ie $R_k$ is well-defined $\forall k$.
 
   By definition of the increment,
   \cf \autoref{thm:adi:increment-form},
-  $v^k := -M_k^{-1} r^k$.
+  $v^k := -M_k^{-1} \big( r^k \big)$.
   Therefore,
   \begin{equation*}
     V_k Y_k V_k^\HT
     = (A_k^+)^{-1} R_k
     \underbrace{
-      \big( -2 \Re(\alpha_k) S_k \big)
+      \big( -2 \Re(\alpha_k) S \big)
     }_{Y_k}
     R_k^\HT (A_k^+)^{-\HT}
     ,
   \end{equation*}
   \ie $V_k = (A_k^+)^{-1} R_k$.
-  \todo{@Martin: is this $(\ast)$ ok?}
   Applying this to $(\ast)$ yields the remaining equality.
 \end{proof}
 
-\todo[inline]{%
-Can $\rho(M) \leq \norm{M}$ (for any operator norm) be used to further simplify \cite[Algorithm~2.2, line~2]{Lang2017},
-\ie can $\norm{}_2$ be replaced by \eg $\norm{}_F$?
-As we are dealing with low-rank formulations of known rank $r$,
-given that we ensure full rank of the factors,
-we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A}_2$.
-}
+\begin{remark}
+  The curious reader may compare the proof above to \cite[Theorem~3.5]{Kuerschner2016}.
+\end{remark}
+
+Still, the full residual $R_k S R_k^\HT \in\Rnn$ should never be assembled.
+Note that $R_k S R_k^\HT$ and $R_k^\HT R_k S \in \R^{n_G\times n_G}$ have the same spectra,
+\cf~\cite[Remark on \pno~56]{Lang2015}.
+Therefore, both are diagonalizable such that:
+\begin{equation}
+\label{eq:adi:residual}
+  \norm[\big]{R_k S R_k^\HT}_2
+  = \rho\big( R_k S R_k^\HT \big)
+  = \rho\big( R_k^\HT R_k S \big)
+  = \norm[\big]{R_k^\HT R_k S}_2
+\end{equation}
+Using the well-known inequality
+\begin{equation}
+  \norm{X}_2
+  \leq \norm{X}_F
+  \leq \sqrt{r} \norm{X}_2
+\end{equation}
+for any matrix $X\in\Rnn$ where $r:=\rank X$,
+one may replace the spectral norm in \eqref{eq:adi:residual} and \cite[Algorithm~2.2]{Lang2017}
+by the Frobenius norm.
+This leads to the stopping criterion
+\begin{equation}
+\label{eq:adi:lrstop}
+  \norm[\big]{R_k^\HT R_k S}_F
+  \leq
+  \epsilon \norm[\big]{G^\HT G S}_F
+\end{equation}
+for a user-specified threshold $0<\epsilon \ll 1$.
+Since $r \leq n_G$, this relation implies
+\begin{equation}
+  \norm[\big]{R_k^\HT R_k S}_2
+  \leq
+  \epsilon \sqrt{n_G} \norm[\big]{G^\HT G S}_2
+  ,
+\end{equation}
+which is slightly weaker than the behavior of \citeauthor{Lang2017}'s implementation \cite{Lang2017}.
+Replacing $\epsilon$ by $n_G^{-1/2} \epsilon$ leads to a slightly more restrictive stopping criterion compared to \cite{Lang2017}.
 
 \subsection{Low-Rank Double-Step}
 \label{sec:adi:lr2step}
 
 \begin{proposition}[Complex Conjugated Parameters]
 \label{thm:adi:ale:complex-pair}
-  Suppose $A, W, X_k\in\Rnn$ for a fixed $k\in\N$,
-  \ie $G, R_k \in \R^{n\times n_G}$ and $S\in\R^{n_G\times n_G}$.
+  Suppose $A, W \in\Rnn$ and $X_k\in\Rnn$ is real for a fixed \mbox{$k\in\N$},
+  \ie $G, R_k \in \R^{n\times n_G}$ and $S\in\R^{n_G\times n_G}$ as defined in \autoref{thm:adi:lowrank-residual}.
   If the next parameters form a complex conjugated pair,
   $\alpha_{k+1} = \conj{\alpha_k}$,
-  then the iterate after that, $X_{k+2}$ is again real.
+  then the iterate after that, $X_{k+2}$ is real again.
   More specifically,
   \begin{align*}
     R_{k+2} &= R_k - 4\Re(\alpha_k) \big(
@@ -715,8 +712,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
   for $\delta_k := \Re(\alpha_k) / \Im(\alpha_k)$.
 \end{proposition}
 \begin{proof}
-  \todo{Finish me}
-  The following is based on the proof of \cite[Theorem~4.2]{Kuerschner2016}.
+  Compare \cite[Theorem~4.2]{Kuerschner2016}.
 \end{proof}
 
 \begin{corollary}[Low-Rank Double-Step]
@@ -736,7 +732,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
     \hat V_k &= \sqrt{2} \big( \Re(V_k) + \delta_k \Im(V_k) \big) \\
     \hat V_{k+1} &= \sqrt{\smash[b]{2\big( \delta_k^2 + 1 \big)}} \Im(V_k)
   \end{align*}
-  and $D_{k+2}$ remains as in \eqref{eq:adi:si-lr-adi}.
+  and $D_{k+2}$ remains as in Equation~\eqref{eq:adi:si-lr-adi}.
 \end{corollary}
 \begin{proof}
   The double-step reads
@@ -777,6 +773,7 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
       \\
       &{}+{}&  2\delta_k^2 \Im(V_k) & Y_k \Im(V_k)^\HT &
       &{}+{}&  2\delta_k^2 \Im(V_k) & Y_k \Im(V_k)^\HT
+      ,
     \end{alignedat}
     \\
 \intertext{which by grouping the terms in each column yields}
@@ -798,35 +795,34 @@ we can \enquote{safely} exploit $\norm{A}_2 \leq \norm{A}_F \leq \sqrt{r}\norm{A
 \section{Parameter Selection}
 \label{sec:adi:parameters}
 
-After deriving a suitable structure of the \ac{ADI} for \ac{ALE},
-we have to determine shift parameters $\Set{\alpha_k : k\in\N}$.
-Classical choices of \emph{pre-computed values} values include
+After deriving a suitable structure of the \ac{ADI} for the \ac{ALE},
+the shift parameters $\Set{\alpha_k : k\in\N}$ are still to be determined.
+Classical choices of \emph{pre-computed} values include
 optimal Wachspress shifts \cite{Wachspress1992,Wachspress2013} and
 heuristic Penzl shifts \cite{Penzl1999}.
 These try to globally minimize $\rho(G_K \cdots G_0)$ for a fixed number of \ac{ADI} steps $K\in\N$,
-and estimates for the spectra $\Lambda(H)$ and $\Lambda(V)$.
-We resort to $V(u)$-shifts, the first ansatz of \emph{self-generating shifts} described in \cite[Section~5.3]{Kuerschner2016},
-which aims at minimizing
-\todo{Does it, though? Highlight the correspondence of $V_k$ to $R_k$ and therefore Krylov methods.}
+and estimates for the spectra~$\Lambda(H)$ and~$\Lambda(V)$.
+This thesis employs the first ansatz of \emph{self-generating shifts} described by \citeauthor{Kuerschner2016}~\cite[Section~5.3]{Kuerschner2016},
+so-called $V(u)$-shifts,
+which aim at minimizing
 $\rho(G_k |_{\colspan V_k})$
 separately for each iteration $k$,
 which does not require any information on the spectra of $H$ or $V$.
 
-\todo[inline]{%
-Maybe formulate this \wrt $\colspan\Set{v^{k-1}, \ldots, v^{k-u}}$ and see what happens.
-Hopefully, this naturally translates to the \ac{LRSIF} factors $V_*$.
-}
-
-\begin{equation*}
-  \Lambda(Q^\HT A Q) \cap \C_-
-\end{equation*}
+As mentioned at the end of \autoref{sec:adi:1step},
+a local criterion like this does in general not guarantee convergence.
+However, these parameters seemed to outperform the aforementioned pre-computed approaches in the experiments of \cite{Kuerschner2016}.
 
 The general idea is to restrict $A$ onto
 $\mathcal Q := \colspan N \subseteq \C^n$
-for some matrix $N$ and take its eigen-values.
-These so-called \emph{Ritz values} are defined as $\Lambda(Q^\HT A Q)$,
+for some matrix $N$ and take its (stable) eigenvalues.
+These so-called \emph{Ritz values} are defined as
+\begin{equation}
+  \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg
+  ,
+\end{equation}
 where $Q\in\C^{n\times d}$ is an orthonormal basis of $\mathcal Q$, $d := \dim\mathcal Q$.
-In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}:
+In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}, choose
 \begin{equation}
   N := \begin{bmatrix}
     V_{j-1} &
@@ -834,7 +830,24 @@ In the context of $V(u)$-shifts for \ac{LRSIF} \ac{ADI} \cite{Lang2015}:
     V_{j-u}
   \end{bmatrix}
   \in \R^{n\times u n_G}
+  .
 \end{equation}
+The overall procedure is summarized in \autoref{alg:ADI}.\footnote{%
+  \autoref{alg:ADI} positions the transposes as the previous chapter does,
+  \cf~\autoref{footnote:adi:transpose} on \autopageref{footnote:adi:transpose}.
+}
+
+\begin{remark}
+  Due to the low-rank structure, only that part of the iteration mapping \eqref{eq:adi:cayley} is considered,
+  which operates on one of the low-rank factors.
+  This part is exactly \mbox{$\hat G_k := \Cayley(A, E, \alpha_k, \conj{\alpha_k})$}.
+  Suppose $\lambda \in \Lambda(A, E) \cap \R$, $\lambda < 0$.
+  Notice how choosing $\alpha = \beta := \lambda$ in \autoref{thm:adi:cayley}
+  maps $\lambda$ onto $0$ as an eigenvalue of $\Cayley(A, E, \lambda, \lambda)$.
+  Above Ritz values act similarly on $\hat G_k |_{\colspan N}$.
+  % TODO: Future research question: how does the ADI using these parameters relate to Krylov methods,
+  % given the relation between increment and residual?
+\end{remark}
 
 To obtain an orthonormal basis,
 recall that $\R^n$ and $\R^{un_G}$ decompose into
@@ -849,7 +862,7 @@ and that $NN^\MP = N (N^\T N)^\MP N^\T$ is the projection onto $\colspan N$,
 where $(\optional{})^\MP$ denotes the Moore-Penrose pseudo-inverse \cite{Strang2016}.
 This leads to an implicit orthogonalization procedure.
 Note that $N^\T N$ is symmetric positive semi-definite.
-Hence, it permits a real eigen-decomposition
+Hence, it permits a real eigendecomposition
 \begin{align*}
   N^\T N &= \hat N \hat D \hat N^\T, &
   \hat N^\T \hat N &= I_r, &
@@ -857,7 +870,7 @@ Hence, it permits a real eigen-decomposition
   \lambda_1 \geq \ldots \geq \lambda_r > 0,
 \end{align*}
 where $r = \rank N = \rank N^\T N \leq u n_G$.
-The pseudo-inverse is then given by $ (N^\T N)^\MP := \hat N \hat D^{-1} \hat N^\T $.
+The Moore-Penrose pseudo-inverse is then given by \mbox{$(N^\T N)^\MP := \hat N \hat D^{-1} \hat N^\T$}.
 Finally,
 \begin{equation}
 \label{eq:adi:param:Q}
@@ -882,28 +895,34 @@ for any $x\in\R^{un_G}$ it is
   &= N(N^\T N \hat x + 0) && \text{for some $\hat x \in\R^{un_G}$} \\
   &= N (\hat N \hat D \hat N^\T) \hat x \\
   &= N \hat N \hat D^{-\frac{1}{2}} \hat y && \text{for $\hat y := \hat D^{\frac{3}{2}} \hat N^\T \hat x \in \R^r$}
+  ,
 \end{align*}
 \ie $\colspan N \subseteq \colspan Q$.
 This implies equality,
 since $\colspan Q \subseteq \colspan N$ (trivial).
 
-The derivation above neglected zero eigen-values of $N^\T N$,
-whose eigen-vectors are syzygies of $\colspan N$.
-Indeed, let $(\epsilon,s)\in\R\times\R^{un_G}$ be an eigen-pair of $N^\T N$ with $\norm{s}_2 = 1$.
+\pagebreak
+
+The derivation above neglected zero eigenvalues of $N^\T N$,
+whose eigenvectors are syzygies of $\colspan N$.
+Indeed, let $(\epsilon,s)\in\R\times\R^{un_G}$ be an eigenpair of $N^\T N$ with $\norm{s}_2 = 1$.
 Then,
 \begin{equation}
   \norm{Ns}_2^2
   = s^\T (N^\T N s)
   = \epsilon\norm{s}_2^2
   = \epsilon
+  ,
 \end{equation}
 which for $\epsilon=0$ reveals linearly dependent columns of $N$.
-In that sense, small eigen-values $\lambda_*$ correspond to nearly linearly dependent columns.
-It is therefore advised to only consider the first $d \leq r$ eigen-values
+In that sense, small eigenvalues $\lambda_*$ correspond to nearly linearly dependent columns.
+It is therefore advised to only consider the first $d \leq r$ eigenvalues
 \begin{equation}
   \lambda_* \geq \epsilon \lambda_1
 \end{equation}
-for some $0 < \epsilon \ll 1$, \eg $r$ times the machine precision.
+for some $0 < \epsilon \ll 1$,
+\eg a multiple of the machine precision,
+$\epsilon := n\umach$.
 This corresponds to replacing
 $\hat N$ by its first $d$ columns,
 $\hat D$ by its leading diagonal block of size $d$,
@@ -911,14 +930,8 @@ and $\colspan N$ by $\colspan(\hat N \diag(\lambda_1, \ldots, \lambda_d, 0, \ldo
 while the overall formula \eqref{eq:adi:param:Q} remains unchanged.
 Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
 
-\citeauthor{Kuerschner2016}~\cite{Kuerschner2016} recommends to perform this orthogonalization twice
-to account for numerical instabilities caused by very small $\lambda_*$.
-
-\todo[inline]{Describe cost}
-
-\todo[inline]{Summarize as algorithm}
-
-\begin{algorithm}[t]
+\begin{algorithm}[tp]
+  %TODO: rename this as to not be confused with LR-ADI = LRCF-ADI
   \caption{Low-Rank Alternating-Directions Implicit Method}
   \label{alg:ADI}
   \KwIn{%
@@ -931,13 +944,13 @@ to account for numerical instabilities caused by very small $\lambda_*$.
   }
   \Comment{Compute initial parameters, \cf \autoref{sec:adi:parameters}:}
   $Q \gets \orth G$\;
-  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
   \Comment{Perform actual \ac{ADI}:}
   $R_0 \gets G$\;
   $k \gets 1$\;
   % Watch out: k as in the final condition already has the value for the next/upcoming iteration,
   % therefore subtract one:
-  \Repeat{$\norm{R_{k-1}^\T R_{k-1} S} \leq \epsilon \norm{G^\T GS}$}{%
+  \Repeat{$\norm[\big]{R_{k-1}^\T R_{k-1} S}_F \leq \epsilon \norm[\big]{G^\T GS}_F$}{%
   %TODO: ...or $j > J$
     \If{$\alpha_k$ is not available}{%
       $Q \gets$ \leIf{$\alpha_{k-1}\in\R$}{%
@@ -948,13 +961,12 @@ to account for numerical instabilities caused by very small $\lambda_*$.
           \hat V_{k-1}
         \end{bmatrix}$
       }
-      $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda(Q^\HT A Q, Q^\HT E Q)$\;
+      $\Set{\alpha_k, \alpha_{k+1}, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
     }
     $Y_k \gets -2\Re(\alpha_k) S$\;
-    $A^+_k \gets A + \alpha_k E^\T$\;
+    $A^+_k \gets A^\T + \alpha_k E$\; \nllabel{alg:ADI:smw}
     \eIf{$\alpha_k \in\R$}{%
-      %TODO: Change me once autorefname of subsection is capitalized.
-      \Comment{Perform single step, \cf subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
+      \Comment{Perform single step, \cf Subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
       Solve $A^+_k V_k = R_k$ for $V_k$\;
       $L_k \gets \begin{bmatrix}
         L_{k-1} &
@@ -964,7 +976,7 @@ to account for numerical instabilities caused by very small $\lambda_*$.
         D_{k-1} \\
         & Y_k
       \end{bmatrix}$\;
-      $R_k \gets R_{k-1} - 2\alpha_k E^\T V_k$\;
+      $R_k \gets R_{k-1} - 2\alpha_k E V_k$\;
       $k \gets k+1$\;
     }{%
       \Comment{Perform double-step, \cf \autoref{sec:adi:lr2step}:}
@@ -982,14 +994,17 @@ to account for numerical instabilities caused by very small $\lambda_*$.
         & Y_k \\
         && Y_k
       \end{bmatrix}$\;
-      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E^\T \big( \Re(V) + \delta_k \Im(V) \big)$\;
+      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E \big( \Re(V) + \delta_k \Im(V) \big)$\;
       $ k \gets k + 2$\;
     }
-    Compress $L_{k-1}, D_{k-1}$ if necessary, \cf~\autoref{sec:lr:compression}\;
+    Compress $L_{k-1}, D_{k-1}$ if necessary, \cf~\autoref{alg:lowrank:compression}\;
   }(,~\cf \autoref{sec:adi:lrstop})
 \end{algorithm}
 
-\section{Alternative Lyapunov Solvers}
-Krylov subspace,
-projection-based,
-hybrid
+%\section{Alternative Lyapunov Solvers}
+
+%A different approach to solve \ac{ALE} are Krylov subspace methods,
+%see \eg~\cite{Simoncini2016}.
+
+% projection-based?
+% hybrid?

@@ -1,4 +1,92 @@
 \chapter{Introduction}
 
-The implementations of the parareal scheme and \ac{DRE} solver must be composable and,
-therefore, independent from one another.
+Current challenges in science and engineering require a fast iteration on (intermediate) ideas and designs,
+which in turn demands highly performant algorithms.
+In this context, efficiency may only be a secondary concern.
+Meanwhile, modern computer architectures are dominated by parallelism:
+multiple cores per CPU,
+multiple CPUs per node,
+multiple nodes per cluster.
+Many real-world application cans be described by means of \acp{PDE} or \acp{ODE},
+which describe the behavior of an underlying system in space and time.
+A common strategy is to solve these equations \emph{parallel-in-space},
+\ie to distribute the spatial domain onto several CPUs,
+which are then usually worked on in lockstep along the time dimension.
+This strategy only scales as far as the local problems don't become too small,
+due to the communication necessary along the interfaces of spatial sub-domains.
+Another strategy is to (also) solve the problem \emph{parallel-in-time},
+%\ie to solve the temporal dynamics of the system in parallel.
+\ie to distribute the temporal domain onto several CPUs.
+One algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
+which is the focus of this thesis.
+%From a pure energy-consumed or efficiency perspective,
+From a pure efficiency perspective in terms of energy consumed,
+the parareal method is not worth pursuing.
+However, as engineering demands fast cycle times,
+this method can lead to large speed-ups.
+
+In this thesis, above method shall be applied to the matrix-valued \ac{DRE},
+which arises \eg in optimal control and model order reduction.
+Practical applications quickly lead to large-scale systems,
+for which the solution matrices easily reach thousands of rows and columns.
+In order to handle them efficiently,
+one uses the problem's inherent rapid decay of singular values
+to represent the solution matrices in a low-rank factorization, see \eg~\cite{Penzl2000,Kuerschner2016,Lang2017}.
+As the rank of the solution is not constant for all the interfaces of the temporal sub-domains,
+implementation is somewhat difficult in well-established frameworks like OpenMPI\footnote{%
+  \url{https://www.open-mpi.org/}
+}.
+Therefore, since Julia~\cite{Julia} promises to provide a fresh perspective on the problems of high-performance computing,
+this thesis serves as a test project for just that.
+
+The thesis is structured as follows.
+First, \autoref{sec:HJT} gives an overview on the \ac{DRE} arising in optimal control of a linear dynamical system,
+and \autoref{sec:matrixeq} presents the general techniques used to handle large-scale problems.
+Then, \autoref{sec:ros} shows how to adapt a first-order and a second-order Rosenbrock method to the matrix-valued \ac{DRE}.
+Every step of the Rosenbrock method requires the solution of an \ac{ALE},
+which may be done using \eg the \ac{ADI} method described in \autoref{sec:ADI}.
+This completes the general building blocks of a \ac{DRE} solver.
+To speed-up this solver,
+\autoref{sec:pr} shows how to apply the parareal method to the particular low-rank factorization used in this thesis.
+\autoref{sec:impl} describes the implementation of aforementioned algorithms in the form of two Julia packages
+as well as the numerical results of applying sequential and parareal solvers to
+a small configuration of the Rail benchmark problem~\cite{morwiki_steel} going back to \citeauthor{Benner2005}~\cite{Benner2005},
+comparing low-rank and dense versions of all algorithms.
+Finally, \autoref{sec:conclusion} briefly summarizes findings and future research or optimization opportunities.
+
+\section*{Hardware and Software Used}
+
+The numerical experiments throughout this thesis were performed
+on up to 29 standard nodes (450 cores) of the linux cluster Mechthild\footnote{\url{https://www.mpi-magdeburg.mpg.de/cluster/mechthild}}
+at the Max Planck Institute for Dynamics of Complex Technical Systems in Magdeburg,
+each having
+two Intel Xeon Skylake Silver 4110 with 8 cores per CPU
+and \SI{192}{\giga\byte} of memory,
+or on a laptop (MacBook Pro, 13-inch, 2018, macOS 11) having
+Intel Core i5-8259U with 4 cores and \SI{16}{\giga\byte} of memory.
+Each process uses a single Julia thread and,
+unless stated otherwise, one BLAS\footnote{%
+  \url{http://www.netlib.org/blas/}
+}/LAPACK\footnote{%
+  \url{http://www.netlib.org/lapack/}
+} thread.
+
+\julia{DrWatson.jl}~\cite{DrWatson} was used to assist data management.
+The dense \ac{DRE} solvers are built on top of \julia{MatrixEquations.jl}~\cite{MatrixEquations}.
+\julia{DifferentialEquations.jl}~\cite{DifferentialEquations} was used for \autoref{example:parareal}.
+The figures in this thesis were created with
+\julia{Makie.jl}~\cite{Makie} or Ti\emph{k}Z~\cite{TikZ}.
+Julia was used in version 1.6.1 on Mechthild and 1.6.2 on the laptop.
+
+\section*{Sources to this Document}
+
+The \LaTeX{} and Julia source codes for this thesis may be found at:
+\begin{center}
+\begin{tabular}{r}
+  \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/master-thesis} \\
+  \href{https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl}{\ttfamily .../DifferentialRiccatiEquations.jl} \\
+  \href{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl}{\ttfamily .../ParaReal.jl}
+\end{tabular}
+\end{center}
+The present version of the document corresponds to git hash
+\code{\input{githash.txt}}\unskip.

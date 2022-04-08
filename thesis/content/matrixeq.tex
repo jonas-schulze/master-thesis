@@ -1,109 +1,152 @@
 \chapter{Large-Scale Matrix Equations}
+\label{sec:matrixeq}
+
+This chapter will give a very brief overview on common strategies necessary to solve large-scale matrix equations.
+First, \autoref{sec:matrixeq:sparse} is concerned with suitable representations of matrices having only very few non-zero entries.
+\autoref{sec:basics:smw} then shows an efficient strategy to solve shifted linear systems.
+Finally, \autoref{sec:lowrank} presents a memory-efficient representations of matrices having a low (numerical) rank.
 
 \section{Sparse Matrices}
-Describe data structures to store sparse matrices.
+\label{sec:matrixeq:sparse}
 
-\begin{example}[Non-zeros of Steel Profile]
-  The Steel Profile of the Oberwolfach Benchmark Collection of size $n=371$
-  contains of sparse matrices having
-  $\nnz(E) = 2343$ or \SI{1.7}{\percent},
-  $\nnz(A) = 2341$ or \SI{1.7}{\percent}, and
-  $\nnz(B) = 87$ or \SI{3.4}{\percent} non-zero entries.
-  Although not being stored sparsely, $\nnz(C) = 17$ or \SI{0.8}{\percent}.
+Many matrices arising in practical applications are sparse.
+For example, the shape regularity of the space triangulation of a \ac{PDE}
+implies that each node has about the same number of neighbors,
+and that number mainly depends on the space dimension of the problem.
+For the matrix corresponding to that triangulation,
+this number of neighbors determines the number of non-zero entries in the column or row corresponding a particular node.
+
+\begin{example}[Sparsity of Rail Problem]
+  The system matrices of the Rail benchmark~\cite{morwiki_steel} of size $n=371$ are sparse.
+  Their patterns are shown in \autoref{fig:spy}, as well as the number of non-zero entries $\nnz(\optional{})$ per matrix.
+  $E$ has 4 to 11 entries per row, $A$ has 3 to 11, both having about \num{6.3} entries per row on average.
+  For a uniform mesh of equilaterals covering~$\R^2$ that number would be \num{6}.
 \end{example}
 
-Even if the system matrices $E, A, B, C$ are sparse,
-the solution $X$ is dense.
-However, it usually is of low numerical rank.
+The common idea to represent a sparse matrix in memory is to only store the non-zero entries as well as their location within the matrix.
+Perhaps the most common implementation is the so-called Compressed Column Storage (CCS),
+sometimes called Compressed Sparse Column (CSC) format.
+It's the format that \eg MATLAB\footnote{\url{https://www.mathworks.com/help/pdf_doc/otherdocs/simax.pdf}}
+and Julia\footnote{\url{https://docs.julialang.org/en/v1.6/stdlib/SparseArrays/}} use by default.
+
+\begin{figure}[t]
+  \centering
+  \begin{minipage}[c]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{figures/spy_ABC.pdf}
+  \end{minipage}
+  \begin{minipage}[c]{0.25\textwidth}
+    \flushright
+    \begin{tabular}{cS[table-format=4.0]}
+      \toprule
+      & {$\nnz(\optional{})$} \\
+      \midrule
+      $E$ & 2343 \\
+      $A$ & 2341 \\
+      $B$ & 87 \\
+      $C$ & 17 \\
+      \bottomrule
+    \end{tabular}
+  \end{minipage}
+  \caption[Sparsity pattern of Rail problem]{%
+    Sparsity pattern of $A$, $B$ (right), and $C$ (bottom) of Rail problem for $n=371$,
+    as well as their number of non-zero entries $\nnz(\optional{})$.
+    The pattern of $E$ looks very similar to the one of $A$, only having 2 entries more.
+  }
+  \label{fig:spy}
+\end{figure}
+
+\section{Sherman-Morrison-Woodbury Formula}
+\label{sec:basics:smw}
+
+Anticipating the coming chapters,
+the \ac{ADI} method has to solve a number of linear systems of the form
+\begin{equation}
+  \big(A + \alpha^{-1} UV \big) X = B
+  ,
+\end{equation}
+where the system matrix has the structure of a low-rank update.
+$A\in\Rnn$ is usually sparse,
+%\todo{Reformulate by means of $\alpha$ instead of $\alpha^{-1}$?}
+$\alpha\in\C$ is a scalar,
+and $U, V^\T \in\R^{n\times k}$ are dense and have a low rank $k\ll n$.
+Therefore, the product $UV \in\Rnn$ is dense,
+which makes assembling the system matrix infeasible for many applications.
+Still, the solution $X$ to that updated system is itself a rank-$k$ update of the solution to the non-updated system $A \hat X = B$,
+see \eg \cite{Strang2016, Golub2013}.
+This is summarized by the Sherman-Morrison-Woodbury formula:
+\begin{equation}
+  \big( A + \alpha^{-1}UV \big)^{-1} =
+  A^{-1} - A^{-1} U (\alpha I_k + V A^{-1} U)^{-1} V A^{-1}
+\end{equation}
+That is, instead of performing a dense solve \wrt $A + \alpha^{-1} UV \in\Rnn$,
+one only has to solve systems involving the sparse $A \in \Rnn$
+as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$.
 
 \section{Low-Rank Representations}
+\label{sec:lowrank}
 
-\todo{Find reference. Max Behr had a slide on that in his defense.}
-\begin{theorem}[Low-Rank Solutions]
-\label{thm:lowrank}
-The solution $X$ to a \ac{DRE} is of low numerical rank.
-\end{theorem}
+Even for sparse system matrices $E, A, B, C$
+the solution $X$ of a \ac{DRE} is in general dense.
+However, it usually is of low numerical rank,
+\cf \eg~\cite[Section~2.1.4]{Lang2017}
+and~\cite[Sections~2.3.3 and~2.3.4]{Kuerschner2016}
+and the references therein.
+The same holds for the solution $X(\optional{})$ of a \ac{DRE},
+which is motivated by the following example.
 
-Briefly describe classical Cholesky-type factorization, $X=ZZ^\T$.
-This does only exist for symmetric positive-definite matrices $X$.
-
-\todo[inline]{Decide on how to call the low-rank factors: $ZZ^\T$ vs $QQ^\T$.}
-\todo[inline]{Decide on how to call the low-rank factors: $LDL^\T$ vs $QSQ^\T$.}
-
-$Z$ and $L \in \R^{n\times r}$ are not necessarily triangular,
-though there exist equivalent triangular decompositions.
-
-\begin{proposition}[Triangular Low-Rank Factorizations]
-  Let $X=ZZ^\T$ or $X=ZDZ^\T$ for some $Z\in\R^{n\times r}$ and $D\in\R^{r\times r}$,
-  $r \leq n$,
-  then there exist a lower triangular $\hat{Z}$
-  and some $\hat D$ of the same size satisfying
-  $X=\hat Z \hat Z^\T$
-  or $X=\hat Z \hat D \hat Z^\T$.
-\end{proposition}
-\begin{proof}
-  We are looking for a transformation $H\in\R^{r\times r}$ such that $\hat Z := ZH$ is triangular and $HH^\T = I_r$.
-  Then $\hat Z := ZH$ and $\hat D := H^\T DH$ have the desired properties.
-
-  \todo{How to handle row permutations?}
-  Without loss of generality, let the first $r$ rows of $Z$ have full rank.
-  Let $z_1\in\R^r$ denote the first row of $Z$.
-  Let $H_r\in\R^{r\times r}$ be the \Householder transformation mapping
-  $z_1$ onto $\norm{z_1}e_1 = (\norm{z_1},0,\ldots) \in \R^r$, \ie
-  \begin{equation}
-    H_r := I_r - \frac{2}{v^\T v} vv^T
-  \end{equation}
-  for $v := z_1 - \norm{z_1}e_1$.
-  Note that $H_r H_r^\T = I_r$ and $H_r = H_r^\T$.
-  As $Z$ has full rank, $v \neq 0$ and $H_r$ is well defined.
-  Indeed,
+\begin{example}[Low-Rank Solution of Rail Problem]
+\label{thm:lowrank:rail}
+  The solution of the Rail benchmark \cite{morwiki_steel} is given by the generalized \ac{DRE}~\eqref{eq:basics:DRE},
   \begin{equation*}
-    H_r z_1
-    = z_1 - \frac{2v^\T z_1}{v^\T v} \cdot v
-    = z_1 - 1 \cdot v
-    = \norm{z_1}e_1
-  \end{equation*}
-  such that
-  \begin{equation}
-    Z H_r = (H_r Z^\T) = \begin{pmatrix}
-      \norm{z_1} & 0 \\
-      Z_{12} & Z_{22}
-    \end{pmatrix}
-  \end{equation}
-  for some $Z_{12} \in \R^{n-1 \times 1}$ and $Z_{22} \in \R^{n-1 \times r-1}$.
-
-  Similarly, let $z_2\in\R^{r-1}$ denote the first row of $Z_{22}$ and
-  let $H_{r-1} \in \R^{r-1 \times r-1}$ be the \Householder matrix mapping
-  $z_2$ onto $\norm{z_2}e_1 \in\R^{r-1}$.
-  This iteratively defines the matrix
-  \begin{equation}
-    H :=
-    H_r \cdot
-    \begin{pmatrix}
-      I_1 \\ & H_{r-1}
-    \end{pmatrix}
-    \cdots
-    \begin{pmatrix}
-      I_{r-2} \\ & H_2
-    \end{pmatrix}
+  \left\{
+  \begin{aligned}
+    E^\T \dot X E &= C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E \\
+    E^\T X(t_0) E &= \tfrac{1}{100} C^\T C
     .
-  \end{equation}
+  \end{aligned}
+  \right.
+  \end{equation*}
+  Following \autoref{thm:basics:dre-limit-are:backwards},
+  $X(t)$ converges to $\bar X$ as $t\to\infty$,
+  where $\bar X$ is a solution of the generalized \ac{ARE}
+  %$\tilde C = C E^{-1}$,
+  \begin{equation*}
+    0 = C^\T C + A^\T \bar X E + E^\T \bar X A - E^\T \bar X BB^\T \bar X E
+  \end{equation*}
+  \cf Equation~\eqref{eq:basics:ARE} having $S = BB^\T$ and $W = C^\T C$.
+  That is, on one end of the time span it is $\rank X(t_0) = \rank C = q = 6$,
+  while past the other end $X$ converges to a matrix having $\rank \bar X \approx 113$.
+  As the corresponding optimal control has some form of minimal energy,
+  one can expect the numerical rank of the solution $X(\optional{})$ to depend on the ranks of its initial and limit value,
+  and to be not much larger in between.
+  For this particular example that's about $\frac{1}{3}n$,
+  which means the storage requirement of a single matrix can ideally be reduced by about $\frac{2}{3}$.
+\end{example}
 
-  Note that $H_1 = I_1$ or $H_1 = -I_1$,
-  which therefore isn't needed for the transformation into a triangular matrix.
-  Further, note that every factor in the product above is itself a \Householder transformation acting on $\R^r$,
-  whose corresponding vector has its leading components filled with zeros.
-\end{proof}
+% using MatrixEquations
+%
+% julia> Ed = collect(E);
+%
+% julia> Ad = collect(A);
+%
+% julia> Gd = collect(B*B');
+%
+% julia> Qd = collect(C'C);
+%
+% julia> X, EVAL, Z = garec(Ad, Ed, Gd, Qd);
+%
+% julia> rank(X)
+% 113
 
-\todo[inline]{%
-  The theorem above doesn't help / is misleading.
-  It's better to defer the reader to the compression section.
-}
+\paragraph{Classical Formulation}
 
-\subsection{Low-Rank Update Formula}
-\label{sec:lr:update}
-
-Let $A, B \in\R^{n\times r}$ and $C, D\in\R^{r\times r}$.
+As $X\in\Rnn$ is symmetric and positive semi-definite,
+the classical approach would be a \ac{LRCF} $X=ZZ^\T$
+for $Z \in\R^{n\times r}$, $r\ll n$.
+The idea is then to only compute the low-rank factor $Z$
+and never evaluate the full $X$.
+This requires low-rank formulations for addition and subtraction of low-rank matrices.
+Let $AA^\T$ and $BB^\T \in\Rnn$ be defined.
 While an update for the \ac{LRCF} is straight-forward,
 \begin{equation}
   AA^\T + BB^\T =
@@ -127,25 +170,24 @@ One option is to use complex arithmetic, \ie
   \end{bmatrix}
 \end{equation}
 where $\im^2=-1$.
-This has several drawbacks.
-The mathematical one is that we expect a real-valued\todo{Do we?}\ solution to the \ac{DRE}.
+This has several drawbacks, though.
+The mathematical one is that we expect a real-valued solution to the \ac{DRE}.
 Hence, the imaginary part should converge to zero quickly,
 or there should be an equivalent real-valued factorization.
-This leads to two technical drawbacks.
-Firstly, the complex arithmetic should not be necessary everywhere,
-switching back to real arithmetic is highly non-trivial.\footnote{Don't be clever / KISS!}
-\todo{Find reference!}
-Secondly, complex arithmetic is inefficient, \ie has a more than the to-be-expected 2x penalty compared to real arithmetic.
+This leads to the technical drawback of a factor-2 overhead of complex arithmetic over real arithmetic.
 
-Another option is to handle the parts separately which are added versus subtracted in the superposition,
-and compute the difference afterwards.
+Another option is therefore to handle the parts separately which are added versus subtracted in the superposition.
+The actual difference is then only computed at the very end.
 While this may only require updates,
 the overall result suffers from numerical cancellation
 \cite[50]{Lang2015}
 \cite[\pno~186, thesis~10]{Lang2017}.
 
-A different strategy to represent matrices of low numerical rank is the \ac{LRSIF} \cite{Benner2009,Lang2015},
-which does not require up- and downdate to be handled separately:
+\paragraph{Indefinite Formulation}
+
+A different strategy to represent matrices of low numerical rank is the \ac{LRSIF} \cite{Benner2009,Lang2015}
+$X = LDL^\T$ for $L\in\R^{n\times r}$ and $D\in\R^{r \times r}$, $D=D^\T$, $r\ll n$.
+This factorization does not require up- and downdate to be handled separately,
 \begin{equation}
   ACA^\T \pm BDB^\T =
   \begin{bmatrix}
@@ -158,43 +200,70 @@ which does not require up- and downdate to be handled separately:
     A^\T \\ B^\T
   \end{bmatrix}
 \end{equation}
-The resulting low-rank object $QSQ^\T$ consists of much larger matrices,
-$Q \in\R^{n\times 2r}$ and $S\in\R^{2r\times 2r}$.
-Having \autoref{thm:lowrank} in mind,
-and with iterative algorithms in sight,
-the inner dimension must not grow arbitrarily.
+for $A, B, C, D$ of compatible dimensions.
+The inner dimension $r$ is sometimes referred to as the rank of the factorization,
+even though $\rank LDL^\T \leq r$.
+If the overall result is expected to have a low rank,
+\eg
+\begin{equation}
+  LDL^\T + LDL^\T + LDL^\T
+  = \begin{bmatrix}
+    L & L & L
+  \end{bmatrix}
+  \begin{bmatrix}
+    D \\
+    & D \\
+    && D
+  \end{bmatrix}
+  \begin{bmatrix}
+    L^\T \\
+    L^\T \\
+    L^\T
+  \end{bmatrix}
+  ,
+\end{equation}
+that inner dimension must not grow arbitrarily.
+\autoref{alg:lowrank:compression} shows how to compress a \ac{LRSIF}
+based on the most significant eigenvalues,
+without imposing a maximum-rank condition,
+\cf~\cite[Section~6.3.3]{Lang2017}.
+The resulting factorization has a diagonal $D$ and (potentially) a lower inner dimension.
 
-\subsection{Column Compression}
-\label{sec:lr:compression}
+\begin{remark}
+  It is worth to emphasize that $LDL^\T$ may even represent a full rank matrix~$X$,
+  albeit very inefficiently.
+  In this case $L$ and $D$ are both square, \ie~$r=n$,
+  such that they take twice as much memory as~$X$.
+\end{remark}
 
-maximum-rank truncation,
-singular value tolerance,
-...
+\begin{remark}
+  Despite its name, $L$ does not need to be (lower) triangular.
+  Similarly, $D$ does not need to be diagonal.
+  In fact, the main results of \cite{Lang2015} are only due to non-diagonal $D$,
+  and are repeated in \autoref{sec:ros}.
+\end{remark}
 
-\todo{use proper algorithm}
-Taken from \cite[Section 6.3.3]{Lang2017}:
-Given $GSG^\T$, $G\in\Rnk$, and a tolerance $\epsilon\in\R$,
-compute $G_rS_rG_r^\T \approx GSG^\T$, $G_r\in\Rnr$.
-\begin{enumerate}
-  \item
-    Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$.
-  \item
-    Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
-    and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$.
-  \item
-    Set $G_r := QV_r \in\Rnr$ and $S := \Lambda_r$ with $r\leq k$ and $\abs{\lambda_{r+1}}\leq\epsilon$.
-    $V_r$ consists of the first $r$ columns of $V$ and $\Lambda_r$ of the first diagonal block of $\Lambda$.
-\end{enumerate}
+\begin{algorithm}[t]
+  \caption[Column Compression for Low-Rank Symmetric Indefinite Factorizations]{%
+    Column Compression for \acp{LRSIF}
+  }
+  \label{alg:lowrank:compression}
+  \KwIn{$G \in\Rnk$, $S\in\R^{k\times k}$}%, tolerance $0 < \epsilon \ll 1$}
+  \KwOut{$G_r\in\Rnr$, $S_r\in\R^{r\times r}$ such that $G_r S_r G_r^\T \approx GSG^\T$ and $r \leq k$}
+  Compute $G=QR\Pi^\T$ with $Q\in\Rnk$, $R\in\Rkk$ and a permutation $\Pi\in\Rkk$\;
+  Compute a decomposition $R \Pi^\T S \Pi R^\T = V \Lambda V^\T$ with $V \in \Rkk$
+  and a diagonal matrix $\Lambda\in\Rkk$ with diagonal entries $\abs{\lambda_1}\geq\ldots\geq\abs{\lambda_k}$\;
+  \Comment{Let $\umach$ denote the machine precision.}
+  $\epsilon \gets k \umach$\;
+  % FIXME: this should be max{1, lambda_1}. Currently, it shouldn't do any harm as any X is psd,
+  % and the RHS of the ALE should be as well. Check first stage of Ros2, though!
+  % https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl/-/issues/7
+  Select $r \leq k$ such that $\abs{\lambda_r} \geq \epsilon\max\Set{1, \lambda_1} \geq \abs{\lambda_{r+1}}$\;
+  \Comment{%
+    Let $V_r$ denote the first $r$ columns of $V$
+    and $\Lambda_r$ the first diagonal block of $\Lambda$.
+  }
+  $G_r \gets Q V_r$\;
+  $S_r \gets \Lambda_r$\;
+\end{algorithm}
 
-\todo[inline]{%
-The algorithm above uses an absolute cut-off $\epsilon$.
-How to integrate $G,S$ into a relative cut-off?
-Maybe a \enquote{cheap} adaptation of \cite[Algorithm~2.2, line~2]{Lang2017},
-or the even simpler $\epsilon\abs{\lambda_1}$?
-}
-
-\section{Model Order Reduction}
-Give brief overview.
-Details out of scope.
-Assume problem to be given in reduced form;
-solving the reduced order model then requires same algorithms/techniques.

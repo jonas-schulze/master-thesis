@@ -4,3 +4,18 @@
 \newcommand\LDLt{LDL\textsuperscript{T}}
 
 \counterwithout*{footnote}{chapter}
+\setcounter{topnumber}{1} % max number of floats at top of page
+\renewcommand{\bottomfraction}{0.5}
+\renewcommand{\listtheoremname}{List of Theorems and Examples}
+
+% runtime estimates
+\newcommand\hattpar{\hat t_\text{par}} % estimate
+\newcommand\hattseq{\hat t_\text{seq}} % estimate
+\newcommand\tpar{t_\text{par}}
+\newcommand\tseq{t_\text{seq}}
+\newcommand\twarmup{t_\text{warm-up}}
+\newcommand\trampup{t_\text{ramp-up}}
+\newcommand\JIT{\operatorname{compile}}
+
+% error estimates
+\newcommand\umach{\mathrm u_\text{mach}} % machine precision

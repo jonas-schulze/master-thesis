@@ -1,50 +1,184 @@
 \section{DifferentialRiccatiEquations.jl}
 \label{sec:impl:DRE}
 
-This section describes the general properties of the \julia{DifferentialRiccatiEquations.jl} package.
+% Don't mention the inconsistency in tspan!  I was inspired by Norman's code,
+% which received tspan sorted, i.e. in forwards time, and internally reversed
+% it before and after solving.  Not knowing what I was doing, I thought
+% accepting tspan in backwards time was a clever idea.  Now this package has to
+% be used with backwards tspan, while having the equations stated in forwards
+% time.
+%
+% https://gitlab.mpi-magdeburg.mpg.de/jschulze/DifferentialRiccatiEquations.jl/-/issues/6#note_13652
 
-\begin{itemize}
-  \item
-    Type of compression (none, $LDL^\T$) is selected by dispatching on the data type of the initial value $X_0$/\julia{X0},
-    \cf~\autoref{lst:impl:GDREProblem}.
-    For a dense matrix \julia{X0::Matrix}, a dense solver will be used.
-    For a \ac{LRSIF} \julia{X0::\LDLt}, a low-rank solver will be used.
-  \item
-    \julia{X::\LDLt} of rank $r$ consisting of $L \in\R^{n\times r}$ and $D\in\R^{r\times r}$ will be compressed,
-    \cf~\autoref{sec:lr:compression},
-    if the inner dimension becomes too big, $r \geq 0.5 n$,
-    and every 20 modifications without compression,
-    \cf~\autoref{sec:lr:update}.
-    For now, this is not configurable.
-  \item
-    Usage of Sherman-Morrison-Woodbury formula, \cf~\autoref{sec:basics:smw},
-    is hidden from \ac{ADI} via \julia{LowRankUpdate}.
-\end{itemize}
+This package is concerned with sequential \ac{DRE} solvers only.
+The general user interface has been inspired by \code{DifferentialEquations.jl}~\cite{DifferentialEquations},
+and looks like this:
+\begin{lstlisting}[
+  caption={[User Interface of \code{DifferentialRiccatiEquations.jl}]},
+]
+prob = GDREProblem(E, A, B, C, X0, tspan)
+alg = Ros1()
+sol = solve(prob, alg; dt=dt)
+\end{lstlisting}
+Besides \julia{Ros1()} and \julia{Ros2()},
+which correspond to the algorithms described in \autoref{sec:ros},
+there also is a \julia{Ros4()} solver.
+It is based on \cite[Appendix~A]{Lang2017} and only supports the dense case.
+The \julia{GDREProblem} type is parametrized on the type of the initial value \julia{X0},
+by which the proper \ac{ALE} solver is selected via runtime dispatch on \julia{solve()}.
+Dense initial values are represented by the built-in \julia{Matrix} type,\footnote{%
+  \url{https://docs.julialang.org/en/v1.6/stdlib/LinearAlgebra/}}
+and lead to a direct \ac{ALE} solver from \code{MatrixEquations.jl}~\cite{MatrixEquations}.
+Initial values in \ac{LRSIF} are represented by the \julia{\LDLt} type,
+and lead to the iterative \ac{ADI} solver described in \autoref{sec:ADI}.
 
-\begin{lstlisting}[%
-  float=t,
-  caption={Definition and docstring of \julia{GDREProblem}},
-  label={lst:impl:GDREProblem},
+\paragraph{Representation of Low-Rank Matrices}
+
+Suppose $X = LDL^\T$ and \julia{X = \LDLt(L, D)} are mathematical and Julia representations of the same objects,
+$L\in\R^{n\times r}$, $D\in\R^{r\times r}$.
+Then, the internal representation of~\julia{X} consists of lists~\julia{[L]} and~\julia{[D]},
+such that updates may be performed lazily by merely collecting all the summands,
+\cf \autoref{sec:lowrank}.
+Compression of~\julia{X} is performed once these lists contain 10 elements or more,
+or if the equivalent inner dimension is too large, $r \geq \onehalf n$.
+This causes a compression every 10 iterations of the \ac{ADI} or earlier.
+This is not configurable yet,
+\cf~\autoref{lst:impl:LDLt}.
+Note that line~\ref{line:impl:LDLt:compression_due} mainly guards the situation
+when a user accesses $L$ and $D$ (via iteration: \mbox{\julia{L, D = X}}),
+compression is not performed twice.
+All internal usages guarantee the assumption in the comment above line~\ref{line:impl:LDLt:compression_due}.
+
+\begin{lstlisting}[
+  float=tp,
+  caption={%
+    [{Definition of \julia{\LDLt} and \julia{(+)}}]
+    Definition of \julia{\LDLt} and addition \julia{(+)} of other \ac{LRSIF} objects.
+    The compression, \julia{compress!()}, is described in \autoref{alg:lowrank:compression}.
+  },
+  label={lst:impl:LDLt},
   escapechar=\%,
 ]
-"""
-Generalized differential Riccati equation
+struct %\LDLt%{TL,TD}
+    Ls::Vector{TL}
+    Ds::Vector{TD}
+end
 
-    E'%\.X%E = C'C + A'XE + E'XA - E'XBB'XE
-    X(t0) = X0
-
-having the fields `E`, `A`, `C`, `X0`, and `tspan`=`(t0, tf)`.
-"""
-struct GDREProblem{XT}
-    E
-    A
-    B
-    C
-    X0::XT
-    tspan
-
-    function GDREProblem(E, A, B, C, X0::XT, tspan) where {XT}
-        new{XT}(E, A, B, C, X0, tspan)
+function Base.:(+)(Xs::%\LDLt%{TL,TD}...) where {TL,TD}
+    Ls = TL[]
+    Ds = TD[]
+    for X in Xs
+        append!(Ls, X.Ls)
+        append!(Ds, X.Ds)
     end
+    X = %\LDLt%{TL,TD}(Ls, Ds)
+    maybe_compress!(X)
+end
+
+function compression_due(X::%\LDLt%)
+    # If there is only one component, it has likely already been compressed:
+    length(X.Ls) == 1 && return false%\label{line:impl:LDLt:compression_due}%
+    # Compression is due every couple of modifications:
+    length(X.Ls) >= 10 && return true
+    # Compression is due if rank is too large:
+    n = size(X, 1)
+    r = rank(X)
+    return r >= 0.5n
+end
+
+function maybe_compress!(X::%\LDLt%)
+    compression_due(X) || return X
+    compress!(X)
 end
 \end{lstlisting}
+
+\paragraph{Representation of Shifted Matrices}
+
+Recall that the Rosenbrock methods yield \acp{ALE},
+whose system matrices are sparse matrices shifted by a low-rank matrix,
+\cf $\tilde A_n$ on \autoref{alg:ros1:smw} of \autoref{alg:ros1} and $\hat A_n$ on \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
+Within the \ac{ADI}, these matrices are updated by another sparse matrix,
+\cf $A^+_k$ on \autoref{alg:ADI:smw} of \autoref{alg:ADI}.
+Overall, taking \Ros{1} as an example,
+the system to be solved with is
+\begin{equation}
+  A_k^+ =
+  \big(\big( A_n - \tfrac{1}{2\tau} E \big)^\T + \alpha_k E \big) - K_n^\T B^\T
+  .
+\end{equation}
+This structure, however, is completely hidden from the \ac{ADI} code via
+\begin{lstlisting}[
+  caption={[Abstraction of shifted linear system between Rosenbrock method and ADI]},
+  %caption={Representation of shifted linear systems},
+  escapechar=\%,
+]
+%\~A% = LowRankUpdate(A - E/(2%$\tau$%), -1, B, K)
+R = %\LDLt%(G, S)
+lyap = GALEProblem(E, %\~A%, R)
+solve(lyap, ADI())
+\end{lstlisting}
+Thereby, the \ac{ADI} transposes $\tilde A$ via \julia{adjoint()},
+%\footnote{%
+%  In Julia, \julia{A'} is syntactic sugar for \julia{adjoint(A)},
+%  \cf \url{https://docs.julialang.org/en/v1.6/manual/functions/\#Operators-With-Special-Names}
+%}
+and adds the sparse $\alpha_k E$ via \julia{(+)} without losing the \julia{LowRankUpdate} structure.
+Its main feature, however, is solving the corresponding linear system via the backslash operator~\julia{(\textbackslash)}
+using the Sherman-Morrison-Woodbury formula,
+\cf \autoref{sec:basics:smw}.
+See \autoref{lst:impl:LowRankUpdate} for the basic definition of \julia{LowRankUpdate} and the aforementioned functions.
+
+\def\mi{\textsuperscript{-1}}
+\begin{lstlisting}[
+  float=tp,
+  caption={%
+    [{Definition of \julia{LowRankUpdate} as well as \julia{(+)} and \julia{(\textbackslash)}}]
+    Definition of \julia{LowRankUpdate},
+    a lazy representation of the shifted linear system $A + \alpha^{-1} UV$,
+    as well as addition \julia{(+)} of a sparse matrix,
+    and left-division \julia{(\textbackslash)}
+    using the Sherman-Morrison-Woodbury formula,
+    \cf \autoref{sec:basics:smw}.
+  },
+  label={lst:impl:LowRankUpdate},
+  escapechar=\%,
+]
+struct LowRankUpdate{TA,T,TU,TV}
+    A::TA
+    %$\alpha$%::T
+    U::TU
+    V::TV
+end
+
+function Base.adjoint(AUV::LowRankUpdate)
+    A, %$\alpha$%, U, V = AUV
+    LowRankUpdate(A', %$\alpha$%', V', U')
+end
+
+function Base.:(+)(AUV::LowRankUpdate, E::AbstractMatrix)
+    @assert issparse(E)
+    A, %$\alpha$%, U, V = AUV
+    LowRankUpdate(A+E, %$\alpha$%, U, V)
+end
+
+function Base.:(\)(AUV::LowRankUpdate, B::AbstractVecOrMat)
+    A, %$\alpha$%, U, V = AUV
+
+    FA = factorize(A)
+    A%\mi%B = FA \ B
+    A%\mi%U = FA \ U
+
+    S = %$\alpha$%*I + V * A%\mi%U
+    S%\mi%VA%\mi%B = S \ (V * A%\mi%B)
+
+    X = A%\mi%B - A%\mi%U*S%\mi%VA%\mi%B
+    return X
+end
+\end{lstlisting}
+
+% Above listing used to contain `_factorize`, which is a custom implementation.
+% It's only purpose was to ensure that if the factorization is a `Diagonal`,
+% its diagonal is a dense vector. In some of my dummy experiments, this was
+% faster to solve with. However, A and E are basically never diagonal, so this
+% function exists for "historical reasons" (TM) only.
+

@@ -6,9 +6,13 @@
 \usepackage{thmtools} % \listoftheorems
 \usepackage{array} % >{...} column modifiers
 \usepackage{siunitx}
+\usepackage{tikz}
+\usepackage{booktabs} % \toprule etc
 \usepackage{xspace}
 \usepackage{enumitem} % improved listings: \setlist
 \usepackage{listings,xcolor} % source code
+\usepackage{subcaption} % subfigure
+\usepackage[nottoc]{tocbibind} % remove toc from toc (caused by algorithm2e)
 \usepackage[
   linesnumbered,
   algochapter,
@@ -31,10 +35,20 @@
   showmanualtags,
 }
 
-\hypersetup{
-  %hidelinks, %TODO: activate me for print version
+\sisetup{
+  binary-units,
 }
+
+\hypersetup{
+  hidelinks, %TODO: activate me for print version
+}
+
+\usetikzlibrary{graphs,arrows.meta}
+\tikzset{>=Stealth}
 
 % hyperref/babel/koma
 \renewcaptionname{american}\chapterautorefname{Chapter}
 \renewcaptionname{american}\sectionautorefname{Section}
+\renewcaptionname{american}\subsectionautorefname{Subsection}
+\newcaptionname{american}\algorithmcflinename{step} % algorithm2e
+% step, line, page remain lowercase!

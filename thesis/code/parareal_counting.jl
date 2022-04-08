@@ -35,7 +35,6 @@ end
 #== solve ==#
 inc_F = (p::SomeProblem) -> Counters(p.v.F + 1, p.v.G)
 inc_G = (p::SomeProblem) -> Counters(p.v.F, p.v.G + 1)
-
 tspan = (0., 42.) # doesn't matter here
 prob = SomeProblem(Counters(0, 0), tspan)
 sol = solve(

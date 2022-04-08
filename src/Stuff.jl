@@ -48,7 +48,10 @@ function parareal_setup()
 end
 
 abstract type Config{X} end
-struct SequentialConfig{X} <: Config{X}
+Base.@kwdef struct SequentialConfig{X} <: Config{X}
+    ncpus::Int # slurm c
+    nsteps::Int
+    order::Int
 end
 Base.@kwdef struct ParallelConfig{X} <: Config{X}
     # number of parareal steps:
@@ -66,6 +69,8 @@ Base.@kwdef struct ParallelConfig{X} <: Config{X}
     # other stuff:
     jobid::String="0"
 end
+
+kind(::Config{X}) where {X} = X
 
 function ParallelConfig(X::Symbol)
     X in (:dense, :lowrank) || throw(ArgumentError("type must be `:dense` or `:lowrank`; got $X"))
@@ -91,6 +96,19 @@ function ParallelConfig(X::Symbol)
     ParallelConfig{X}(; nstages, ncpus, nc, nf, oc, of, wc, wf, jobid)
 end
 
+function SequentialConfig(X::Symbol)
+    X in (:dense, :lowrank) || throw(ArgumentError("type must be `:dense` or `:lowrank`; got $X"))
+    ncpus = something(
+        readenv("SLURM_CPUS_PER_TASK"),
+        readenv("OMP_NUM_THREADS"),
+        1,
+    )
+    nsteps = something(readenv("MY_N"), 1)
+    order = something(readenv("MY_O"), 1)
+
+    SequentialConfig{X}(; ncpus, nsteps, order)
+end
+
 DrWatson.default_prefix(c::Config{X}) where {X} = "rail371-$X"
 
 include("addworkers.jl")
@@ -101,7 +119,9 @@ include("storage.jl")
 include("parareal_dre.jl")
 include("problems.jl")
 
-export ParallelConfig
+include("figures.jl")
+
+export ParallelConfig, SequentialConfig, kind
 export load_rail, algorithms, Δt
 
 export readenv

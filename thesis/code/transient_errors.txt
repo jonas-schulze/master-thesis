@@ -1,0 +1,16 @@
+$ julia --version
+julia version 1.6.2
+
+$ julia -e 'throw(Exception)'
+ERROR: Exception
+Stacktrace:
+ [1] top-level scope
+   @ none:1
+
+$ echo $?
+1
+
+$ julia -e '@async throw(Exception); sleep(1)'
+
+$ echo $?
+0

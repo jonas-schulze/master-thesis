@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  text height=1.5ex,
+  text depth=0.25ex,
+]
+  \graph[
+    math nodes,
+    chain shift={(70:1.2cm)},
+    %chain shift={(90:1cm)},
+    group shift={(2cm,0)},
+    diag/.style={out=30,in=180},
+    %diag/.style={bend left=15},
+  ]{
+    Unk/"U_{n-1}^{k-1}"
+    -> Gnk/"G(U_{n-1}^{k-1})" -> Un1k/"U_{n}^{k-1}"
+    -> Gn1k/"G(U_{n}^{k-1})" -> Un2k/"U_{n+1}^{k-1}",
+    "" -!- Fnk/"F(U_{n-1}^{k-1})" -!- "" -!- Fn1k/"F(U_{n}^{k-1})",
+    Unk1/"U_{n-1}^{k}"
+    -> Gnk1/"G(U_{n-1}^{k})" -> Un1k1/"U_{n}^{k}"
+    -> Gn1k1/"G(U_{n}^{k})" -> Un2k1/"U_{n+1}^{k}",
+    "" -!- Fnk1/"F(U_{n-1}^{k})" -!- "" -!- Fn1k1/"F(U_{n}^{k})",
+    Unk2/"U_{n-1}^{k+1}"
+    -> Gnk2/"G(U_{n-1}^{k+1})" -> Un1k2/"U_{n}^{k+1}"
+    -> Gn1k2/"G(U_{n}^{k+1})" -> Un2k2/"U_{n+1}^{k+1}";
+
+    Unk -> Fnk -> Un1k1 -> Fn1k1 -> Un2k2;
+    Un1k -> Fn1k -> Un2k1;
+    Unk1 -> Fnk1 -> Un1k2;
+    Gnk -> [diag] Un1k1;
+    Gnk1 -> [diag] Un1k2;
+    Gn1k -> [diag] Un2k1;
+    Gn1k1 -> [diag] Un2k2;
+  };
+  \foreach \n in {Unk,Unk1,Unk2} {
+    \draw (\n)++(70:-6mm) node[rotate=70] {$\cdots$};
+  }
+  \foreach \n in {Un2k,Un2k1,Un2k2} {
+    \draw (\n)++(70:6mm) node[rotate=70] {$\cdots$};
+  }
+  \foreach \n in {Unk2,Un1k2,Un2k2} {
+    \node [right=4mm] at (\n) {$\cdots$};
+  }
+  \foreach \n in {Unk,Un1k,Un2k} {
+    \node [left=4mm] at (\n) {$\cdots$};
+  }
+\end{tikzpicture}

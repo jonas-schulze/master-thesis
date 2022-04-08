@@ -1,10 +1,113 @@
 \chapter{Notes}
 
+\begin{itemize}
+  \item
+    Does \Ros{2} work better if we don't condense the right-hand side of the second stage?
+    That is, does
+    \begin{equation}
+      \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1
+      = \begin{bmatrix}
+        T_1 & T_1
+      \end{bmatrix}
+      \begin{bmatrix}
+        \tau^2 M_1 T_1^\T BB^\T T_1 M_1 \\
+        &\big( 2-\tfrac{1}{\gamma} \big) M_1
+      \end{bmatrix}
+      \begin{bmatrix}
+        T_1^\T \\
+        T_1^\T
+      \end{bmatrix}
+    \end{equation}
+    work better?
+    Maybe it suffers from cancellation.
+\end{itemize}
+
 \begin{align}
   E\dot{X} &= AX + BU \\
   Y &= CX + DU \\
   X(t_0) &= X_0
 \end{align}
+
+\section{Linear Systems and Related Matrix Equations}
+
+refer to \cite{Simoncini2016}
+
+A \emph{generalized state-space system}
+\begin{equation}
+\label{eq:basics:system}
+\left\{
+\begin{aligned}
+  E \dot x &= Ax + Bu\\
+  y &= Cx
+\end{aligned}
+\right.
+\end{equation}
+describes the dynamics of the \emph{state} $x(t) \in\R^n$, $t\in [t_0, t_f]$,
+under the influence of the \emph{input} or \emph{control} $u(t)\in\R^m$,
+as observed by the \emph{output} $y(t) \in\R^q$.
+The system consists of the so-called
+\emph{mass matrix} $E(t) \in\Rnn$,
+\emph{state-space matrix} $A(t) \in\Rnn$,
+\emph{input map} $B(t) \in\R^{n\times m}$, and
+\emph{output map} $C(t) \in\R^{q\times n}$,
+where typically $m,q \ll n$.
+If these \emph{system matrices} are constant over the whole time span $t \in [t_0, t_f]$,
+\eqref{eq:basics:system} is called a \ac{LTI} system, and \ac{LTV} otherwise.
+The first equation of \eqref{eq:basics:system} is called \emph{state equation},
+the other \emph{ouput equation}.
+If $E=I$ the system is said to be in \emph{standard state-space form}.
+
+From system \eqref{eq:basics:system} one may derive a \ac{DRE}, \ac{ARE}, \ac{ALE}, \etc
+
+\section{Cayley Transformation}
+
+\begin{lemma}
+  Let $\alpha_k,\beta_k\in\C$ and $A=H+V$ be given.
+  Define $\Aipm, \Aiipm$ according to \eqref{eq:adi:shorthand}.
+  The \ac{ADI} iteration matrix $M_k^{-1}N_k$ as in \eqref{eq:adi:general1step} is a Cayley transformation.
+\end{lemma}
+\begin{proof}
+  For brevity, we omit the subscript $k$.
+  Observe
+  \begin{align*}
+    \Aip\Aiip
+    &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H + \alpha_k(H+V) \\
+    \Aim\Aiim
+    &= HV + \alpha_k\beta_k I_n - \alpha_k H - \beta_k V \\
+    &= HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H - \beta_k(H+V)
+  \end{align*}
+  such that
+  \todo{Check whether $-\alpha\in\Lambda(B, A)$.}
+  \begin{equation*}
+    M_k^{-1} N_k
+    = (\Aip\Aiip)^{-1}(\Aim\Aiim)
+    = \Cayley(B_k, A, \alpha_k, \beta_k)
+  \end{equation*}
+  for
+  \begin{equation*}
+    B_k := HV + \alpha_k\beta_k I_n - (\alpha_k-\beta_k)H
+    .
+  \end{equation*}
+\end{proof}
+
+As we will see later, $\beta_k = \conj{\alpha_k}$.
+Thus, if $\Lambda(H), \Lambda(V) \subseteq \Cneg$
+and $\alpha_k \in \Cneg$ for all $k\in\N$, then $\rho(G_k) < 1$ for all $k$.
+This is a reasonable starting point towards showing $G_k\cdots G_0 \to 0$,
+\cf~\autoref{thm:adi:convergence},
+but not a necessary condition.
+
+If further $\alpha_k = \conj{\beta_k} \in\R$ and $H,V$ are hermitean, so is $G_k$.
+As they all commute,
+they are simultaneously diagonalizable and $\rho(\optional{}) = \norm{}_2$,
+such that the eigenvalues of $G_k$ are given by
+\begin{equation}
+  \frac{\lambda - \beta_k}{\lambda + \alpha_k}
+  \cdot
+  \frac{\mu - \alpha_k}{\mu + \beta_k}
+\end{equation}
+where $\lambda \in \Lambda(H)$, $\mu\in\Lambda(V)$.
 
 \section{Equation Types}
 \subsection{Standard}
@@ -32,9 +135,74 @@ Generalized differential and algebraic Riccati equations (assuming $\dot E = 0$)
 
 \cite{Lang2017}
 
+\section{Low-Rank Factorizations}
+
+\begin{proposition}[Triangular Low-Rank Factorizations]
+  Let $X=ZZ^\T$ or $X=ZDZ^\T$ for some $Z\in\R^{n\times r}$ and $D\in\R^{r\times r}$,
+  $r \leq n$,
+  then there exist a lower triangular $\hat{Z}$
+  and some $\hat D$ of the same size satisfying
+  $X=\hat Z \hat Z^\T$
+  or $X=\hat Z \hat D \hat Z^\T$.
+\end{proposition}
+\begin{proof}
+  We are looking for a transformation $H\in\R^{r\times r}$ such that $\hat Z := ZH$ is triangular and $HH^\T = I_r$.
+  Then $\hat Z := ZH$ and $\hat D := H^\T DH$ have the desired properties.
+
+  \todo{How to handle row permutations?}
+  Without loss of generality, let the first $r$ rows of $Z$ have full rank.
+  Let $z_1\in\R^r$ denote the first row of $Z$.
+  Let $H_r\in\R^{r\times r}$ be the \Householder transformation mapping
+  $z_1$ onto $\norm{z_1}e_1 = (\norm{z_1},0,\ldots) \in \R^r$, \ie
+  \begin{equation}
+    H_r := I_r - \frac{2}{v^\T v} vv^T
+  \end{equation}
+  for $v := z_1 - \norm{z_1}e_1$.
+  Note that $H_r H_r^\T = I_r$ and $H_r = H_r^\T$.
+  As $Z$ has full rank, $v \neq 0$ and $H_r$ is well defined.
+  Indeed,
+  \begin{equation*}
+    H_r z_1
+    = z_1 - \frac{2v^\T z_1}{v^\T v} \cdot v
+    = z_1 - 1 \cdot v
+    = \norm{z_1}e_1
+  \end{equation*}
+  such that
+  \begin{equation}
+    Z H_r = (H_r Z^\T) = \begin{pmatrix}
+      \norm{z_1} & 0 \\
+      Z_{12} & Z_{22}
+    \end{pmatrix}
+  \end{equation}
+  for some $Z_{12} \in \R^{n-1 \times 1}$ and $Z_{22} \in \R^{n-1 \times r-1}$.
+
+  Similarly, let $z_2\in\R^{r-1}$ denote the first row of $Z_{22}$ and
+  let $H_{r-1} \in \R^{r-1 \times r-1}$ be the \Householder matrix mapping
+  $z_2$ onto $\norm{z_2}e_1 \in\R^{r-1}$.
+  This iteratively defines the matrix
+  \begin{equation}
+    H :=
+    H_r \cdot
+    \begin{pmatrix}
+      I_1 \\ & H_{r-1}
+    \end{pmatrix}
+    \cdots
+    \begin{pmatrix}
+      I_{r-2} \\ & H_2
+    \end{pmatrix}
+    .
+  \end{equation}
+
+  Note that $H_1 = I_1$ or $H_1 = -I_1$,
+  which therefore isn't needed for the transformation into a triangular matrix.
+  Further, note that every factor in the product above is itself a \Householder transformation acting on $\R^r$,
+  whose corresponding vector has its leading components filled with zeros.
+\end{proof}
+
 \section{Software}
 
 \cite{DrWatson}
+\cite{Makie}
 
 \section{Hamilton-Jacobi Theory}
 

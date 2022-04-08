@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  text height=1.5ex,
+  text depth=0.25ex,
+  double equal sign distance,
+  ghost/.style={gray},
+  eq/.style={double, shorten >=2ex, shorten <=2ex},
+]
+  \graph[
+    math nodes,
+    chain shift={(70:1.2cm)},
+    group shift={(2cm,0)},
+    diag/.style={out=30,in=180},
+  ]{
+    Unk/"U_0^0"
+    -> Gnk/"G(U_0^0)" -> Un1k/"U_1^0"
+    -> Gn1k/"G(U_1^0)" -> Un2k/"U_2^0",
+    Unk1/"U_0^1" [ghost]
+    -!- Fnk/"F(U_0^0)" -!- "" -!- Fn1k/"F(U_1^0)",
+    "" -!- "" -!- Un1k1/"U_1^1"
+    -> Gn1k1/"G(U_1^1)" -> Un2k1/"U_2^1",
+    "" -!- "" -!- Un1k2/"U_1^2" [ghost]
+    -!- Fn1k1/"F(U_1^1)",
+    "" -!- "" -!- "" -!- "" -!- Un2k2/"U_2^2";
+
+    Unk -> Fnk -> Un1k1 -> Fn1k1 -> Un2k2;
+    Un1k -> Fn1k -> Un2k1;
+    Gn1k -> [diag] Un2k1;
+
+    Unk -- [ghost,eq] Unk1;
+    Un1k1 -- [ghost,eq] Un1k2;
+  };
+  \draw[ghost] (Un2k2) ++ (2cm,0) node (Un2k3) {$U_2^3$};
+  \draw[ghost,eq] (Un2k2) -- (Un2k3);
+
+  \foreach \n in {Un2k,Un2k1,Un2k2} {
+    \draw (\n)++(70:6mm) node[rotate=70] {$\cdots$};
+  }
+  \foreach \n in {Unk1,Un1k2,Un2k3} {
+    \node[ghost,right=3mm] at (\n) {$\cdots$};
+  }
+\end{tikzpicture}

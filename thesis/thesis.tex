@@ -31,7 +31,7 @@
 ]{biblatex}
 \addbibresource{stuff.bib}
 
-\usepackage{todonotes}
+%\usepackage{todonotes}
 
 \input{preamble/packages}
 \input{preamble/math}
@@ -49,51 +49,51 @@
 \frontmatter
 
 \input{titlepage.tex}
-\include{content/abstract}
+%\include{content/abstract}
 
 \cleardoublepage
-%\pdfbookmark{\contentsname}{toc} % not needed due to [dotocloa]algorithm2e
+\pdfbookmark{\contentsname}{toc} % add toc to bookmarks, but not to toc
 \tableofcontents
+\listofalgorithms
+\lstlistoflistings
 \listoffigures
+\listoftables
 
 \cleardoublepage
 \pdfbookmark{\listtheoremname}{loe}
 \listoftheorems[ignore=remark]
 
-\cleardoublepage
-\listofalgorithms
+\printglossaries
 
-\cleardoublepage
-\lstlistoflistings
-
-\listoftodos
-\markboth{TODO LIST}{TODO LIST}
-\todototoc
+%\listoftodos
+%\markboth{TODO LIST}{TODO LIST}
+%\todototoc
 
 % -----------------------------------------------------------------------------
 \mainmatter
 \include{content/intro}
+\glsresetall
 \include{content/basics}
 \include{content/matrixeq}
 \include{content/rosenbrock}
 \include{content/adi}
+\renewcommand{\textfraction}{0.1}
 \include{content/parareal}
+\renewcommand{\textfraction}{0.2} % default
 \include{content/implementation_and_results}
-
-\chapter{Conclusion}
+\glsresetall
+\include{content/conclusion}
 
 % -----------------------------------------------------------------------------
 \appendix
-\include{appendix/notes}
+%\include{appendix/notes}
 \include{appendix/adi_reordering}
 
-\include{appendix/control}
+%\include{appendix/control}
 \include{appendix/vectorization}
 
 % -----------------------------------------------------------------------------
 \backmatter
-\glsaddallunused
-\printglossaries
 \printbibliography
 
 \end{document}
