@@ -126,7 +126,7 @@ which results in significantly larger ranks for about $t < \SI{40}{\second}$.
 
 \begin{remark}
   \citeauthor{Lang2015}~\cite[63]{Lang2015} noted a problem with the low-rank version of \Ros{2} as well.
-  The error behavior here looks similar to \cite[Fig~1]{Lang2015},
+  The error behavior here looks similar to \cite[Fig.~1]{Lang2015},
   keeping in mind that here the step size is $100\times$ larger
   and that the results are compared to dense solvers instead of \ac{LRCF} ones.
 \end{remark}
@@ -135,7 +135,7 @@ which results in significantly larger ranks for about $t < \SI{40}{\second}$.
   \centering
   \includegraphics[width=0.7\textwidth]{figures/fig_results_sequential_rank.pdf}
   \caption[Numerical rank of low-rank sequential solutions to Rail problem]{%
-    Numerical rank of low-rank sequential solutions $X$ to Rail problem,
+    Numerical rank of low-rank sequential solutions $X$ to the Rail problem,
     \cf~\cite[Figure~6.6b]{Lang2017}.
   }
   \label{fig:results:sequential:rank}
@@ -265,7 +265,7 @@ which does not fulfill all the assumptions due to early convergence.
   \centering
   \includegraphics[width=0.7\textwidth]{figures/fig_results_parareal_rank.pdf}
   \caption[Numerical rank of low-rank parareal solutions to Rail problem]{%
-    Numerical rank of low-rank parareal solutions to Rail problem,
+    Numerical rank of low-rank parareal solutions to the Rail problem,
     \cf~\cite[Figure~6.6b]{Lang2017}.
     Only values at parareal interfaces $t_n$ are shown,
     which coincide with the time steps of the sequential solutions.
@@ -277,7 +277,7 @@ which does not fulfill all the assumptions due to early convergence.
 \begin{figure}[tp]
   \includegraphics[width=\textwidth]{figures/fig_timeline_all.pdf}
   \caption[Timeline diagrams for parareal method applied to Rail problem]{%
-    Timeline diagrams for the parareal methods applied to Rail problem.
+    Timeline diagrams for the parareal methods applied to the Rail problem.
     The schemes of coarse/fine order are as described in \autoref{fig:results:parareal:rail}.
   }
   \label{fig:results:parareal:timeline}
@@ -401,7 +401,7 @@ The other ratios are skewed by the rank problem of \ac{LRSIF}~\Ros{2}.
   \caption[Runtime and storage requirements]{%
     Overall runtime (as reported by Slurm)
     including time to write results to disk,
-    and storage requirements of solutions to Rail benchmark~\cite{morwiki_steel}.
+    and storage requirements of solutions to the Rail benchmark~\cite{morwiki_steel}.
     The resolution is the step size $\tau$ of the (fine) solver.
     The storage size includes both $X$ and $K$ trajectories,
     storing only $K$ would result in substantially smaller files.
