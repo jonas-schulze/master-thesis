@@ -21,7 +21,7 @@ Another strategy is to (also) solve the problem \emph{parallel-in-time},
 An algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
 which is the focus of this thesis.
 %From a pure energy-consumed or efficiency perspective,
-From a energy efficiency perspective,
+From an energy efficiency perspective,
 the parareal method is not worth pursuing.
 However, as engineering demands fast cycle times,
 this method can lead to large speed-ups.
@@ -33,6 +33,8 @@ for which the solution matrices easily reach thousands of rows and columns.
 In order to handle them efficiently,
 one uses the problem's inherent rapid decay of singular values
 to approximate the solution matrices in a low-rank factorization, see \eg~\cite{Penzl2000,Kuerschner2016,Lang2017}.
+This low-rank approach sets this thesis apart from the work of \citeauthor{Koehler2016}~\cite{Koehler2016},
+who use a dense parareal scheme.
 As the rank of the solution approximation varies in time,
 an implementation using well-established frameworks like OpenMPI\footnote{\url{https://www.open-mpi.org/}}
 would be more involved.
@@ -49,7 +51,8 @@ This completes the general building blocks of a \ac{DRE} solver.
 To improve the performance of the solver,
 \autoref{sec:pr} shows how to apply the parareal method to the particular low-rank factorization used in this thesis.
 \autoref{sec:impl} describes the implementation of the aforementioned algorithms in the form of two Julia packages,
-as well as the numerical results of applying them to
+which have been created for this thesis.
+The chapter also presents the numerical results of applying these packages to
 a small configuration of the Rail benchmark problem~\cite{morwiki_steel},
 which goes back to \citeauthor{Benner2005}~\cite{Benner2005}.
 The chapter compares low-rank and dense algorithms in sequential and parareal execution.

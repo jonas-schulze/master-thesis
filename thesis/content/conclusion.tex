@@ -5,7 +5,7 @@
 
 This thesis has given a brief overview of the \ac{DRE} arising in optimal control in \autoref{sec:HJT},
 and how to handle large-scale problems in general in \autoref{sec:matrixeq}.
-Then, \autoref{sec:ros} has shown that
+\autoref{sec:ros} has shown that
 applying the classical Rosenbrock method to the matrix-valued \ac{DRE}
 results in the stage equations being \acp{ALE}
 having absolute terms in \ac{LRSIF}.
@@ -20,6 +20,7 @@ how to evaluate its norm without assembling the full residual matrix,
 and how to handle complex parameters using real arithmetic for the iterates.
 Lastly, \autoref{sec:ADI} described how to choose \ac{ADI} parameters based on quantities computed during the \ac{ADI} iteration,
 \ie independent from user input.
+An open research question is to explain the performance of these self-generating \ac{ADI} shifts.
 
 \autoref{sec:pr} and parts of \autoref{sec:impl} addressed the parareal method.
 It was shown how to apply the method to \acp{LRSIF}.
@@ -33,23 +34,29 @@ Overall, the efficiency is very low:
 less than \SI{2}{\percent} for the low-rank algorithms and
 \SIrange{4.6}{7.6}{\percent} for the dense algorithms.
 Yet, the speed-up is very noticeable:
-\eg more than \num{34} for the most expensive dense algorithm,
+\eg more than \num{20} for the dense order~1/1 scheme,
+or \num{34} for the most expensive dense algorithm,
 \cf~\autoref{tab:impl:pr:speedup}.
+For the low-rank algorithms,
+the speed-up is much lower,
+\ie only about \num{3.5} for the \ac{LRSIF} order~1/1 scheme.
 These metrics would be larger for finer temporal resolutions,
 a lower ramp-up delay~$\trampup$,
 or more advanced scheduling strategies.
-The latter would especially benefit the low-rank algorithms.
+The latter would especially benefit the low-rank algorithms,
+and thereby could be another starting point for further research.
 
 Numerically, the \ac{LRSIF} version of \Ros{1} performed just like its dense counterpart.
-The problems with the \ac{LRSIF} version of \Ros{2} as noted by \citeauthor*{Lang2015}~\cite{Lang2015,Lang2017} have been reproduced in Julia.
-They are especially severe in a parareal context,
+The problem with the \ac{LRSIF} version of \Ros{2} as noted by \citeauthor*{Lang2015}~\cite{Lang2015,Lang2017} has been reproduced in Julia.
+The cause of that problem needs further investigation.
+It is especially severe in a parareal context,
 which makes the comparison of runtime and derived metrics involving this method basically pointless.
 However, investigation is difficult as the level of introspection
 currently possible using \code{DifferentialRicccatiEquations.jl} is quite poor:
 it does not track the actual rank of the \ac{ALE} right-hand sides,
 nor the number of \ac{ADI} iterations or number of \ac{LRSIF} compressions performed.
 Furthermore, the thresholds when to perform a \ac{LRSIF} compression are not configurable yet,
-would be necessary to apply the algorithms to large-scale problems.
+which would be necessary to apply the algorithms to large-scale problems.
 
 Julia allows for user-friendly abstractions while still providing good performance.
 In particular, dynamic dispatch and extendable standard operators like \julia{(+)} are very useful.
