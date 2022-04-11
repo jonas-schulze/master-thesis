@@ -28,7 +28,12 @@
 ]{hyperref}
 
 % glossaries must be loaded after hyperref
-\usepackage[toc,shortcuts]{glossaries}
+\usepackage[%
+  section, % use \section instead of \chapter
+  shortcuts, % \ac etc
+  %nonumberlist,
+  nogroupskip,
+]{glossaries}
 
 \mathtoolsset{
   %showonlyrefs,

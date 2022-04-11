@@ -1,0 +1,93 @@
+\chapter*{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
+\printglossary[title=Abbreviations]
+
+\markboth{\bfseries GLOSSARY}{\bfseries GLOSSARY}
+
+\section*{Numbers and Vector Spaces}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $\N$ & set of natural numbers. \\
+  $\R$ & field of real numbers. \\
+  $\C$ & field of complex numbers. \\
+  $\Cneg$ & left complex half plane, $\Cneg := \Set{z\in\C : \Re(z) < 0}$. \\
+  $\K^n$ & vector space of $n$-tuples having entries in $\K$. \\
+  $\K^{m\times n}$ & vector space of $m\times n$ matrices having entries in $\K$. \\
+  $\im$ & imaginary unit, $\im^2 = -1$. \\
+  $\conj{(\optional{})}$ & complex conjugate of a scalar or matrix, $\conj{a + b\im} := a - b\im$ for $a,b\in\R$. \\
+  $\Re(\optional{}) / \Im(\optional{})$ & real/imaginary part of a scalar or matrix, \\
+    & $\Re(a + b \im) := a$, $\Im(a+b\im) := b$ for $a, b\in\R$.
+\end{tabular}
+
+\section*{Norms}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $\abs{}$ & absolute value of a scalar. \\
+  $\norm{}_2$ & Euclidean norm of a vector, $\norm{x}_2 := \sqrt{x^\HT x}$ for $x\in\R^n$, or \\
+              & spectral norm of a matrix, $\norm{A}_2 := \max_{\norm{x}_2 = 1} \norm{Ax}_2 = \rho(A)$. \\
+  $\norm{}_F$ & Frobenius norm of a vector or matrix, $\norm{X}^2_F := \sum_{i,j} \abs{x_{ij}}^2$.
+\end{tabular}
+
+\section*{Matrices}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $I_n$ & identity matrix of size $n\in\N$. \\
+  $\mathrlap{(\optional{})^\T} \hphantom{(\optional{})^{-\T}} / (\optional{})^\HT$ & transpose / Hermitian transpose of a matrix. \\
+  $(\optional{})^{-\T} / (\optional{})^{-\HT}$ & inverse of the transpose / Hermitian transpose of a (square) matrix. \\
+  $(\optional{})^{-1}$ & inverse of a (square) matrix. \\
+  $(\optional{})^\MP$ & Moore-Penrose pseudo inverse of a matrix. \\
+  $\rank(\optional{})$ & rank of a matrix. \\
+  $\colspan(\optional{})$ & vector space spanned by the columns of a matrix. \\
+  $\Lambda(\optional{}) / \Lambda(\optional{},\optional{})$ & spectrum of a matrix / matrix pair,\\
+    & $\Lambda(A) := \Lambda(A, I)$, $\Lambda(A, E) := \Set{\lambda\in\C \given \exists v : Av = \lambda Ev}$. \\
+  $\rho(\optional{})$ & spectral radius of a matrix, $\rho(G) := \max\Set[\big]{\abs{\lambda} : \lambda\in\Lambda(G)}$. \\
+  $\nnz(\optional{})$ & number of non-zero entries of a matrix.
+\end{tabular}
+
+\section*{Relations}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $X \succeq 0 / Y \succ 0$ & positive semi-definite matrix $X$ / positive definite matrix $Y$, \\
+    & $\Lambda(X) \subseteq \Set{\lambda\in\R : \lambda\geq 0}$, $\Lambda(Y) \subseteq \Set{\lambda\in\R : \lambda > 0}$. \\
+  $f(x) \smash{\mathrel{\overset{!}{\Delta}}} 0$ & determine $x$ such that $f(x) \mathrel{\Delta} 0$ holds, where $\Delta\in\Set{=,\succ}$ is a relation. \\
+  $\ll$ & much less than. \\
+  $\equiv$ & pointwise equality of functions. \\
+  $\cong$ & equality up to an isomorphism.
+\end{tabular}
+
+\section*{Derivatives}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $\vphantom{\smash[t]{\Big(}} f'(x) := \diff{x}{f}(x)$ & first derivative of $f$. \\
+  $\vphantom{\smash[t]{\Big(}} \dot x := \diff{t}{x}$ & derivative of $x$ \wrt time $t$. \\
+  $\vphantom{\smash[t]{\Big(}} V_z := \pdiff{z}{V}$ & partial derivative of $V$ \wrt $z$. \\
+  $V_z(t,z) |_{z=x} $ & partial derivative of $V$ \wrt z, evaluated at $(t,z)=(t,x)$.
+\end{tabular}
+
+\section*{Variables and Constants}
+
+\noindent
+\begin{tabular}{@{}p{2.5cm}l}
+  $k$ & ADI or parareal step. \\
+  $k_n$ & last parareal refinement $U^{k_n}_n$ computed by stage $n$. \\
+  $K$ & depending on the context: \\
+    & feedback matrix $K(t) := R^{-1} B^T X(t) E \in\R^{m\times n}$, or \\
+    & maximum number of parareal steps/refinements allowed, $k\leq K$. \\
+  $m$ & number of system controls $u(t)\in\R^m$, $m\ll n$. \\
+  $n$ & depending on the context: \\
+    & number of system states $x(t)\in\R^n$, or \\
+    & specific of time step $t_n$, $1 \leq n \leq N$. \\
+  $N$ & number of time steps $t_0 < t_1 < \ldots < t_N = t_f$. \\
+  $q$ & number of system outputs $y(t)\in\R^q$, $q\ll n$. \\
+  $t_0$ and $t_f$ & initial and final time, $t_0 < t_f$. \\
+  $t_F = t_F(n, k)$ & runtime of fine solver $F(U_{n-1}^k)$. \\
+  $t_G = t_G(n, k)$ & runtime of coarse solver $G(U_{n-1}^k)$. \\
+  $\hat{t}_*$ & estimate of $t_*$. \\
+  $\umach$ & machine precision.
+\end{tabular}
+
