@@ -6,19 +6,19 @@ in particular how right-multiplication $X \mapsto XA^\HT$ can be described as a 
 The key ingredients for this are \emph{vectorization} $\vec : \R^{m\times n} \to \R^{mn}$,
 \eg for $X=(x_1,\ldots, x_n)$ with $x_i\in\R^m$
 \begin{equation}
-  \vec(X) := \begin{pmatrix}
+  \vec(X) := \begin{bmatrix}
     x_1 \\
     \vdots \\
     x_n
-  \end{pmatrix}
+  \end{bmatrix}
 \end{equation}
 and the \emph{Kronecker product} $\otimes : \R^{m\times n} \times \R^{p\times q} \to \R^{mp \times nq}$,
 \begin{equation}
-  A \otimes B := \begin{pmatrix}
+  A \otimes B := \begin{bmatrix}
     a_{11} B & \cdots & a_{1n} B \\
     \vdots   & \ddots & \vdots \\
     a_{m1} B & \cdots & a_{mn} B
-  \end{pmatrix}
+  \end{bmatrix}
   .
 \end{equation}
 Then, without a proof, the following holds:
