@@ -4,9 +4,9 @@
 The parareal method is a parallel-in-time integration scheme to solve \acp{ODE}.
 It goes back to \citeauthor{Lions2001}~\cite{Lions2001},
 though the most common form also used in this thesis first appeared in \citeauthor{Baffico2002}~\cite{Baffico2002}.
-In this chapter we'll first describe the general properties of the parareal method,
-and derive it as a Newton method following \cite{Gander2007}.
-Lastly, in \autoref{sec:pr:DRE} we'll adapt the method for \acp{LRSIF}.
+This chapter first describes the general properties of the parareal method,
+and derives it as a Newton method following \citeauthor{Gander2007}~\cite{Gander2007}.
+Lastly, \autoref{sec:pr:DRE} adapts the method for \acp{LRSIF}.
 
 \section{Overview}
 \label{sec:pr:properties}
@@ -87,7 +87,7 @@ due to the following proposition.
 
 \begin{proposition}[Diagonal Convergence]
 \label{thm:pr:conv}
-  Stage $n$ of the parareal method converges after at most $n$ iterations:
+  Stage $n$ of the parareal method converges after at most $k=n$ iterations:
   \begin{equation*}
     U^k_n = U^n_n = F(U^{n-1}_{n-1})
     \quad
@@ -193,7 +193,7 @@ the slope of the $k=0$ face depends on the runtime of $G$.
       First couple of refinements $k$ of the
       parareal method applied to the linear problem \eqref{eq:pr:linear}.
       The stages $n$ are decoded by color,
-      dots denoting $U^k_n$ and lines $F(\optional{}, t_{n-1}, U^k_{n-1})$.
+      with dots denoting $U^k_n$ and lines denoting $F(\optional{}, t_{n-1}, U^k_{n-1})$.
       The dashed gray curve represents the exact solution.
     }
     \label{fig:pr:linear}
@@ -243,7 +243,7 @@ for the initial value $u_0 \in V$
 and the solution $u_0 : [t_0,t_1] \to V$ to the first local problem.
 The local solutions $u_n : [t_n,t_{n+1}] \to V$ represent a global solution to the \ac{IVP}~\eqref{eq:IVP} if
 \begin{equation}
-  F(U_0, \ldots, U_{N-1}) :=
+  \mathcal F(U_0, \ldots, U_{N-1}) :=
   \left(
   \begin{aligned}
     U_0 &- u_0 \\
@@ -254,10 +254,10 @@ The local solutions $u_n : [t_n,t_{n+1}] \to V$ represent a global solution to t
   \right)
   \overset{!}{=} 0.
 \end{equation}
-Let $U := (U_0, \ldots, U_{N-1})$ and $\mathcal J_F(U)$ denote the Jacobian of $F$ at $U$.
+Let $U := (U_0, \ldots, U_{N-1})$ and $\Jac(U)$ denote the Jacobian of $\mathcal F$ at $U$.
 Then, Newton's method reads
 \begin{equation}
-  U^{k+1} = U^k - \mathop{\mathcal J_F(U^k)^{-1}} F(U^k)
+  U^{k+1} = U^k - \mathop{\Jac(U^k)^{-1}} \mathcal F(U^k)
 \end{equation}
 or, equivalently, avoiding the inversion of the Jacobian,
 \begin{equation}
@@ -267,7 +267,8 @@ or, equivalently, avoiding the inversion of the Jacobian,
     & \ddots & \ddots \\
     && -\pdiff{U_{N-2}}{u_{N-2}}(t_{N-1}, U_{N-2}) & I
   \end{bmatrix}
-  (U^{k+1} - U^k) = -F(U^k)
+  (U^{k+1} - U^k) = -\mathcal F(U^k)
+  .
 \end{equation}
 Writing the above in separate equations yields
 \begin{equation}

@@ -24,7 +24,7 @@ Note that the algorithms are formulated for the problem stated in forwards time,
 \end{aligned}
 \right.
 \end{equation}
-but it's common practice to plot results in the time corresponding to the underlying \ac{OCP},
+but it's common practice to plot the results in the time corresponding to the underlying \ac{OCP},
 \ie $E^\T \tilde X(t_f) E = C^\T C/100$.
 
 As described in \autoref{sec:HJT},
@@ -38,14 +38,14 @@ Furthermore, the (global) relative error
 \label{eq:results:err:ref}
   \frac{\norm{K(t) - K_\text{ref}(t)}_F}{\norm{K_\text{ref}(t)}_F}
 \end{equation}
-is analyzed \wrt a reference solution computed with the dense 4th order method described in \cite[Appendix~A]{Lang2017}.
+is analyzed \wrt a reference solution computed with the dense 4th order method described by \citeauthor{Lang2017}~\cite[Appendix~A]{Lang2017}.
 Any error at $t=\SI{45}{\second}$ is not shown,
 as it is zero due to the boundary condition of the \ac{DRE},
 which would distort the overall diagram.
 
 The tolerances for both the \ac{ADI} and parareal method,
-\cf~\eqref{eq:adi:lrstop} in \autoref{sec:adi:lrstop}
-and~\eqref{eq:impl:pr:conv} in \autoref{sec:impl:pr:conv},
+\cf~Equation~\eqref{eq:adi:lrstop} in \autoref{sec:adi:lrstop}
+and Equation~\eqref{eq:impl:pr:conv} in \autoref{sec:impl:pr:conv},
 are chosen to be $\epsilon := n\umach$
 where $\umach$ denotes machine precision
 and $n=371$ refers to the problem dimension.
@@ -55,14 +55,14 @@ if the inner dimension~$r$ reaches~$\onehalf n$,
 \cf~\autoref{sec:impl:DRE}.
 Furthermore, each of the $N = 450$ parareal stages requires two successive refinements without significant change
 for (local) convergence,
-while computing at most $K = 10$ refinements.
+while computing at most $K = 10$ parareal refinements.
 
 \begin{remark}
   In this subsection,
   $n$ may denote the problem dimension $X \in\Rnn$,
   or the time stop $t_n$,
-  which is also related to the parareal stage $n$ corresponding to the time span $[t_{n-1}, t_n]$
-  where $1 \leq n \leq N$.
+  which is also related to the parareal stage $n$ corresponding to the time span $[t_{n-1}, t_n]$,
+  in which case $1 \leq n \leq N$.
   Furthermore,
   $K$ may denote the feedback matrix \mbox{$K = B^\T X E$},
   or the maximum number of parareal refinements $k_n \leq K$ computed per stage $n$.
@@ -74,7 +74,7 @@ while computing at most $K = 10$ refinements.
 \autoref{fig:results:sequential:rail} shows the results of the Rosenbrock schemes described in \autoref{sec:ros},
 both in a dense and a \ac{LRSIF} formulation.
 The low-rank variants are expected to perform identically to their dense counterparts,
-which for \Ros{1} is ok.
+which for \Ros{1} is true.
 However, there is a small difference between the second order methods for $t\leq\SI{44}{\second}$,
 which destroys the order of \ac{LRSIF}~2 for about $t\leq\SI{35}{\second}$.
 The general downward trend of the errors as $t$ approaches \SI{0}{\second} is due to the L-stability of the methods and the constant limit,
@@ -85,7 +85,7 @@ The general downward trend of the errors as $t$ approaches \SI{0}{\second} is du
   \caption[Rosenbrock method applied to Rail problem]{%
     Several Rosenbrock schemes applied to the problem of \autoref{thm:rail:parameters}.
     Each scheme performs 450 steps ($\tau = \SI{100}{\milli\second}$).
-    Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
+    Top: trajectory of $K_{1,77}$ (same as \citeauthor*{Lang2015}~\cite[Fig.~1]{Lang2015}),
     % same as Lang2015, Fig. 1
     % Lang2017, Fig 6.1 used K_{1,71} instead
     bottom: relative error \eqref{eq:results:err:ref} compared to reference solution
@@ -136,15 +136,17 @@ which results in significantly larger ranks for about $t < \SI{40}{\second}$.
   \includegraphics[width=0.7\textwidth]{figures/fig_results_sequential_rank.pdf}
   \caption[Numerical rank of low-rank sequential solutions to Rail problem]{%
     Numerical rank of low-rank sequential solutions $X$ to the Rail problem,
-    \cf~\cite[Figure~6.6b]{Lang2017}.
+    \cf~\citeauthor{Lang2017}~\cite[Figure~6.6b]{Lang2017}.
   }
   \label{fig:results:sequential:rank}
 \end{figure}
 
 The rank of the solution $X(t_n)$ has a major effect on the runtime of the next Rosenbrock step.
 Recall that \Ros{1} leads to an \ac{ALE} whose right-hand is (a compression of) a \ac{LRSIF} of rank $q+r$
-where $r := \rank X(t_n)$ denotes the rank of the previous Rosenbrock iterate.
-Similarly, the right-hand side of the first stage of \Ros{2} is (a compression) of rank $q + 2r$.
+where $r := \rank X(t_n)$ denotes the rank of the previous Rosenbrock iterate,
+\cf~Equation~\eqref{eq:ros:LR:ros1}.
+Similarly, the right-hand side of the first stage of \Ros{2} is (a compression) of rank $q + 2r$,
+\cf~Equation~\eqref{eq:ros:LR:ros2}.
 The rank of the \ac{ADI} iterate thus grows by about that amount.
 In the worst case, this causes a compression to be performed after every iteration of the \ac{ADI}.
 
@@ -172,7 +174,7 @@ Its $K_{1,77}$ trajectory is not shown as it would be indistinguishable from the
     Each scheme performs
     one coarse step ($\tau=\SI{100}{\milli\second}$) and
     100 fine steps ($\tau=\SI{1}{\milli\second}$) per stage.
-    Top: trajectory of $K_{1,77}$ (same as \cite[Fig.~1]{Lang2015}),
+    Top: trajectory of $K_{1,77}$ (same as \citeauthor*{Lang2015}~\cite[Fig.~1]{Lang2015}),
     % same as Lang2015, Fig. 1
     % Lang2017, Fig 6.1 used K_{1,71} instead
     bottom: relative error \eqref{eq:results:err:ref} compared to reference solution
@@ -184,7 +186,7 @@ Its $K_{1,77}$ trajectory is not shown as it would be indistinguishable from the
 \end{figure}
 
 For the methods involving \ac{LRSIF}~2,
-the relative error~\eqref{eq:results:err:ref} reveals
+the relative error~\eqref{eq:results:err:ref} in \autoref{fig:results:parareal:rail} reveals
 the typical discontinuities at the interval bounds
 before convergence is reached,
 \cf~\autoref{fig:pr:linear},
@@ -220,7 +222,7 @@ it allows some observations to be made for the low-rank methods:
   \item
     Due to its two stages, \Ros{2} is more affected by the growing rank.
     Therefore, for \ac{LRSIF}~1/2 the runtime $t_F(n, k)$ is monotonic in $n$.
-    Yet it is nearly constant in $k$,
+    Yet, it is nearly constant in~$k$,
     which causes the timeline diagram of \ac{LRSIF}~2/2
     to be narrow for early stages $n \leq 100$,
     and wider for later stages $n \geq 300$,
@@ -229,19 +231,13 @@ it allows some observations to be made for the low-rank methods:
 The second effect is visible for \ac{LRSIF}~1/1 as well, but not to that extent.
 
 The rank of the solution $X$ obtained from the parareal scheme \ac{LRSIF}~2/2, however,
-is even larger rank than the rank produced by the sequential \ac{LRSIF}~2,
-while showing the same growth behavior (for decreasing $t$).
-Neither of the methods of order 2/2 has a timeline diagram explained by~\eqref{eq:impl:tpar} or \autoref{fig:timeline:generic},
+is even larger than the rank produced by the sequential \ac{LRSIF}~2,
+while showing the same growth behavior (for decreasing $t$),
+\cf~\autoref{fig:results:parareal:rank}.
+As can be seen in \autoref{fig:results:parareal:timeline},
+neither of the methods of order 2/2 has a timeline diagram explained by the runtime model~\eqref{eq:impl:tpar} or \autoref{fig:timeline:generic},
 which is for the following reasons:
 \begin{enumerate}[resume]
-  \item
-    Dense~2/2 does not fulfill the assumption that all stages $n$ compute the same number of refinements,
-    \ie $k_n$ is not constant.
-    Due to early convergence, \cf~\autoref{sec:impl:pr:conv},
-    the last stage $n=N$ for example computes fewer refinements, $k_N = 7 < 10 = K$.
-    This causes the runtime model~\eqref{eq:impl:tpar} to over-estimate the actual runtime,
-    $\hattpar > \tpar$,
-    as seen by the large error in \autoref{tab:results:warmup}.
   \item
     For \ac{LRSIF}~2/2 both runtimes $t_G(n, k)$ and $t_F(n, k)$ are monotonic in both $n$ (due to the growing rank) and $k$,
     while also having a big deviation from their median.
@@ -254,22 +250,32 @@ which is for the following reasons:
     which determines the slope of the $k=0$ face of the timeline.
     This causes the estimated ramp-up delay $\trampup$ to become negative.
     Both effects, the gaps on stage $n=N$ as well as $\trampup<0$,
-    attribute to the runtime model~\eqref{eq:impl:tpar} under-estimating the actual runtime,
+    attribute to the runtime model~\eqref{eq:impl:tpar} greatly under-estimating the actual runtime,
     $\hattpar < \tpar$,
+    as seen by the large error in \autoref{tab:results:warmup}.
+  \item
+    Dense~2/2 does not fulfill the assumption that all stages $n$ compute the same number of refinements,
+    \ie $k_n$ is not constant.
+    Due to early convergence, \cf~\autoref{sec:impl:pr:conv},
+    the last stage $n=N$ for example computes fewer refinements, $k_N = 7 < 10 = K$.
+    This causes the runtime model~\eqref{eq:impl:tpar} to greatly over-estimate the actual runtime,
+    $\hattpar > \tpar$,
     as seen by the large error in \autoref{tab:results:warmup}.
 \end{enumerate}
 The timeline diagram of the Dense~4/4 reference solution is shown in \autoref{fig:impl:restart},
-which does not fulfill all the assumptions due to early convergence.
+which also does not fulfill all the assumptions of the runtime model~\eqref{eq:impl:tpar} due to early convergence.
 
 \begin{figure}[tp]
   \centering
   \includegraphics[width=0.7\textwidth]{figures/fig_results_parareal_rank.pdf}
   \caption[Numerical rank of low-rank parareal solutions to Rail problem]{%
     Numerical rank of low-rank parareal solutions to the Rail problem,
-    \cf~\cite[Figure~6.6b]{Lang2017}.
+    \cf~\citeauthor{Lang2017}~\cite[Figure~6.6b]{Lang2017}.
     Only values at parareal interfaces $t_n$ are shown,
     which coincide with the time steps of the sequential solutions.
-    The numerical ranks of \autoref{fig:results:sequential:rail} are shown in the background.
+    The numerical ranks of the sequential solutions,
+    \cf~\autoref{fig:results:sequential:rail},
+    are shown in the background.
   }
   \label{fig:results:parareal:rank}
 \end{figure}
@@ -277,7 +283,7 @@ which does not fulfill all the assumptions due to early convergence.
 \begin{figure}[tp]
   \includegraphics[width=\textwidth]{figures/fig_timeline_all.pdf}
   \caption[Timeline diagrams for parareal method applied to Rail problem]{%
-    Timeline diagrams for the parareal methods applied to the Rail problem.
+    Timeline diagrams for the parareal method applied to the Rail problem~\cite{morwiki_steel}.
     The schemes of coarse/fine order are as described in \autoref{fig:results:parareal:rail}.
   }
   \label{fig:results:parareal:timeline}
@@ -360,7 +366,7 @@ which does not fulfill all the assumptions due to early convergence.
 
 Refer to \autoref{tab:results:runtime} for the runtime and storage size of all resulting data sets.
 Note that the ratios of the sizes of the data sets resulting from
-sequential order~1 and parareal order~1/1
+sequential order~1 and parareal order~1/1 solvers
 fit well to the estimated~1/3 of \autoref{thm:lowrank:rail}.
 The other ratios are skewed by the rank problem of \ac{LRSIF}~\Ros{2}.
 

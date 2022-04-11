@@ -13,7 +13,7 @@ It has been designed with the following requirements in mind:
   \item\label{item:impl:goal:variablesize}
     Allow the data transferred be variable in size.
 
-    This is necessary to transmit \ac{LRSIF} of varying rank and, therefore, storage size depending on $n$ (and $k$).
+    This is necessary to transmit \acp{LRSIF} of varying rank and, therefore, storage size depending on $n$ (and $k$).
   \item\label{item:impl:goal:notransfer}
     Do not transfer the final solution data back to the calling/managing process.
 
@@ -47,7 +47,7 @@ as to not clash with the standard nomenclatures of other disciplines.\footnote{%
   and the widely-used \julia{DifferentialEquations.jl} package~\cite{DifferentialEquations} uses $u$.
 }
 The next section will describe the user interface of the \julia{ParaReal.jl} package,
-and how to cope with problem~\ref{item:impl:goal:notransfer}.
+and how to cope with requirement~\ref{item:impl:goal:notransfer}.
 
 \subsection{User Interface}
 
@@ -107,14 +107,14 @@ Start by launching some worker processes and loading the necessary packages:
 \lstinputlisting[%
   %caption={User-defined problem type for \code{ParaReal.jl}},
   %label={lst:impl:parareal_counting},
-  caption={[User Interface of \code{ParaReal.jl}]},
+  caption={[User interface of \code{ParaReal.jl}]},
   lastline=4,
 ]{code/parareal_counting.jl}
-Next, define the problem type and ensure that definition is available on all processes.
+Next, define the problem type and ensure that its definition is available on all processes.
 The only requirement to the problem type is to have a \julia{tspan} field.\footnote{%
   Alternatively, it must support \julia{getproperty(prob, :tspan)}.
 }
-In the context of \ac{ODE}, this should not clash with any other notation.
+In the context of \acp{ODE}, this should not clash with any other notation.
 \addtocounter{lstnumber}{1} %FIXME
 \lstinputlisting[nolol, firstnumber=last, linerange=problem-end]{code/parareal_counting.jl}
 The solution type will hold counters of the applications of $F$ and $G$:
@@ -163,21 +163,21 @@ unless it has already been compiled.
 Therefore, unless the code has been compiled \ac{AOT},
 only the second execution of code is fast.
 This effect is called \emph{warm-up}.
-As mentioned in~\autoref{sec:pr}, computing the coarse solutions
-$G(U_n^*)$ is essentially a sequential operation over all $n$.
-The computations of $F(U^*_n)$ can only be parallelized after such a global coarse solve.
+As mentioned in~\autoref{sec:pr}, computing the coarse solutions~$G(U_n^*)$
+is essentially a sequential operation over all~$n$.
+The computations of~$F(U^*_n)$ can only be parallelized after such a global coarse solve.
 Therefore, it is critical that the individual coarse solutions are available as fast as possible.
 
 In order to describe the runtime of the present parareal implementation,
-let $t_F$, $t_G$ denote the runtime of $F$ and $G$, respectively.
-Let $N$ be the number of stages $1 \leq n \leq N$,
-and $K$ be the number of refinements $0 \leq k \leq K$.
-Let $\trampup$ be the overhead imposed on each computing the first coarse solution $G(U_n^0)$,
-and $\twarmup$ be a general global overhead.
+let~$t_F$ and~$t_G$ denote the runtime of~$F$ and~$G$, respectively.
+Let~$N$ be the number of stages $1 \leq n \leq N$,
+and~$K$ be the number of refinements $0 \leq k \leq K$.
+Let~$\trampup$ be the overhead imposed on the computation of each first coarse solution~$G(U_n^0)$,
+and~$\twarmup$ be a general global overhead.
 
 \pagebreak
 \noindent
-Further, we make the following assumptions:
+Further, the following assumptions are made:
 \begin{enumerate}
   \item
     \label{item:impl:assumption:tF}
@@ -197,7 +197,7 @@ The runtime may then be estimated using
 \begin{equation}
 \label{eq:impl:tpar}
   \hattpar
-  = \twarmup
+  := \twarmup
   + \underbrace{
     \strut
     N \cdot (\trampup + t_G)
@@ -384,7 +384,7 @@ For the remainder of the thesis, $G$ will always be warmed up.
 A common strategy to improve CPU utilization is to perform data transfers between processes asynchronously.
 Julia offers the \julia{RemoteChannel} data structure for this purpose.
 As of the writing of this thesis,
-the \julia{RemoteChannel} is not thread-safe.\footnote{\url{https://github.com/JuliaLang/julia/issues/37706}}
+a \julia{RemoteChannel} is not thread-safe.\footnote{\url{https://github.com/JuliaLang/julia/issues/37706}}
 More specifically, it must be used from thread~1 of each process.
 This means that in order to asynchronously send the interface~values~$U_n^{k+1}$ from stage $n$ to the next,
 one would have to move the calls to~$F$ and~$G$ off of thread~1.
@@ -418,7 +418,7 @@ how much the stages are out-of-sync.
 Assuming that
 \begin{equation}
 \label{eq:impl:assumption}
-  t_F > t_G + t_{\JIT(G)}
+  t_F > t_{\JIT(G)} + t_G
 \end{equation}
 this includes for $n+k < N$
 \begin{enumerate}
@@ -439,7 +439,8 @@ this includes for $n+k < N$
 \end{enumerate}
 The last point causes the current stage to then \enquote{finish late} as well,
 from the perspective of the previous stage.
-For the first row of \autoref{fig:impl:warmup} effect~\ref{item:impl:comm:2} shadows~\ref{item:impl:comm:1},
+For the first row of \autoref{fig:impl:warmup},
+effect~\ref{item:impl:comm:2} shadows~\ref{item:impl:comm:1},
 while for the remaining rows effect~\ref{item:impl:comm:2} is essentially zero.
 
 \subsection{Early Convergence}
@@ -457,10 +458,10 @@ and number of successive $k$.
 In the case of the \ac{LRSIF} $U_n^k = LDL^\T$,
 the norm is evaluated as $\norm{L^\T L D}_F$,
 \cf~\autoref{sec:adi:lrstop},
-while the distance $\norm{\optional{} - \optional{}}$ uses the low-rank update formula,
+while the distance $\norm{\optional{} - \optional{}}$ uses the low-rank downdate formula,
 \cf~\autoref{sec:lowrank}.
-For other user-defined data structures,
-define methods for the \julia{ParaReal.dist()} and \julia{LinearAlgebra.norm()} functions.
+For other custom data structures,
+a user has to define corresponding methods for the \julia{ParaReal.dist()} and \julia{LinearAlgebra.norm()} functions.
 
 Therefore, if stage $n$ has converged (locally),
 it may defer the computation of a refinement $k$
@@ -489,7 +490,7 @@ For large $N$, $N \gg K$, that effect will be negligible for the overall runtime
 \begin{figure}[tp]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_timeline_ref.pdf}
-  \caption[Restarted parareal computation]{
+  \caption[Restarted parareal computations]{
     Restarted parareal computations to maintain $k_{n+1} \geq k_n - 1$.
     Top: full timeline of dense parareal algorithm of order 4 coarse and fine solvers applied to the Rail benchmark~\cite{morwiki_steel}, $N=450$.
     This corresponds to the reference solution mentioned in \autoref{fig:results:parareal:rail}.
@@ -530,7 +531,7 @@ a more relevant comparison is the theoretical runtime of the fine solver $F$ ove
 Therefore, let $\hattseq$ be the total duration of the most recent fine solutions computed,
 \begin{equation}
 \label{eq:impl:tseq}
-  \hattseq = \sum_{n=1}^N t_F(n, k_n)
+  \hattseq := \sum_{n=1}^N t_F(n, k_n)
   ,
 \end{equation}
 where $k_n$ is the latest refinement $k$ computed on stage $n$,
@@ -565,7 +566,7 @@ resulting in fewer processors being necessary, $P < N$,
 to obtain the same timeline.
 However, these processes must be warmed up only once,
 since the warm-up calls to $G$ would not be executed in parallel.
-Refer to \eg \cite{Nielsen2018} for a more advanced scheduling strategy to better utilize given hardware.
+Refer to \eg \citeauthor*{Nielsen2018}~\cite{Nielsen2018} for a more advanced scheduling strategy to better utilize given hardware.
 
 \subsection{Parallel Programming Pitfalls}
 
@@ -574,7 +575,7 @@ that occurred during the development of this thesis.
 
 Julia provides the \julia{@sync} macro to wait for tasks launched in the enclosed block.
 Internally, it waits for the tasks to complete,
-collects any errors and re-throws them in a grouped exception if any.
+collects any errors and re-throws them in a grouped exception, if any.
 However, it does so sequentially,
 by which the first task waited for may shadow the failure of the next task,
 such that the whole block enclosed by \julia{@sync} reached a deadlocked.\footnote{%
@@ -608,7 +609,7 @@ It would be very handy, if users could configure Julia to crash on unhandled exc
 Golang\footnote{%
   Golang may not be widely used in scientific computing,
   but it is much more widespread in general.
-  As its parallel features are as expressive as Julia's,
+  As its parallel features are about as expressive as Julia's,
   it may serve as an example nonetheless.
 }
 for example does this by default.\footnote{%

@@ -2,9 +2,9 @@
 \label{sec:HJT}
 
 This chapter gives an overview on the \Riccati equations arising in the optimal control
-of linear dynamical systems following~\cite{Locatelli2011},
+of a linear dynamical system following \citeauthor{Locatelli2011}~\cite{Locatelli2011},
 as well as the \Lyapunov equation to be seen in this thesis.
-For a more general overview on matrix equations refer to \eg~\cite{Simoncini2016}.
+For a more general overview on matrix equations refer to \eg \citeauthor{Simoncini2016}~\cite{Simoncini2016}.
 
 \section{Finite Control Horizon}
 \label{sec:basics:HJT}
@@ -102,7 +102,7 @@ $\hat y(t) \in\R^q$ describes a desired trajectory the modeled system should fol
 The system~\eqref{eq:basics:system:standard} is referred to as \ac{LTI}
 if the \emph{system matrices} $A(t), B(t), C(t)$ are constant for $t\in [t_0,t_f]$,
 and \ac{LTV} otherwise.
-We restrict ourselves to \ac{LTI} and \emph{controllable} systems,
+This thesis only considers \ac{LTI} and \emph{controllable} systems,
 \ie for any given $(t_0, x_0)$ and $(t_1, x_1)$, $t_1 > t_0$,
 there exists a bounded control $u(\optional{})$ such that $x(t_1; t_0, x_0, u(\optional{})) = x_1$.
 
@@ -163,6 +163,7 @@ and regrouping based on the order of $z$ yields
   & \tfrac{1}{2} z^\T \big( \dot X + C^\T Q C + X A + A^\T X^\T - X B R^{-1} B^\T X^\T \big) z \\
   & + \big( \dot w^\T + w^\T A - w^\T B R^{-1} B^\T X^\T - \hat y^\T Q C \big) z \\
   & + \big( \dot v - \tfrac{1}{2} \big( w^\T B R^{-1} B^\T w - \hat y Q \hat y \big) \big)
+  ,
 \end{align}
 \end{subequations}
 while the final condition~\eqref{eq:basics:HJE:condition} reads
@@ -179,8 +180,8 @@ while the final condition~\eqref{eq:basics:HJE:condition} reads
 \end{aligned}
 \end{equation}
 
-Sufficient conditions are obtained by letting \eqref{eq:basics:LQR:HJE} be the (multivariate) zero polynomial in $z$,
-and comparing the coefficients of the therms in $z$ in \eqref{eq:basics:LQR:condition}.
+Sufficient conditions are obtained by letting Equation~\eqref{eq:basics:LQR:HJE} be the (multivariate) zero polynomial in $z$,
+and by comparing the coefficients of the therms in $z$ in Equation~\eqref{eq:basics:LQR:condition}.
 Upon noting that if $X$ fulfills the dynamics of \eqref{eq:basics:LQR:HJE:X}, so does $X^\T$,
 this leads to a \ac{DRE} in $X(t)\in\Rnn$,
 \begin{equation}
@@ -208,13 +209,13 @@ and another \ac{ODE} in $v(t)\in\R$,
 \begin{equation}
 \left\{
 \begin{aligned}
-  \dot v &= \onehalf ( w^\T B R^{-1} B^\T w - \hat y Q \hat y) \\
+  \dot v &= \onehalf \big( w^\T B R^{-1} B^\T w - \hat y Q \hat y \big) \\
   v(t_f) &= \onehalf \hat y(t_f)^\T S \hat y(t_f)
   ,
 \end{aligned}
 \right.
 \end{equation}
-all to be solved backwards in time $t \in [t_0,t_f]$.
+all to be solved backwards in time, $t \in [t_0,t_f]$.
 
 However, the optimal control $u^*$ given by the feedback law \eqref{eq:basics:HJ:feedback},
 \begin{equation}
@@ -306,7 +307,7 @@ Since typically $m \ll n$, this has a major impact on the storage requirements.
   \ie $t_f = \SI{45}{\second}$.
 \end{example}
 
-Within this thesis we'll only consider the \ac{LTI} case with invertible $E$.
+Only the \ac{LTI} case with invertible $E$ is covered in this thesis.
 In fact, most computations will be performed for the problem above.
 Therefore, $Q$ and $R$ are assumed to be identity matrices of appropriate size.
 
@@ -327,8 +328,8 @@ For
 $
   \ell(t, x, u) = \onehalf \norm{Cx - \hat y(t)}_Q^2 + \onehalf \norm{u}_R^2
 $
-as in \eqref{eq:basics:LQR:cost},
-following the proof of \cite[Theorem~3.2]{Locatelli2011},
+as in Equation~\eqref{eq:basics:LQR:cost},
+following the proof of \citeauthor{Locatelli2011}~\cite[Theorem~3.2]{Locatelli2011},
 the optimal control is given by
 \begin{equation}
   u^*(t) = - R^{-1} B^\T \big( \bar X(t) x(t) + \bar w(t) \big)
@@ -352,7 +353,7 @@ To summarize:
 \begin{theorem}[LQR over Infinite Time Horizon]
 \label{thm:basics:dre-limit-are:backwards}
   The solution $X(\optional{})$ to the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards}
-  converges at any fixed $t<t_f$ to a solution of an \ac{ARE} for $t_f \to\infty$.
+  converges at any fixed $t<t_f$ to a solution $\bar X$ of the \ac{ARE}~\eqref{eq:basics:LQR:ARE} for $t_f \to\infty$.
 \end{theorem}
 \begin{proof}
   Let $X_f := C^\T S C$.
@@ -444,8 +445,8 @@ which will be covered in \autoref{sec:ADI}.
 \end{remark}
 
 \begin{remark}
-  The matrices denoted with $A$ and $W$ in \eqref{eq:basics:DRE}, \eqref{eq:basics:ARE}, and \eqref{eq:basics:ALE} are not necessarily the same.
-  Matrix $S$ in \eqref{eq:basics:ARE} is not related to the weight matrix of \autoref{sec:basics:HJT}.
+  The matrices denoted with $A$ and $W$ in Equations~\eqref{eq:basics:DRE}, \eqref{eq:basics:ARE}, and \eqref{eq:basics:ALE} are not necessarily the same.
+  Matrix $S$ in Equation~\eqref{eq:basics:ARE} is not related to the weight matrix of \autoref{sec:basics:HJT}.
 \end{remark}
 
 \begin{theorem}[Solvability of DRE]

@@ -14,7 +14,7 @@ This package is concerned with sequential \ac{DRE} solvers only.
 The general user interface has been inspired by \code{DifferentialEquations.jl}~\cite{DifferentialEquations},
 and looks like this:
 \begin{lstlisting}[
-  caption={[User Interface of \code{DifferentialRiccatiEquations.jl}]},
+  caption={[User interface of \code{DifferentialRiccatiEquations.jl}]},
 ]
 prob = GDREProblem(E, A, B, C, X0, tspan)
 alg = Ros1()
@@ -23,13 +23,13 @@ sol = solve(prob, alg; dt=dt)
 Besides \julia{Ros1()} and \julia{Ros2()},
 which correspond to the algorithms described in \autoref{sec:ros},
 there also is a \julia{Ros4()} solver.
-It is based on \cite[Appendix~A]{Lang2017} and only supports the dense case.
+It is based on \citeauthor{Lang2017}~\cite[Appendix~A]{Lang2017} and only supports the dense case.
 The \julia{GDREProblem} type is parametrized on the type of the initial value \julia{X0},
 by which the proper \ac{ALE} solver is selected via runtime dispatch on \julia{solve()}.
 Dense initial values are represented by the built-in \julia{Matrix} type,\footnote{%
   \url{https://docs.julialang.org/en/v1.6/stdlib/LinearAlgebra/}}
 and lead to a direct \ac{ALE} solver from \code{MatrixEquations.jl}~\cite{MatrixEquations}.
-Initial values in \ac{LRSIF} are represented by the \julia{\LDLt} type,
+Initial values in \ac{LRSIF} are represented by the new \julia{\LDLt} type,
 and lead to the iterative \ac{ADI} solver described in \autoref{sec:ADI}.
 
 \paragraph{Representation of Low-Rank Matrices}
@@ -53,7 +53,7 @@ All internal usages guarantee the assumption in the comment above line~\ref{line
   float=tp,
   caption={%
     [{Definition of \julia{\LDLt} and \julia{(+)}}]
-    Definition of \julia{\LDLt} and addition \julia{(+)} of other \ac{LRSIF} objects.
+    Definition of \julia{\LDLt} and addition \julia{(+)} of \ac{LRSIF} objects.
     The compression, \julia{compress!()}, is described in \autoref{alg:lowrank:compression}.
   },
   label={lst:impl:LDLt},
@@ -96,9 +96,9 @@ end
 
 Recall that the Rosenbrock methods yield \acp{ALE},
 whose system matrices are sparse matrices shifted by a low-rank matrix,
-\cf $\tilde A_n$ on \autoref{alg:ros1:smw} of \autoref{alg:ros1} and $\hat A_n$ on \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
+\cf $\tilde A_n$ in \autoref{alg:ros1:smw} of \autoref{alg:ros1} and $\hat A_n$ in \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
 Within the \ac{ADI}, these matrices are updated by another sparse matrix,
-\cf $A^+_k$ on \autoref{alg:ADI:smw} of \autoref{alg:ADI}.
+\cf $A^+_k$ in \autoref{alg:ADI:smw} of \autoref{alg:ADI}.
 Overall, taking \Ros{1} as an example,
 the system to be solved with is
 \begin{equation}

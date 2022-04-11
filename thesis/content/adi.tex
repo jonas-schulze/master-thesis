@@ -7,8 +7,8 @@ $Ax=b$
 for symmetric positive-definite $A\in\Rnn$
 and applied to elliptic and parabolic \acp{PDE} using a finite-difference scheme.
 This chapter first derives the method as a splitting method.
-\autoref{sec:adi:ale} then applies the \ac{ADI} to \ac{ALE} in \ac{LRSIF} following \cite{Lang2017}.
-Finally, \autoref{sec:adi:parameters} describes how to choose the \ac{ADI} parameters following \cite{Kuerschner2016}.
+\autoref{sec:adi:ale} then applies the \ac{ADI} to an \ac{ALE} in \ac{LRSIF} following \citeauthor{Lang2017}~\cite{Lang2017}.
+Finally, \autoref{sec:adi:parameters} describes how to choose the \ac{ADI} parameters following \citeauthor{Kuerschner2016}~\cite{Kuerschner2016}.
 
 \section{Parametrized Splitting Schemes}
 
@@ -32,7 +32,7 @@ The \emph{second normal form} of a consistent linear iteration method reads
 \end{equation}
 and $B := M^{-1}$ is called \emph{matrix of the second normal form}.
 
-We call a splitting method \emph{parametrized} if the iteration matrix depends on the iteration,
+A splitting method is called \emph{parametrized} if the iteration matrix depends on the iteration,
 \ie $A = M_k - N_k$ for $k\in\N$.
 The normal forms are thus given by
 \begin{subequations}
@@ -47,7 +47,7 @@ The normal forms are thus given by
   .
 \end{align}
 \end{subequations}
-We further call an operator split and a method \emph{commuting} if $M_k, N_k$ commute, \ie
+An operator split and a method is further called \emph{commuting} if $M_k, N_k$ commute, \ie
 \begin{equation*}
   M_k N_k = N_k M_k
   \qquad
@@ -192,7 +192,7 @@ This leads to an alternative formulation of the second normal form.
   which relies on \autoref{thm:adi:permutation},
   is outlined in \autoref{sec:li2002}.
   Note that \autoref{thm:adi:increment-form} does not require a fully commuting splitting method,
-  and does not restrict the initial value $x^0$.
+  nor does it restrict the initial value $x^0$.
 \end{remark}
 
 Reasoning about the convergence of parametrized splitting schemes is not as straight-forward as in the classical case.
@@ -279,7 +279,7 @@ Finally, multiplying by $(\alpha_k + \beta_k)^{-1}$ reveals the splitting formul
   x^k + b
   .
 \end{equation}
-Indeed, $M_k - N_k = A$ since
+Indeed, the splitting is consistent, $M_k - N_k = A$, since
 \begin{equation}
 \begin{aligned}
   \Aip\Aiip &= HV + \alpha_k\beta_k I_n + \beta_k H + \alpha_k V \\
@@ -293,7 +293,7 @@ Indeed, $M_k - N_k = A$ since
 \end{corollary}
 \begin{proof}
   %Obvious.
-  $H$, $V$, $\gamma I_n$ for $\gamma\in\C$, and thus $\Aipm,\Aiipm$ commute $\forall k\in\N$.
+  $H$, $V$, $\gamma I_n$ for $\gamma\in\C$, and thus $H^\pm_*, V^\pm_*$ commute.
 \end{proof}
 
 \begin{lemma}[Cayley Transformation]
@@ -374,7 +374,7 @@ Apply the \ac{ADI} in its intermediate-step formulation~\eqref{eq:adi:general2st
   \left\{
   \begin{aligned}
     (A + \alpha_k I_n) X_{k+\frac{1}{2}} &= -W - X_k (A^\HT - \alpha_k I_n) \\
-    X_{k+\frac{1}{2}} (A^\HT + \beta I_n) &= -W - (A - \beta I_n) X_k
+    X_{k+1} (A^\HT + \beta_k I_n) &= -W - (A - \beta_k I_n) X_{k+\frac{1}{2}}
   \end{aligned}
   \right.
 \end{equation}
@@ -468,7 +468,7 @@ the iterates are build by successively adding column blocks of size $n_G$:
   \end{bmatrix}
 \end{aligned}
 \end{equation}
-Using an initial value $X^0=0$,
+Using an initial value $X_0=0$,
 the $k$-th iterate has dimensions $L_k \in\R^{n\times kn_G}$ and $D_k \in\R^{kn_G\times kn_G}$.
 As a consequence, computing $L_{k+1}$
 requires $kn_G + n_G$ system solves and
@@ -606,7 +606,7 @@ that the following subsections aim to answer:
     R_{k+1} &= R_k - 2\Re(\alpha_k) V_k \\
     V_k &= (A_k^+)^{-1} R_k
   \end{align*}
-  where $V_k \in\C^{n\times n_G}$ denotes the low-rank increment of \eqref{eq:adi:si-lr-adi}.
+  where $V_k \in\C^{n\times n_G}$ denotes the low-rank increment of Formula~\eqref{eq:adi:si-lr-adi}.
 \end{theorem}
 \begin{proof}
   In the notation of the previous section,
@@ -621,7 +621,7 @@ that the following subsections aim to answer:
     \big( (A_k^+)^{-1} A_k^- \big)^\HT
   \end{equation*}
   using the short-hand notation~\eqref{eq:adi:ale:shorthand},
-  and the iteration mapping $G_k \equiv M_k^{-1} \circ N_k$ as defined by~\eqref{eq:adi:ale:MN}.
+  and the iteration mapping $G_k \equiv M_k^{-1} \circ N_k$ as defined by Equation~\eqref{eq:adi:ale:MN}.
   This implies
   \begin{equation*}
   \tag{$\ast$}
@@ -634,9 +634,9 @@ that the following subsections aim to answer:
   \ie $R_k$ is well-defined $\forall k$.
 
   By definition of the increment,
+  $v^k := -M_k^{-1} \big( r^k \big)$,
   \cf \autoref{thm:adi:increment-form},
-  $v^k := -M_k^{-1} \big( r^k \big)$.
-  Therefore,
+  it holds
   \begin{equation*}
     V_k Y_k V_k^\HT
     = (A_k^+)^{-1} R_k
@@ -654,17 +654,20 @@ that the following subsections aim to answer:
   The curious reader may compare the proof above to \cite[Theorem~3.5]{Kuerschner2016}.
 \end{remark}
 
-Still, the full residual $R_k S R_k^\HT \in\Rnn$ should never be assembled.
-Note that $R_k S R_k^\HT$ and $R_k^\HT R_k S \in \R^{n_G\times n_G}$ have the same spectra,
+Still, the full residual $R_k S R_k^\HT \in\Cnn$ should never be assembled.
+Note that $R_k S R_k^\HT$ and $R_k^\HT R_k S \in \C^{n_G\times n_G}$ have the same spectra,
 \cf~\cite[Remark on \pno~56]{Lang2015}.
-Therefore, both are diagonalizable such that:
+Therefore, both are diagonalizable such that
 \begin{equation}
 \label{eq:adi:residual}
   \norm[\big]{R_k S R_k^\HT}_2
   = \rho\big( R_k S R_k^\HT \big)
   = \rho\big( R_k^\HT R_k S \big)
   = \norm[\big]{R_k^\HT R_k S}_2
+  .
 \end{equation}
+
+Suppose the residual is real, \ie $R_k \in\R^{n\times n_G}$.
 Using the well-known inequality
 \begin{equation}
   \norm{X}_2
@@ -672,7 +675,7 @@ Using the well-known inequality
   \leq \sqrt{r} \norm{X}_2
 \end{equation}
 for any matrix $X\in\Rnn$ where $r:=\rank X$,
-one may replace the spectral norm in \eqref{eq:adi:residual} and \cite[Algorithm~2.2]{Lang2017}
+one may replace the spectral norm in Equation~\eqref{eq:adi:residual} and \cite[Algorithm~2.2]{Lang2017}
 by the Frobenius norm.
 This leads to the stopping criterion
 \begin{equation}
@@ -712,7 +715,7 @@ Replacing $\epsilon$ by $n_G^{-1/2} \epsilon$ leads to a slightly more restricti
   for $\delta_k := \Re(\alpha_k) / \Im(\alpha_k)$.
 \end{proposition}
 \begin{proof}
-  Compare \cite[Theorem~4.2]{Kuerschner2016}.
+  Compare \citeauthor{Kuerschner2016}~\cite[Theorem~4.2]{Kuerschner2016}.
 \end{proof}
 
 \begin{corollary}[Low-Rank Double-Step]

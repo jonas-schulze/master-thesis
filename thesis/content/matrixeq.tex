@@ -4,7 +4,7 @@
 This chapter will give a very brief overview on common strategies necessary to solve large-scale matrix equations.
 First, \autoref{sec:matrixeq:sparse} is concerned with suitable representations of matrices having only very few non-zero entries.
 \autoref{sec:basics:smw} then shows an efficient strategy to solve shifted linear systems.
-Finally, \autoref{sec:lowrank} presents a memory-efficient representations of matrices having a low (numerical) rank.
+Finally, \autoref{sec:lowrank} presents memory-efficient representations of matrices having a low (numerical) rank.
 
 \section{Sparse Matrices}
 \label{sec:matrixeq:sparse}
@@ -14,16 +14,17 @@ For example, the shape regularity of the space triangulation of a \ac{PDE}
 implies that each node has about the same number of neighbors,
 and that number mainly depends on the space dimension of the problem.
 For the matrix corresponding to that triangulation,
-this number of neighbors determines the number of non-zero entries in the column or row corresponding a particular node.
+this number of neighbors determines the number of non-zero entries in the column or row corresponding to that particular node.
 
 \begin{example}[Sparsity of Rail Problem]
   The system matrices of the Rail benchmark~\cite{morwiki_steel} of size $n=371$ are sparse.
   Their patterns are shown in \autoref{fig:spy}, as well as the number of non-zero entries $\nnz(\optional{})$ per matrix.
-  $E$ has 4 to 11 entries per row, $A$ has 3 to 11, both having about \num{6.3} entries per row on average.
+  $E$ has 4 to 11 entries per row, $A$ has 3 to 11, both have about \num{6.3} entries per row on average.
   For a uniform mesh of equilaterals covering~$\R^2$ that number would be \num{6}.
 \end{example}
 
-The common idea to represent a sparse matrix in memory is to only store the non-zero entries as well as their location within the matrix.
+The common idea to represent a sparse matrix in memory is to only store the non-zero entries,
+as well as their location within the matrix.
 Perhaps the most common implementation is the so-called Compressed Column Storage (CCS),
 sometimes called Compressed Sparse Column (CSC) format.
 It's the format that \eg MATLAB\footnote{\url{https://www.mathworks.com/help/pdf_doc/otherdocs/simax.pdf}}
@@ -88,11 +89,12 @@ as well as the dense but much smaller $\alpha I_k + VA^{-1} U \in\R^{k\times k}$
 Even for sparse system matrices $E, A, B, C$
 the solution $X$ of a \ac{DRE} is in general dense.
 However, it usually is of low numerical rank,
-\cf \eg~\cite[Section~2.1.4]{Lang2017}
-and~\cite[Sections~2.3.3 and~2.3.4]{Kuerschner2016}
+\cf \eg \citeauthor{Penzl2000}~\cite{Penzl2000},
+\citeauthor{Lang2017}~\cite[Section~2.1.4]{Lang2017},
+and \citeauthor{Kuerschner2016}~\cite[Sections~2.3.3 and~2.3.4]{Kuerschner2016}
 and the references therein.
-The same holds for the solution $X(\optional{})$ of a \ac{DRE},
-which is motivated by the following example.
+The extent of this phenomenon
+is motivated by the following example.
 
 \begin{example}[Low-Rank Solution of Rail Problem]
 \label{thm:lowrank:rail}
@@ -112,15 +114,15 @@ which is motivated by the following example.
   %$\tilde C = C E^{-1}$,
   \begin{equation*}
     0 = C^\T C + A^\T \bar X E + E^\T \bar X A - E^\T \bar X BB^\T \bar X E
+    .
   \end{equation*}
-  \cf Equation~\eqref{eq:basics:ARE} having $S = BB^\T$ and $W = C^\T C$.
-  That is, on one end of the time span it is $\rank X(t_0) = \rank C = q = 6$,
+  That is, on one end of the time span it holds $\rank X(t_0) = \rank C = q = 6$,
   while past the other end $X$ converges to a matrix having $\rank \bar X \approx 113$.
   As the corresponding optimal control has some form of minimal energy,
   one can expect the numerical rank of the solution $X(\optional{})$ to depend on the ranks of its initial and limit value,
   and to be not much larger in between.
   For this particular example that's about $\frac{1}{3}n$,
-  which means the storage requirement of a single matrix can ideally be reduced by about $\frac{2}{3}$.
+  which means that the storage requirement of a single matrix can ideally be reduced by about $\frac{2}{3}$.
 \end{example}
 
 % using MatrixEquations
@@ -168,13 +170,14 @@ One option is to use complex arithmetic, \ie
   \begin{bmatrix}
     A^\T \\ \im B^\T
   \end{bmatrix}
+  ,
 \end{equation}
 where $\im^2=-1$.
 This has several drawbacks, though.
-The mathematical one is that we expect a real-valued solution to the \ac{DRE}.
+The mathematical one is that the solution to the \ac{DRE} is expected to be real.
 Hence, the imaginary part should converge to zero quickly,
 or there should be an equivalent real-valued factorization.
-This leads to the technical drawback of a factor-2 overhead of complex arithmetic over real arithmetic.
+This leads to the technical drawback of a $2\times$ overhead of complex arithmetic over real arithmetic.
 
 Another option is therefore to handle the parts separately which are added versus subtracted in the superposition.
 The actual difference is then only computed at the very end.
@@ -183,10 +186,13 @@ the overall result suffers from numerical cancellation
 \cite[50]{Lang2015}
 \cite[\pno~186, thesis~10]{Lang2017}.
 
+\pagebreak
+
 \paragraph{Indefinite Formulation}
 
-A different strategy to represent matrices of low numerical rank is the \ac{LRSIF} \cite{Benner2009,Lang2015}
+A different strategy to represent matrices of low numerical rank is the \ac{LRSIF}
 $X = LDL^\T$ for $L\in\R^{n\times r}$ and $D\in\R^{r \times r}$, $D=D^\T$, $r\ll n$.
+It first appeared in the work of \citeauthor{Benner2009}~\cite{Benner2009}.
 This factorization does not require up- and downdate to be handled separately,
 \begin{equation}
   ACA^\T \pm BDB^\T =
@@ -226,7 +232,7 @@ that inner dimension must not grow arbitrarily.
 \autoref{alg:lowrank:compression} shows how to compress a \ac{LRSIF}
 based on the most significant eigenvalues,
 without imposing a maximum-rank condition,
-\cf~\cite[Section~6.3.3]{Lang2017}.
+\cf~\citeauthor{Lang2017}~\cite[Section~6.3.3]{Lang2017}.
 The resulting factorization has a diagonal $D$ and (potentially) a lower inner dimension.
 
 \begin{remark}
@@ -239,7 +245,7 @@ The resulting factorization has a diagonal $D$ and (potentially) a lower inner d
 \begin{remark}
   Despite its name, $L$ does not need to be (lower) triangular.
   Similarly, $D$ does not need to be diagonal.
-  In fact, the main results of \cite{Lang2015} are only due to non-diagonal $D$,
+  In fact, the main results of \citeauthor{Lang2015}~\cite{Lang2015} are only due to non-diagonal $D$,
   and are repeated in \autoref{sec:ros}.
 \end{remark}
 

@@ -1,9 +1,11 @@
 \chapter{Rosenbrock Method}
 \label{sec:ros}
 
-First, we give an overview on Rosenbrock methods in the classical \ac{ODE} setting,
-and state the selection of methods used in this thesis.
-Afterwards, we reformulate these methods for the matrix-valued \ac{DRE} with low-rank solutions.
+This chapter first gives an overview on Rosenbrock methods in the classical \ac{ODE} setting,
+and states the selection of methods used in this thesis.
+Afterwards, these methods are reformulated for the matrix-valued \ac{DRE} with low-rank solutions
+following \citeauthor{Lang2017}~\cite{Lang2017}
+and \citeauthor{Mena2007}~\cite{Mena2007}.
 
 \section{Overview}
 
@@ -31,12 +33,12 @@ Then, the $s$-stage Rosenbrock method~\Ros{$s$} reads
 \end{aligned}
 \right.
 \end{equation}
-where $\Jac := f'(x_n)$ denotes the Jacobian and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients.
-We follow the common notation of neglecting a subscript $n$ for the stages $k_i=k_i(t_n)$.
-In the remainder, we restrict the analysis to methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
+where $\Jac := f'(x_n)$ denotes the Jacobian and $\alpha_{ij}, \gamma_{ij}, b_j$ are the determining coefficients of the method.
+Above formula follows the common notation of neglecting a subscript~$n$ for the stages~$k_i=k_i(t_n)$.
+In the remainder, the analysis is restricted to methods with $\gamma_{11} = \ldots = \gamma_{ss} =: \gamma$.
 For certain choices of $\gamma$, such a method is of order $s$ or $s+1$ \cite{HairerWanner2}.
 
-In this thesis we will focus on a first-order one-stage method as well as a second-order two-stage method.
+This thesis focuses on a first-order one-stage method as well as a second-order two-stage method.
 The first method, \Ros{1}
 \begin{equation}
 \label{eq:ros:gen:ros1}
@@ -49,10 +51,11 @@ The first method, \Ros{1}
 \end{equation}
 having $b_1=1$,
 is A-stable for $\gamma \geq \frac{1}{2}$ \cite[Table~6.3]{HairerWanner2}.
-We use $\gamma=1$, for which the method
+For a value of $\gamma=1$, this method
 is often referred to as the \emph{(linearly) implicit Euler} scheme,
 as it can be derived from the implicit Euler scheme
 by a degree-1 Taylor approximation of $f(x_{n+1})$ around $f(x_n)$.
+
 The second method, \Ros{2}
 \begin{equation}
 \label{eq:ros:gen:ros2}
@@ -65,7 +68,7 @@ The second method, \Ros{2}
 \right.
 \end{equation}
 having $\alpha_{21}=1$, $b_1=b_2=\frac{1}{2}$, and $\gamma_{21}=-2\gamma$,
-was first described in \cite{Verwer1999}.\footnote{%
+was first described by \citeauthor{Verwer1999}~\cite{Verwer1999}.\footnote{%
   The formulation \eqref{eq:ros:gen:ros2} as in \cite[Equation~(3.4)]{Verwer1999}
   is based on $k_1 := \hat k_1$ and $k_2 := \hat k_2 - 2 \hat k_1$,
   where $\hat k_1$ and $\hat k_2$ are the stages of the original form \eqref{eq:ros:def}.
@@ -73,7 +76,7 @@ was first described in \cite{Verwer1999}.\footnote{%
 }
 This method is L-stable for $\gamma = 1 \pm \frac{\sqrt{2}}{2}$,
 \cf~\cite[Table~6.4]{HairerWanner2},
-of which we will use the larger option.
+of which the larger option is chosen here.
 
 \section{Application to \texorpdfstring{\act{DRE}s}{DREs}}
 
@@ -90,7 +93,7 @@ $\Jac$ is itself a \Lyapunov operator,
   \Ricc'(X_n) : U \mapsto (A - BB^\T X_n)^\T U + U (A - BB^\T X_n)
   ,
 \end{equation}
-which causes the stage equations~\eqref{eq:ros:def} to become an \ac{ALE}.
+which causes the stage equations~\eqref{eq:ros:def} to become \acp{ALE}.
 Let $\hat A_n := \gamma\tau(A - BB^\T X_n) - \frac{1}{2} I$.
 Therefore,
 the implicit Euler scheme \Ros{1} reads
@@ -100,6 +103,7 @@ the implicit Euler scheme \Ros{1} reads
 \begin{aligned}
   X_{n+1} &= X_n + \tau K_1 \\
   \hat A_n^\T K_1 + K_1 \hat A_n &= -\Ricc(X_n)
+  ,
 \end{aligned}
 \right.
 \end{equation}
@@ -126,7 +130,7 @@ The following sections describe efficient low-rank formulations of the methods a
     B &\gets E^{-1} B
   \end{align*}
   and avoiding the inversion of $E$,
-  the stages are generalized \ac{ALE}
+  the stages are generalized \acp{ALE}
   having the same right-hand sides as above,
   and coefficients $E$ and $\hat A_n = \gamma\tau(A - BB^\T X_n E) - \frac{1}{2} E$.
 \end{remark}
@@ -139,6 +143,7 @@ The following construction goes back to \citeauthor{Mena2007}~\cite[Section~4.3.
 Substituting $K_1 = \frac{1}{\tau}(X_{n+1} - X_n)$ into the stage equation,
 \Ros{1} simplifies to a single \Lyapunov equation for the next iterate~$X_{n+1}$,
 \begin{subequations}
+\label{eq:ros:LR:ros1}
 \begin{align}
   \MoveEqLeft
   \tilde A_n^\T X_{n+1} + X_{n+1} \tilde A_n
@@ -147,7 +152,7 @@ Substituting $K_1 = \frac{1}{\tau}(X_{n+1} - X_n)$ into the stage equation,
   \tilde A_n^\T X_n + X_n \tilde A_n \\
   &= -C^\T C - X_n BB^\T X_n - \tfrac{1}{\tau} X_n ,\\
 \intertext{%
-where $\tilde A_n := \frac{1}{\tau} \hat A_n = A - BB^\T X_n - \frac{1}{2\tau} I$.
+where $\tilde A_n := \frac{1}{\tau} \hat A_n = A - BB^\T X_n - \frac{1}{2\tau} I$ and $\gamma=1$.
 If $X_n = LDL^\T$ is a \ac{LRSIF} of rank $r\in\N$,
 the right-hand side may be written as
 }
@@ -182,7 +187,7 @@ The result is a \ac{LRSIF} of rank $q + r$.
 See~\autoref{alg:ros1} for a summary.
 
 \begin{remark}
-  For generalized \acp{DRE} it is $G = \begin{bmatrix}
+  For a generalized \ac{DRE} it is $G = \begin{bmatrix}
     C^\T & E^\T L
   \end{bmatrix}$ and $S$ remains unchanged.
 \end{remark}
@@ -192,7 +197,7 @@ See~\autoref{alg:ros1} for a summary.
   \autoref{alg:ros1:adi} of \autoref{alg:ros1}
   will be solved using the \ac{ADI} method,
   which will be presented in \autoref{sec:ADI}.
-  In that context, note the low-rank update on \autoref{alg:ros1:smw},
+  In that context, note the low-rank update in \autoref{alg:ros1:smw},
   which will be critical for an efficient implementation,
   \cf~\autoref{sec:basics:smw}.
   For more details, refer to~\autoref{sec:impl:DRE}.
@@ -227,8 +232,7 @@ See~\autoref{alg:ros1} for a summary.
 \subsection{Second-Order Scheme}
 
 Instead of rewriting \Ros{2} to be a single equation,
-we will give separate low-rank formulations of the stage equations,
-and use the first stage equation for a more efficient formulation of the second one.
+this subsection describes how to use the first stage equation for a more efficient low-rank formulation of the second stage equation.
 
 \paragraph{Low-Rank Formulation of the \Riccati Operator}
 
@@ -236,9 +240,10 @@ The following construction goes back to \citeauthor*{Lang2015}~\cite{Lang2015}.
 Suppose $X_n = LDL^\T$ is a \ac{LRSIF} of rank $r\in\N$.
 Then,
 \begin{subequations}
+\label{eq:ros:LR:ros2}
 \begin{align}
   \Ricc(LDL^\T)
-  &= C^\T C + A^\T (LDL^\T) + (LDL^\T) A - (LDL^\T) BB^\T (LDL^\T) \\
+  &= C^\T C + A^\T \big( LDL^\T \big) + \big( LDL^\T \big) A - \big( LDL^\T \big) BB^\T \big( LDL^\T \big) \\
   &= \begin{bmatrix}
     C^\T & A^\T L & L & L
   \end{bmatrix}
@@ -279,7 +284,7 @@ which is itself a \ac{LRSIF} of rank $q + 2r$.
 \end{remark}
 
 \begin{remark}
-  For generalized \acp{DRE} it is $G^{(1)} = \begin{bmatrix}
+  For a generalized \ac{DRE} it is $G^{(1)} = \begin{bmatrix}
     C^\T & A^\T L & E^\T L
   \end{bmatrix}$ and $S^{(1)}$ remains unchanged.
 \end{remark}
@@ -290,14 +295,14 @@ which is itself a \ac{LRSIF} of rank $q + 2r$.
 
 The following construction is based on the work of \citeauthor{Mena2007}~\cite{Mena2007}.\footnote{%
   The original unfortunately contains many small mistakes,
-  which have hopefully all been eliminated for
+  which have hopefully all been eliminated in preparation of
   \citeauthor{Lang2017}'s dissertation~\cite{Lang2017}
   and, independently, for this thesis.
 }
 Evaluating the \Riccati operator is rather expensive.
 In the context of \Ros{2}~\eqref{eq:ros:DRE:ros2},
-we therefore aim to reuse the evaluation of $\Ricc$ necessary to compute the first stage $K_1$
-for the computation of $K_2$.
+the evaluation of $\Ricc$ necessary to compute the first stage $K_1$
+is therefore reused for the computation of $K_2$.
 First, expand the \Riccati operator of a shifted argument
 \begin{subequations}
 \begin{align}
@@ -359,7 +364,7 @@ This allows a decomposition of $K_2$ according to
 \end{aligned}
 \right.
 \end{equation}
-In anticipation of the next chapter, we replace $K_{21}$ by its negative.
+In anticipation of the next chapter, replace $K_{21}$ by its negative.
 Then substituting $K_2$ into the update equation yields
 \begin{equation}
 \left\{
@@ -374,7 +379,8 @@ Then substituting $K_2$ into the update equation yields
 
 \pagebreak
 
-Finally, we follow~\cite{Lang2015} for a \ac{LRSIF} formulation of the right-hand side of the new second stage equation.
+Finally, the right-hand side of the new second stage equation
+is formulated in \ac{LRSIF} following \citeauthor{Lang2015}~\cite{Lang2015}.
 %Suppose $K_1 = T_1 M_1 T_1^\T$ and apply the same technique as
 %in~\eqref{eq:ros:lr-condensed:1}
 %and~\eqref{eq:ros:lr-condensed:2}
@@ -397,7 +403,7 @@ which allows to directly factor the right-hand side of the second stage equation
 See \autoref{alg:ros2} for a summary.
 
 \begin{remark}
-  For generalized \acp{DRE} it is $G^{(21)} = E^\T T_1$ and $S^{(21)}$ remains unchanged.
+  For a generalized \ac{DRE} it is $G^{(21)} = E^\T T_1$ and $S^{(21)}$ remains unchanged.
 \end{remark}
 
 %TODO: put the algorithm on a page of its own?
@@ -444,7 +450,7 @@ See \autoref{alg:ros2} for a summary.
 \end{algorithm}
 
 \begin{remark}
-  Again, note the low-rank update on \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
+  Again, note the low-rank update in \autoref{alg:ros2:smw} of \autoref{alg:ros2}.
 \end{remark}
 
 %\section{Alternative One-Step Methods}
