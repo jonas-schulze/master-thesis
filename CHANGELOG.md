@@ -1,3 +1,8 @@
+# v1.0
+
+- Get low-rank solvers running (#3 and #4)
+- Print version of thesis
+
 # v0.2
 
 - Get dense solvers running in parareal (#2)
