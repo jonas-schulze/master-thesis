@@ -1,10 +1,10 @@
 \chapter{Hamilton-Jacobi Theory}
 \label{sec:HJT}
 
-This chapter gives an overview on the \Riccati equations arising in the optimal control
+This chapter gives an overview of the \Riccati equations arising in the optimal control
 of a linear dynamical system following \citeauthor{Locatelli2011}~\cite{Locatelli2011},
 as well as the \Lyapunov equation to be seen in this thesis.
-For a more general overview on matrix equations refer to \eg \citeauthor{Simoncini2016}~\cite{Simoncini2016}.
+For a more general overview of matrix equations refer to \eg \citeauthor{Simoncini2016}~\cite{Simoncini2016}.
 
 \section{Finite Control Horizon}
 \label{sec:basics:HJT}
@@ -76,7 +76,7 @@ linear \emph{(standard) state-space system}
 \right.
 \end{equation}
 consisting of, again, \emph{state} $x(t)\in\R^n$ and \emph{input} or \emph{control} $u(t)\in\R^m$.
-$y(t) \in\R^q$ with $q \ll n$ denotes the system's \emph{output},
+The system's \emph{output} is denoted with $y(t) \in\R^q$, where $q \ll n$,
 as for most applications it is impossible to measure the whole state $x$.
 The dynamics of the system are described by the
 \emph{state-space matrix} $A(t) \in \Rnn$,
@@ -97,9 +97,9 @@ for symmetric positive-definite weight matrices
 $Q\in\R^{q\times q}$,
 $R\in\R^{m\times m}$, and
 $S\in\R^{q\times q}$.
-$\hat y(t) \in\R^q$ describes a desired trajectory the modeled system should follow,
+The variable $\hat y(t) \in\R^q$ describes a desired trajectory the modeled system should follow,
 \eg by measurements of a real system, or economic requirements of the technical process behind it.
-The system~\eqref{eq:basics:system:standard} is referred to as \ac{LTI}
+The system~\eqref{eq:basics:system:standard} is called \ac{LTI}
 if the \emph{system matrices} $A(t), B(t), C(t)$ are constant for $t\in [t_0,t_f]$,
 and \ac{LTV} otherwise.
 This thesis only considers \ac{LTI} and \emph{controllable} systems,
@@ -365,7 +365,7 @@ To summarize:
   which happens to be a solution to the \ac{ARE}~\eqref{eq:basics:LQR:ARE}.
 \end{proof}
 
-\section{Reformulating Problems Forward in Time}
+\section{Forward in Time Formulation}
 \label{sec:basics:tdir}
 
 As mentioned previously, the \ac{DRE}~\eqref{eq:basics:LQR:DRE:backwards} has to be solved backwards in time.
@@ -480,7 +480,7 @@ which will be covered in \autoref{sec:ADI}.
 \end{proof}
 
 \begin{example}[Regularity of Rail Problem]
-  For the Rail benchmark \cite{morwiki_steel} it is
+  For the Rail benchmark \cite{morwiki_steel}, it holds
   $E \succ 0$ and $A \prec 0$, \ie the system is \emph{stable}.
   As $E^\T X_0 E = C^\T C / 100 \succeq 0$,
   the associated generalized \ac{DRE} has a unique solution.

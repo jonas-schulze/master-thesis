@@ -6,8 +6,9 @@ In this context, efficiency may only be a secondary concern.
 Meanwhile, modern computer architectures are dominated by parallelism:
 multiple cores per CPU,
 multiple CPUs per node,
+and
 multiple nodes per cluster.
-Many real-world application can be described by means of \acp{PDE} or \acp{ODE},
+Many real-world application can be modeled by \acp{PDE} or \acp{ODE},
 which describe the behavior of an underlying system in space and time.
 A common strategy is to solve these equations \emph{parallel-in-space},
 \ie to distribute the spatial domain onto several CPUs,
@@ -17,41 +18,41 @@ due to the communication necessary along the interfaces of spatial sub-domains.
 Another strategy is to (also) solve the problem \emph{parallel-in-time},
 %\ie to solve the temporal dynamics of the system in parallel.
 \ie to distribute the temporal domain onto several CPUs.
-One algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
+An algorithm of the latter strategy is the so-called parareal method~\cite{Lions2001},
 which is the focus of this thesis.
 %From a pure energy-consumed or efficiency perspective,
-From a pure efficiency perspective in terms of energy consumed,
+From a energy efficiency perspective,
 the parareal method is not worth pursuing.
 However, as engineering demands fast cycle times,
 this method can lead to large speed-ups.
 
-In this thesis, above method shall be applied to the matrix-valued \ac{DRE},
+In this thesis, the parareal method shall be applied to the matrix-valued \ac{DRE},
 which arises \eg in optimal control and model order reduction.
-Practical applications quickly lead to large-scale systems,
+Discretizations of real-world problems quickly lead to large-scale systems,
 for which the solution matrices easily reach thousands of rows and columns.
 In order to handle them efficiently,
 one uses the problem's inherent rapid decay of singular values
-to represent the solution matrices in a low-rank factorization, see \eg~\cite{Penzl2000,Kuerschner2016,Lang2017}.
-As the rank of the solution is not constant for all the interfaces of the temporal sub-domains,
-implementation is somewhat difficult in well-established frameworks like OpenMPI\footnote{%
-  \url{https://www.open-mpi.org/}
-}.
-Therefore, since Julia~\cite{Julia} promises to provide a fresh perspective on the problems of high-performance computing,
+to approximate the solution matrices in a low-rank factorization, see \eg~\cite{Penzl2000,Kuerschner2016,Lang2017}.
+As the rank of the solution approximation varies in time,
+an implementation using well-established frameworks like OpenMPI\footnote{\url{https://www.open-mpi.org/}}
+would be more involved.
+Since Julia~\cite{Julia} promises to provide a fresh perspective on high-performance computing problems,
 this thesis serves as a test project for just that.
 
 The thesis is structured as follows.
-First, \autoref{sec:HJT} gives an overview on the \ac{DRE} arising in optimal control of a linear dynamical system,
+\autoref{sec:HJT} gives an overview of the \ac{DRE} arising in optimal control of a linear dynamical system,
 and \autoref{sec:matrixeq} presents the general techniques used to handle large-scale problems.
 Then, \autoref{sec:ros} shows how to adapt a first-order and a second-order Rosenbrock method to the matrix-valued \ac{DRE}.
-Every step of the Rosenbrock method requires the solution of an \ac{ALE},
+Every step of the Rosenbrock method requires the solution of an \mbox{\ac{ALE}},
 which may be done using \eg the \ac{ADI} method described in \autoref{sec:ADI}.
 This completes the general building blocks of a \ac{DRE} solver.
-To speed-up this solver,
+To improve the performance of the solver,
 \autoref{sec:pr} shows how to apply the parareal method to the particular low-rank factorization used in this thesis.
-\autoref{sec:impl} describes the implementation of aforementioned algorithms in the form of two Julia packages
-as well as the numerical results of applying sequential and parareal solvers to
-a small configuration of the Rail benchmark problem~\cite{morwiki_steel} going back to \citeauthor{Benner2005}~\cite{Benner2005},
-comparing low-rank and dense versions of all algorithms.
+\autoref{sec:impl} describes the implementation of the aforementioned algorithms in the form of two Julia packages,
+as well as the numerical results of applying them to
+a small configuration of the Rail benchmark problem~\cite{morwiki_steel},
+which goes back to \citeauthor{Benner2005}~\cite{Benner2005}.
+The chapter compares low-rank and dense algorithms in sequential and parareal execution.
 Finally, \autoref{sec:conclusion} briefly summarizes the findings and future research or optimization opportunities.
 
 \section*{Hardware and Software Used}
