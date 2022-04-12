@@ -388,7 +388,7 @@ a \julia{RemoteChannel} is not thread-safe.\footnote{\url{https://github.com/Jul
 More specifically, it must be used from thread~1 of each process.
 This means that in order to asynchronously send the interface~values~$U_n^{k+1}$ from stage $n$ to the next,
 one would have to move the calls to~$F$ and~$G$ off of thread~1.
-The reason is that many implementations of $F$ and $G$ don't have an implicit (cooperative) yield point to Julia's runtime,
+The reason is that many implementations of $F$ and $G$ do not have an implicit (cooperative) yield point to Julia's runtime,
 such that no task can run asynchronously on thread~1 next to the task executing~$F$ and~$G$.
 This is particularly true for code that does not require~\ac{IO},
 \eg for many methods from Julia's \julia{LinearAlgebra} standard library,
@@ -474,7 +474,7 @@ which corresponds to the reference solution of \autoref{fig:results:parareal:rai
 This timeline also shows when the stages~$n$ are waiting for input,
 which may be a new initial value~$U_{n-1}^k$ or the signal that the previous stage finished.
 In that case, stage~$n$ may safely finish as well,
-since~$k_{n-1}$ won't increase any further.
+since~$k_{n-1}$ will not increase any further.
 If none of the stages reached the maximum number of iterations,
 \ie $k_n < K$ for all $n$,
 this situation is referred to as global convergence.
@@ -635,7 +635,7 @@ Golang for example supports this via the environment variable \code{GOTRACEBACK=
 Sometimes, the Julia internal code fails to issue a command on a worker process.\footnote{%
   \url{https://discourse.julialang.org/t/77864}}
 It would be very handy if Julia would be able to discover when this happens and just try again.
-\julia{ParaReal.jl} tries 3 times to start a stage, if it didn't fail from a user error.
+\julia{ParaReal.jl} tries 3 times to start a stage, if it did not fail from a user error.
 
 %There is a overhead in loading packages on workers that scales with the number of workers,
 %similar to $\trampup$ described in \autoref{sec:impl:pr:warmup}.

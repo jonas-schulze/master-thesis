@@ -35,7 +35,7 @@ end
 #== solve ==#
 inc_F = (p::SomeProblem) -> Counters(p.v.F + 1, p.v.G)
 inc_G = (p::SomeProblem) -> Counters(p.v.F, p.v.G + 1)
-tspan = (0., 42.) # doesn't matter here
+tspan = (0., 42.) # does not matter here
 prob = SomeProblem(Counters(0, 0), tspan)
 sol = solve(
     ParaReal.Problem(prob),
@@ -43,7 +43,7 @@ sol = solve(
     maxiters=2,
     # disable convergence checks, which call norm(::Counters)
     nconverged=typemax(Int),
-    # don't evaluate default rtol, which calls size(::Counters, 1)
+    # do not evaluate default rtol, which calls size(::Counters, 1)
     rtol=0.0,
 )
 #== end ==#

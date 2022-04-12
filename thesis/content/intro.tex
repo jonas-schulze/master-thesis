@@ -13,7 +13,7 @@ which describe the behavior of an underlying system in space and time.
 A common strategy is to solve these equations \emph{parallel-in-space},
 \ie to distribute the spatial domain onto several CPUs,
 which are then usually worked on in lockstep along the time dimension.
-This strategy only scales as far as the local problems don't become too small,
+This strategy only scales as far as the local problems do not become too small,
 due to the communication necessary along the interfaces of spatial sub-domains.
 Another strategy is to (also) solve the problem \emph{parallel-in-time},
 %\ie to solve the temporal dynamics of the system in parallel.
