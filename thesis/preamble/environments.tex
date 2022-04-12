@@ -49,8 +49,21 @@
 \renewcommand{\lstlistlistingname}{List of Code Snippets}
 \renewcommand{\lstlistingname}{Code Snippet}
 
+% inspired by: https://tex.stackexchange.com/a/212794/95100
+\lstdefinelanguage{julia}{%
+  morekeywords={abstract,begin,break,case,catch,const,continue,do,else,elseif,%
+      end,export,false,for,function,immutable,import,importall,if,in,%
+      macro,module,otherwise,quote,return,struct,true,try,type,typealias,%
+      using,where,while},%
+  sensitive=true,%
+  morecomment=[l]\#,%
+}[keywords,comments]
+
 \lstset{
+  language=julia,
   basicstyle=\small\ttfamily,
+  commentstyle=\color{gray},
+  keywordstyle=\fontseries{b}\selectfont,
   numberstyle=\scriptsize\sffamily, % matches algorithm2e
   numbers=left,
   % use special julia comments as range markers: #== text ==#
