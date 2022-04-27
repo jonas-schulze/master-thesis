@@ -1,0 +1,255 @@
+\documentclass[
+  aspectratio=1610,
+]{beamer}
+
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% needs https://tex.stackexchange.com/questions/423848/xelatex-xy-and-dejavu-otf#423854
+%\usepackage{dejavu-otf} % default Makie font: DejaVu Sans
+%\usefonttheme{professionalfonts}
+
+\title{A Low-Rank Parareal Solver for\\ Differential Riccati Equations\\ Written in Julia}
+\author{Jonas Schulze}
+\institute{Faculty of Mathematics\\ Otto-von-Guericke-Universität Magdeburg}
+\date{May 10, 2022}
+\subject{subject}
+
+% beamer appearance
+\setbeamercolor{block body}{bg=mpi} % for debugging
+\setbeamercovered{transparent}
+\beamertemplatenavigationsymbolsempty
+
+\newcommand\maketocframe[1][]{%
+  \begin{frame}{Outline}
+    \tableofcontents[#1]
+  \end{frame}
+}
+
+\AtBeginSection{%
+  \maketocframe[currentsection,currentsubsection]
+}
+
+\usepackage[
+  style=authoryear,
+]{biblatex}
+\addbibresource{stuff.bib}
+
+\input{preamble/packages-slides}
+\input{preamble/math.tex}
+\input{preamble/abbreviations}
+\input{preamble/drawing}
+
+\begin{document}
+
+\frame[plain]{\titlepage}
+\maketocframe
+
+\section{Motivation}
+
+\everymath{\displaystyle}
+
+\begin{frame}{Motivation}
+  \begin{columns}[t,onlytextwidth]
+  \column{0.5\linewidth}
+  \begin{block}{\strut Optimal Control Problem}
+    Consider the \ac{LQR} problem
+    \begin{equation*}
+      \begin{array}{cl}
+        \min_u & \int_{t_0}^{t_f} y^\T y + u^\T u \dt + \tfrac{1}{100} y(t_f)^\T y(t_f) \medskip\\
+        \text{s.t.} & \begin{aligned}[t]
+          E \dot x &= Ax + Bu \\
+          y &= Cx
+        \end{aligned}
+      \end{array}
+    \end{equation*}
+    using
+    \begin{itemize}
+      \item
+        state $x(t)\in\R^n$
+      \item
+        control $u(t)\in\R^m$, $m\ll n$
+      \item
+        output $y(t)\in\R^q$, $q\ll n$
+      \item
+        autonomous system matrices $E, A \in\Rnn$, $B\in\R^{n\times m}$, $C\in\R^{q\times n}$
+    \end{itemize}
+  \end{block}
+  \column{0.45\linewidth}
+  \begin{block}{\strut Feedback Law}
+    The optimal control is given by
+    \begin{equation*}
+      u(t) = - \underbrace{
+        B^\T X(t) E
+      }_{
+        K\mathrlap{(t)}
+      }
+      x(t)
+    \end{equation*}
+    where $X(t)\in\R^{n\times n}$ solves the \ac{DRE}
+    \begin{equation*}
+      \left\{
+        \begin{aligned}
+          E\dot X E &= C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E \\
+          E^\T X(t_0) E &= \tfrac{1}{100} C^\T C
+        \end{aligned}
+      \right.
+    \end{equation*}
+  \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item
+      For a resolution of \SI{1}{\milli\second} along $[t_0,t_f] = [0, \SI{45}{\second}]$,
+      storing $X$ takes ... memory
+
+      $\leadsto$ only store $K := B^\T X E$
+    \item
+      For moderate size $n=\num{20000}$, a single (dense) $X(t)\in\Rnn$ takes \SI{3.2}{\giga\byte}.
+
+      But: solution usually has low numerical rank \\
+      \parencite[e.g.][]{Lang2017,Kuerschner2016,Penzl2000}
+
+      $\leadsto$ \ac{LRSIF}
+      \begin{equation}
+        \bigmat{X} = \mathop{\tallmat{L}} \mathop{\smallmat{D}} \mathop{\widemat{L^{\smash{\T}}}}
+      \end{equation}
+    \item
+      For a resolution of \SI{1}{\milli\second} along $[t_0,t_f] = [0, \SI{45}{\second}]$,
+      and small $n=371$,
+      computing a 4th order trajectory sequentially takes about 1 day.
+
+      $\leadsto$ need further parallelization
+  \end{itemize}
+\end{frame}
+
+\newcommand\tallcmat[1]{\tikz[baseline=-0.5ex]\node[tallmat,fill=#1] {};}
+\newcommand\smallcmat[1]{\tikz\node[smallmat,fill=#1] {};}
+\newcommand\widecmat[1]{\tikz\node[widemat,fill=#1] {};}
+\newcommand\colorldlt[1]{%
+  \mathop{\tallcmat{#1}}
+  \mathop{\smallcmat{#1}}
+  \mathop{\widecmat{#1}}
+}
+
+\newcommand\colorspacing{%
+  \arraycolsep=3pt
+  \def\arraystretch{0.75}
+}
+
+\begin{frame}{Low-Rank Symmetric Indefinite Factorization}
+  \begin{itemize}
+    \item \cite{Benner2009}
+    \item Addition/Subtraction:
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} \pm \colorldlt{\colc}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\colc}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \pm \smallcmat{\colc}
+        \end{bmatrix}
+        % flag of the Netherlands:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\colc}
+        \end{bmatrix}
+      \end{equation*}
+    \item Problem: growing rank
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} + \colorldlt{\cola}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\cola}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \smallcmat{\cola}
+        \end{bmatrix}
+        % flag of Austria:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\cola}
+        \end{bmatrix}
+        %\not\equiv
+        %\mathop{\tallcmat{\cola}}
+        %\mathop{(\smallcmat{\cola} + \smallcmat{\cola})}
+        %\mathop{\widecmat{\cola}}
+      \end{equation*}
+      $\leadsto$ Column compression techniques
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Parareal Method \parencite{Lions2001}}
+    \begin{equation*}
+      \left\{
+      \begin{aligned}
+        U^0_{n+1} &:= G(U^0_n) \\
+        U^{k+1}_{n+1} &:= G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)
+      \end{aligned}
+      \right.
+    \end{equation*}
+  \end{block}
+  in low-rank formulation:
+  \begin{equation*}
+    \colorspacing
+    U^{k+1}_{n+1}
+    = \underbrace{\colorldlt{\cola}}_{G(U^{k+1}_n)}
+    + \underbrace{\colorldlt{\colb}}_{F(U^{k}_n)}
+    - \underbrace{\colorldlt{\colc}}_{G(U^{k}_n)}
+    =
+    \Bigg[
+    \begin{matrix}
+      \tallcmat{\cola} &
+      \tallcmat{\colb} &
+      \tallcmat{\colc}
+    \end{matrix}
+    \Bigg]
+    \begin{bmatrix}
+      \smallcmat{\cola} \\
+      & \smallcmat{\colb} \\
+      && -\smallcmat{\colc}
+    \end{bmatrix}
+    \begin{bmatrix}
+      \widecmat{\cola} \\
+      \widecmat{\colb} \\
+      \widecmat{\colc}
+    \end{bmatrix}
+  \end{equation*}
+\end{frame}
+
+\section{Results}
+
+\begin{frame}
+  \frametitle{Results}
+  foo
+\end{frame}
+
+\section{Summary}
+
+\begin{frame}
+  \frametitle{Summary}
+  foo
+\end{frame}
+
+\appendix
+
+\begin{frame}
+  table 7.3
+\end{frame}
+
+\end{document}

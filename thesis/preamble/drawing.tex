@@ -1,0 +1,29 @@
+\definecolor{mathcore} {RGB}{102,  99, 100}
+\definecolor{ovgu math}{RGB}{209,  63,  88}
+\definecolor{mpi}      {RGB}{ 61, 167, 197}
+\def\cola{ovgu math}
+\def\colb{mathcore}
+\def\colc{mpi}
+
+\tikzset{
+  mat/.style={
+    rectangle,
+    minimum size=1ex,
+    inner sep=0mm,
+  },
+  bigmat/.style={mat,minimum size=#1},
+  bigmat/.default=1cm,
+  tallmat/.style={mat,minimum height=#1},
+  tallmat/.default=1cm,
+  widemat/.style={mat,minimum width=#1},
+  widemat/.default=1cm,
+  smallmat/.style={mat},
+}
+
+\newcommand\mat[2]{%
+  \tikz[baseline=(M.base)] \node [mat, #1, fill=ovgu math] (M) {$#2$};
+}
+\newcommand\bigmat[1]{\mat{minimum size=2cm}{#1}}
+\newcommand\tallmat[2][6mm]{\mat{minimum size=#1, minimum height=2cm}{#2}}
+\newcommand\widemat[2][6mm]{\mat{minimum size=#1, minimum width=2cm}{#2}}
+\newcommand\smallmat[2][6mm]{\mat{minimum size=#1}{#2}}
