@@ -1004,6 +1004,12 @@ git-tree-sha1 = "481d2b78fc116379a216e4fc31041521773387e1"
 uuid = "99c1a7ee-ab34-5fd5-8076-27c950a045f4"
 version = "1.3.0"
 
+[[MatrixMarket]]
+deps = ["Compat", "SparseArrays"]
+git-tree-sha1 = "54d39ccb57d29aefa666418bca8ca5598ebd8225"
+uuid = "4d4711f2-db25-561a-b6b3-d35e7d4047d3"
+version = "0.3.1"
+
 [[MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "Random", "Sockets"]
 git-tree-sha1 = "1c38e51c3d08ef2278062ebceade0e46cefc96fe"

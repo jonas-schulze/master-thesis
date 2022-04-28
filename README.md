@@ -3,6 +3,13 @@
 * playing with ParaReal and DifferentialRiccatiEquations
 * sharing data with Mechthild
 
+## Rail Benchmark
+
+* modelreduction.org/index.php/Steel_Profile
+* configuration `n=371` already included in `data/Rail371.mat`
+* download bigger configurations from above URL, unzip and store them inside `data/`,
+  e.g. `data/SteelProfile-dim1e3-rail_1357/rail_1357_c60.?`
+
 ## Features used from [DrWatson.jl]
 
 * `projectdir` and `datadir` (check out their MATLAB/Octave ports in `src/m`)
