@@ -1,10 +1,10 @@
-@assert @isdefined(kind)
-
 using Stuff
 using ParaReal: TimingFileObserver
 
+kind = Symbol(ENV["MY_KIND"])
 conf = ParallelConfig(kind)
-@info "Read configuration $(savename(conf))"
+save_X = something(readenv("MY_X"), false)
+@info "Read configuration $(savename(conf))" save_X
 algc, algf = algorithms(conf)
 
 include(scriptsdir("add_workers.jl"))

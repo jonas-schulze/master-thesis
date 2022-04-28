@@ -1,6 +1,6 @@
 using Stuff
 
-kind = Symbol(get(ENV, "MY_KIND", "dense"))
+kind = Symbol(ENV["MY_KIND"])
 conf = SequentialConfig(kind)
 save_X = something(readenv("MY_X"), false)
 @info "Read configuration $(savename(conf))" save_X

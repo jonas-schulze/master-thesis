@@ -26,8 +26,11 @@ export MY_NF=${MY_NF:-10}
 export MY_OC=${MY_OC:-1}
 export MY_OF=${MY_OF:-1}
 
+# dense vs lowrank
+export MY_KIND=dense
+
 module load apps/julia/1.6
 
-MY_WC=0 MY_WF=0 julia dense-par.jl
-MY_WC=1 MY_WF=0 julia dense-par.jl
-MY_WC=1 MY_WF=1 julia dense-par.jl
+MY_WC=0 MY_WF=0 julia compute_par.jl
+MY_WC=1 MY_WF=0 julia compute_par.jl
+MY_WC=1 MY_WF=1 julia compute_par.jl
