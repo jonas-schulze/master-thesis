@@ -80,6 +80,7 @@ function ParallelConfig(X::Symbol)
         readenv("SLURM_NTASKS"),
         Sys.CPU_THREADS ÷ 2,
     )
+    nstages *= something(readenv("MY_ROUNDROBIN"), 1)
     ncpus = something(
         readenv("SLURM_CPUS_PER_TASK"),
         readenv("OMP_NUM_THREADS"),

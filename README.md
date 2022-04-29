@@ -31,6 +31,7 @@ Special to `scripts/compute_par.jl` and `scripts/par.job`:
 * `MY_OC`/`MY_OF`: order of coarse/fine solver (default `1`/`1`)
 * `MY_NC`/`MY_NF`: number of Rosenbrock steps for coarse/fine solver (default `1`/`10`)
 * `MY_WC`/`MY_WF`: whether to warm up coarse/fine solver beforehand (default `true`/`false`)
+* `MY_ROUNDROBIN`: how many parareal stages to assign to every worker process (default `1`)
 
 ## Features used from [DrWatson.jl]
 

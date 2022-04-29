@@ -4,7 +4,8 @@ using ParaReal: TimingFileObserver
 kind = Symbol(ENV["MY_KIND"])
 conf = ParallelConfig(kind)
 save_X = something(readenv("MY_X"), false)
-@info "Read configuration $(savename(conf))" save_X
+roundrobin = something(readenv("MY_ROUNDROBIN"), 1)
+@info "Read configuration $(savename(conf))" save_X roundrobin
 algc, algf = algorithms(conf)
 
 include(scriptsdir("add_workers.jl"))
@@ -20,9 +21,11 @@ logdir = datadir("logfiles", savename(conf))
 logger = TimingFileObserver(LoggingFormats.LogFmt(), Base.time, logdir)
 
 @info "Launching solver"
+ws = repeat(workers(), outer=roundrobin)
 runtime = @elapsed begin
     sol = solve(
         p, a;
+        schedule=ProcessesSchedule(ws),
         logger=logger,
         warmupc=conf.wc,
         warmupf=conf.wf,
