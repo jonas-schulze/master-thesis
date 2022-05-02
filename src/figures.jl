@@ -11,8 +11,7 @@ function _scaled_maybe_integer(ticks, scale::Real, unit::String)
 end
 
 xtime = (
-    xlabel = "Time",
-    xtickformat = ticks -> _scaled_maybe_integer(ticks, 1/100, "s")
+    xtickformat = ticks -> _scaled_maybe_integer(ticks, 1/100, "s"),
 )
 
 xstepsize = (

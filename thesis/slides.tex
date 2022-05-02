@@ -38,6 +38,7 @@
 
 \input{preamble/packages-slides}
 \input{preamble/math.tex}
+\input{preamble/other.tex}
 \input{preamble/abbreviations}
 \input{preamble/drawing}
 
@@ -250,6 +251,40 @@
 
 \begin{frame}
   table 7.3
+\end{frame}
+
+\renewcommand\mathrm\mathsf % fix \umach
+\newcommand\sidenote[1]{\footnotesize{\textcolor{gray}{#1}}}
+
+\begin{frame}[fragile]
+  \frametitle{Parareal Reference Solution}
+  \begin{itemize}
+    \item
+      Thesis Figure 7.7: parareal order 4/4
+
+      \begin{lstlisting}
+MY_KIND=dense MY_NF=100 MY_OF=4 MY_OC=4 sbatch -n450 -c1 -J de44 par.job
+      \end{lstlisting}
+      %MY_NF=100 MY_OF=4 MY_OC=4 sbatch -pmedium --time=2:00:00 -n 450 -c1 -J d44 dense-par.job
+    \item
+      Better: sequential order 4
+
+      \begin{lstlisting}
+MY_KIND=dense MY_N=45000 MY_O=4 sbatch -n1 -c1 -J de4 seq.job
+      \end{lstlisting}
+      % MY_N=45000 MY_KIND=dense MY_O=4 sbatch --partition=long --time=2-00:00:00 -n1 -c1 -J de4-c1 seq.job
+    \item
+      Relative error negligible:
+      \begin{equation*}
+        \frac{\norm{K_\text{par}(t) - K_\text{seq}(t)}_F}{\norm{K_\text{seq}(t)}_F}
+        < 5\umach
+      \end{equation*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Relative Error of Parareal Reference Solution}
+  \includegraphics[width=0.8\textwidth]{figures/slides-seq-parareal-ref.pdf}
 \end{frame}
 
 \end{document}
