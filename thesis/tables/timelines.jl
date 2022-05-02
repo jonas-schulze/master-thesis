@@ -187,6 +187,7 @@ end
 # ╔═╡ 5c39d0ba-cdc3-41e3-bffb-7559b720f04a
 function t̂_seq(wide)
 	k_n_ = k_n(wide)
+	Fs = filter(:tag => ==(:ComputingF), wide)
 	F_n = innerjoin(Fs, k_n_, on=names(k_n_))
 	sum(F_n.duration)
 end
