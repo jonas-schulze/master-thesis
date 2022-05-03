@@ -1,5 +1,6 @@
 output
 figures/*.pdf
+figures/*/*.pdf
 githash.txt
 
 # JabRef

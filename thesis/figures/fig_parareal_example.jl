@@ -170,8 +170,19 @@ function plot_spiral!(ax, sol, colors)
 	end
 end
 
+# ╔═╡ 02aab351-8a67-47a8-b745-f69c2e847555
+md"""
+# Animation for Defense
+"""
+
+# ╔═╡ c1c271a7-c080-46b3-892c-3e831e8e8c84
+begin
+	anim_dir = projectdir("thesis", "figures", "parareal-anim")
+	mkpath(anim_dir)
+end
+
 # ╔═╡ b1819bde-fa19-4920-b785-1efc7c4d95fc
-md"## Internal Stuff"
+md"# Internal Stuff"
 
 # ╔═╡ 5e04b985-c5d2-41b2-8866-1b0780e845eb
 md"As Pluto is based on Distributed, use `myid` instead of `1` to identify the current process."
@@ -227,6 +238,75 @@ end
 # ╔═╡ ddffb4f3-bfa9-4bea-8ce4-ed243306242e
 save(projectdir("thesis", "figures", "fig_parareal_example.pdf"), fig)
 
+# ╔═╡ e1da978d-a413-43f4-872d-b9478fdd02d1
+function animate(sol, ghost, k, fname; write=false)
+	fig = Figure(resolution=(400,300))
+	ax = Axis(fig[1,1])
+	#ax.aspect = DataAspect()
+	ax.autolimitaspect = 1
+	ax.xticks = -8:2:4
+	ax.yticks = -4:2:6
+
+	# Reference Solution:
+    ts = range(tspan...; length=100)
+	points = [Point2f(ref(t)) for t in ts]
+    lines!(ax, points, color=:gray, linestyle=:dash)
+
+	# Initial Value:
+	plot!(ax, Point2f(u0), color=:gray)
+
+	# Ghost:
+	if !isnothing(ghost)
+		for (n, stage) in enumerate(ghost.stages)
+			transparent = 0.3
+			alpha_line = n <= k ? 1.0 : transparent
+			alpha_dot = n < k ? 1.0 : transparent
+			# Fine Solutions:
+			s = solution(stage)
+			points = Point2f.(s.u)
+			lines!(ax, points, label="$n", color=(colors[n], alpha_line))
+			# Parareal Values:
+			v = value(stage)
+			scatter!(ax, Point2f(v), color=(colors[n], alpha_dot))
+		end
+	end
+	write && save("$fname-$k-0.pdf", fig)
+
+	# Parareal Values:
+	for (n, stage) in enumerate(sol.stages)
+		x = plot!(ax, Point2f(value(stage)), color=colors[n])
+		write && n >= k && save("$fname-$k-$n.pdf", fig)
+	end
+	# Fine Solutions:
+	for (n, stage) in enumerate(sol.stages)
+		s = solution(stage)
+		points = Point2f.(s.u)
+		x = lines!(ax, points, label="$n", color=colors[n])
+	end
+	write && save("$fname-$k-$(N+1).pdf", fig)
+	fig
+end
+
+# ╔═╡ 74e13c9a-7372-4de6-acee-c4aa61709dcf
+animate(sol[2], sol[1], 1, joinpath(anim_dir, "step"))
+
+# ╔═╡ 5037b09d-cee5-4baf-b1f9-27422e28dfb0
+for (i, k) in enumerate(Ks)
+	ghost = i > 1 ? sol[i-1] : nothing
+	animate(sol[i], ghost, k, joinpath(anim_dir, "step"); write=true)
+end
+
+# ╔═╡ 29469e28-6e20-435e-9789-a1baf285f4b0
+# just in case I want to match the colors in LaTeX
+with_terminal() do
+	foreach(colors) do c
+		println((c.r, c.g, c.b))
+	end
+end
+
+# ╔═╡ 2ad0b4a8-bfff-4dc5-933e-300ac60c34ce
+TableOfContents()
+
 # ╔═╡ Cell order:
 # ╟─54d0a8ae-6eb7-4024-8544-56e1bb085325
 # ╠═f4723cd5-4590-40a6-8197-3acbe259b178
@@ -252,6 +332,11 @@ save(projectdir("thesis", "figures", "fig_parareal_example.pdf"), fig)
 # ╠═9aba5153-1158-4e17-bdff-e100006e8d9d
 # ╠═ddffb4f3-bfa9-4bea-8ce4-ed243306242e
 # ╠═40ae0661-ae75-4b9a-be97-4d6bbcf453c7
+# ╟─02aab351-8a67-47a8-b745-f69c2e847555
+# ╠═e1da978d-a413-43f4-872d-b9478fdd02d1
+# ╠═74e13c9a-7372-4de6-acee-c4aa61709dcf
+# ╠═c1c271a7-c080-46b3-892c-3e831e8e8c84
+# ╠═5037b09d-cee5-4baf-b1f9-27422e28dfb0
 # ╠═b1819bde-fa19-4920-b785-1efc7c4d95fc
 # ╠═f44cfe1d-0b27-45d9-89b4-fdd82f883daf
 # ╠═f55006d9-2d82-4d4c-9b22-b606d992d425
@@ -265,3 +350,5 @@ save(projectdir("thesis", "figures", "fig_parareal_example.pdf"), fig)
 # ╠═d868c793-8561-4447-9537-32ba92b42df0
 # ╠═0376e21c-eafa-40bd-a937-b64792942950
 # ╠═beb3da79-0b27-432a-a457-f98db0536e58
+# ╠═29469e28-6e20-435e-9789-a1baf285f4b0
+# ╠═2ad0b4a8-bfff-4dc5-933e-300ac60c34ce

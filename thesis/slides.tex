@@ -42,6 +42,8 @@
 \input{preamble/abbreviations}
 \input{preamble/drawing}
 
+%\includeonlyframes{current,other}
+
 \begin{document}
 
 \frame[plain]{\titlepage}
@@ -233,6 +235,23 @@
   \end{equation*}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Parareal Example}
+\begin{columns}
+\column{0.65\textwidth}
+  \foreach \k in {0,1} {%
+  \foreach \n [evaluate={\i=int(1+\n+\k*7)}] in {0,...,6} {%
+    \includegraphics<\i>[width=\textwidth]{figures/parareal-anim/step-\k-\n.pdf}%
+  }}%
+  \includegraphics<15>[width=\textwidth]{figures/parareal-anim/step-2-5.pdf}%
+  \includegraphics<16>[width=\textwidth]{figures/parareal-anim/step-2-6.pdf}%
+  \includegraphics<17>[width=\textwidth]{figures/parareal-anim/step-3-5.pdf}%
+  \includegraphics<18>[width=\textwidth]{figures/parareal-anim/step-3-6.pdf}%
+\column{0.35\textwidth}
+  \input{figures/slide_parareal_anim.tex}
+\end{columns}
+\end{frame}
+
 \section{Results}
 
 \begin{frame}
@@ -251,6 +270,15 @@
 
 \begin{frame}
   table 7.3
+\end{frame}
+
+\begin{frame}
+  \frametitle{Parareal Dependencies}
+  $
+    U^{k+1}_{n+1} := G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)
+  $
+  \vfill
+  \input{figures/fig_parareal_dag2.tex}
 \end{frame}
 
 \renewcommand\mathrm\mathsf % fix \umach
