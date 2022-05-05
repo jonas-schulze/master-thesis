@@ -140,7 +140,7 @@ rolling(mean, e, window)
 
 # ╔═╡ 979c6262-a21b-4936-b275-1dd84b5b7135
 fig_lines = let
-	fig = Figure()
+	fig = Figure(resolution=(500,300))
 	ax = Axis(
 		fig[1,1];
 		#title="Relative Error",

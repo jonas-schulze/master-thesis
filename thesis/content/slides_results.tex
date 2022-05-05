@@ -1,0 +1,105 @@
+\section{Results}
+
+\begin{frame}{Numerical Results}
+  \setbeamertemplate{caption}[numbered]
+  \begin{columns}
+  \column{0.7\textwidth}
+  \begin{minipage}[b][0.75\textwidth][c]{\textwidth}
+\only<+>{
+  \begin{figure}
+  \renewcommand\thefigure{7.7} % number in thesis
+  \includegraphics[width=\textwidth]{figures/fig_results_parareal.pdf}%
+  \caption{Trajectory $X_{1,77}$ and relative error in $K$ for Rail371}
+  \end{figure}
+}
+\only<+>{
+  \begin{figure}
+  \renewcommand\thefigure{7.8} % number in thesis
+  \includegraphics[width=\textwidth]{figures/fig_results_parareal_rank.pdf}%
+  \caption{Rank of $X=LDL^\T$ for Rail371}
+  \end{figure}
+}
+\only<+>{
+  \begin{figure}
+  \renewcommand\thefigure{7.9} % number in thesis
+  \includegraphics[width=\textwidth]{figures/fig_timeline_all.pdf}%
+  \caption{Timeline chart of parareal method applied to Rail371}
+  \end{figure}
+}
+  \end{minipage}
+  \column{0.3\textwidth}
+  \begin{block}{Parareal Setup}
+    \begin{itemize}
+      \item
+        450 coarse steps (\SI{100}{\milli\second})
+      \item
+        100 fine steps per coarse step (\SI{1}{\milli\second})
+      \item
+        Maximum \#iterations: 10
+      \item
+        Convergence threshold: $371\umach$
+    \end{itemize}
+  \end{block}
+  \end{columns}
+\end{frame}
+
+\subsection{Parallel Scaling}
+
+\begin{frame}[b,fragile]{Parallel Scaling}
+  \setbeamertemplate{caption}[numbered]
+  \begin{columns}[c]
+  \column{0.65\textwidth}
+  \begin{table}
+  %TODO: use hanging captions
+  \caption{%
+    Speed-up and parallel efficiency of parareal method applied to Rail371.
+    All timings are in seconds.
+  }
+  \begin{tabular}{%
+    l
+    S[table-format=4.2] % par
+    S[table-format=6.2] % seq est
+    S[table-format=2.2] % speedup
+    S[round-precision=3, round-minimum=0.001, table-format=1.3, scientific-notation=fixed, fixed-exponent=0] % efficiency
+  }
+    \toprule
+    Solver &
+    {$\tpar$} &
+    {$\hattseq$} &
+    {$\frac{\hattseq}{\tpar}$} &
+    {$\frac{\hattseq}{N\cdot\tpar}$} \\
+    \midrule
+    \input{tables/speedup450_lr.tex}
+    \addlinespace
+    \input{tables/speedup450_de.tex}
+    \addlinespace
+    \input{tables/speedup450_ref.tex}
+    \bottomrule
+  \end{tabular}
+  \renewcommand\thetable{7.3} % number in thesis
+  \end{table}
+  \column{0.35\textwidth}
+  \begin{block}{Addendum}
+  \begin{itemize}
+    \item
+      Actual runtime of (sequential) Dense 4:
+
+      $\tseq = \SI{86831}{\second}$
+
+      (Slurm job duration)
+    \item
+      Runtime of LRSIF 1/1 applied to Rail1357:
+
+      $\tpar = \SI{3600}{\second}$
+
+      (Slurm job duration)
+
+      (2 BLAS threads per process, $2\times$ round-robin scheduling)
+  \end{itemize}
+  \end{block}
+  \end{columns}
+  \vfill
+  \begin{lstlisting}
+MY_KIND=dense MY_NF=100 MY_OF=1 MY_OC=1 sbatch -n450 -J de11 par.job
+  \end{lstlisting}
+\end{frame}

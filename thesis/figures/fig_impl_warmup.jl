@@ -108,7 +108,7 @@ mechthild_dir = filter(contains(string(jobid)), readdir(logdir()))
 
 # ╔═╡ 57d76bda-1308-4854-b938-655846aaa732
 laptop_dir = [
-	savename(ParallelConfig{:dense}(; nf=10, jobid="0", nstages=4, ncpus=1, wc, wf))
+	savename(ParallelConfig{:dense,371}(; nf=10, jobid="0", nstages=4, ncpus=1, wc, wf))
 	for (wc, wf) in [(false, false), (true, false), (true, true)]
 ]
 
