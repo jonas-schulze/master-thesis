@@ -39,7 +39,7 @@ done
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[b,fragile,label=other]{Rail1357}
+\begin{frame}[b,fragile,label=rail1357]{Rail1357}
   \begin{columns}[T]
   \column{0.6\textwidth}
   \begin{figure}
@@ -48,9 +48,8 @@ done
     \includegraphics<3->[width=\textwidth]{figures/slides_timeline1357_zoom.pdf}%
   \end{figure}
   \column{0.42\textwidth}
-  %\setcounter{beamerpauses}{3} % broken :-(
-  %TODO: delay uncovers by 2
-  \begin{itemize}
+  \setcounter{beamerpauses}{3}
+  \only<3->{\begin{itemize}}
     \temporal<+>{}{%
     \item
       Stage $n=384$
@@ -100,7 +99,7 @@ done
     \item
       The final gap on stage~449\\ is due to synchronous\\ data transfer.
     }{}
-  \end{itemize}
+  \only<3->{\end{itemize}}
   \end{columns}
   \vfill
   %\begin{visibleenv}<2>
