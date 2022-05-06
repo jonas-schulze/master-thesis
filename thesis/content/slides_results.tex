@@ -1,5 +1,7 @@
 \section{Results}
 
+\subsection{Numerical Results}
+
 \begin{frame}{Numerical Results}
   \setbeamertemplate{caption}[numbered]
   \begin{columns}
@@ -37,7 +39,10 @@
       \item
         Maximum \#iterations: 10
       \item
-        Convergence threshold: $371\umach$
+        Convergence:
+        relative change in~$X$\\ below $371\umach$,\\
+        twice in a row,\\
+        and all previous stages converged
     \end{itemize}
   \end{block}
   \end{columns}
@@ -45,7 +50,7 @@
 
 \subsection{Parallel Scaling}
 
-\begin{frame}[b,fragile]{Parallel Scaling}
+\begin{frame}[b,fragile,label=current]{Parallel Scaling}
   \setbeamertemplate{caption}[numbered]
   \begin{columns}[c]
   \column{0.65\textwidth}
@@ -53,15 +58,15 @@
   %TODO: use hanging captions
   \renewcommand\thetable{7.3} % number in thesis
   \caption{%
-    Speed-up and parallel efficiency of parareal method applied to Rail371.
-    All timings are in seconds.
+    Speed-up and parallel efficiency of parareal method applied to Rail371 using $N=450$ cores.
+    (timings in seconds)
   }
   \begin{tabular}{%
     l
     S[table-format=4.2] % par
     S[table-format=6.2] % seq est
     S[table-format=2.2] % speedup
-    S[round-precision=3, round-minimum=0.001, table-format=1.3, scientific-notation=fixed, fixed-exponent=0] % efficiency
+    S[round-precision=3, round-minimum=0.001, table-format=1.3, table-space-text-post=$^{*}$] % efficiency
   }
     \toprule
     Solver &
@@ -75,6 +80,9 @@
     \input{tables/speedup450_de.tex}
     \addlinespace
     \input{tables/speedup450_ref.tex}
+    \midrule
+    \pause
+    Rail1357 & 3001.4058759212494 & 22684.368317604065 & 7.557914275969537 & 0.016795365057710083$^{*}$ \\
     \bottomrule
   \end{tabular}
   \end{table}
@@ -84,20 +92,29 @@
     \item
       Actual runtime of (sequential) Dense 4:
 
-      $\tseq = \SI{86831}{\second}$
+      $\tseq < \SI{86831}{\second}$
 
       (Slurm job duration)
     \item
-      Runtime of LRSIF 1/1 applied to Rail1357:
+      LRSIF 1/1 applied to Rail1357:
+      % TODO: goto button for timeline (and back button there)
 
-      $\tpar = \SI{3600}{\second}$
+      \begin{itemize}
+        \item
+          2 BLAS threads\\ per process
+        \item
+          $2\times$ round-robin scheduling onto\\
+          $P=225$ processes
+        \item[{\makebox[\widthof{\usebeamertemplate{itemize item}}][c]{$\ast$}}]
+          actual efficiency:
+          $2\hattseq/2P\cdot \tpar = \num[round-precision=3]{0.033590730115420166}$
+      \end{itemize}
 
-      (Slurm job duration)
-
-      (2 BLAS threads per process, $2\times$ round-robin scheduling)
+      % $\tpar = \SI{3600}{\second}$ (Slurm job duration)
   \end{itemize}
   \end{block}
   \end{columns}
+  \onslide
   \vfill
   \begin{lstlisting}
 MY_KIND=dense MY_NF=100 MY_OF=1 MY_OC=1 sbatch -n450 -J de11 par.job

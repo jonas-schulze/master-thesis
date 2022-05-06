@@ -129,7 +129,7 @@ export load_rail, algorithms, Δt
 
 export readenv
 export δ
-export logdir, timeline, timeline!, load_eventlog
+export logdir, timeline, timeline!, load_eventlog, prep_eventlog
 export addworkers, set_num_threads, log_worker_info
 export storemeta, readdata, mergedata
 
