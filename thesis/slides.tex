@@ -52,6 +52,31 @@
   \end{beamercolorbox}
 }
 
+%TODO: what if the frame needs multiple slides?
+\newcommand\bigpicture[1]{%
+  \begin{block}{Big Picture}
+    \begin{itemize}
+      \item
+        Differential \Riccati Equation (DRE)
+      \ifnum#1<2 \pause\fi
+      \item
+        Solution in LRSIF
+      \ifnum#1<3 \pause\fi
+      \item
+        Rosenbrock method\\ to solve DRE
+      \ifnum#1<4 \pause\fi
+      \item
+        Rosenbrock stages are ALEs
+      \ifnum#1<5 \pause\fi
+      \item
+        ADI method\\ to solve ALE
+      \ifnum#1<6 \pause\fi
+      \item
+        Parareal method\\ for speed-up
+    \end{itemize}
+  \end{block}
+}
+
 \newcommand\tallcmat[1]{\tikz[baseline=-0.5ex]\node[tallmat,fill=#1] {};}
 \newcommand\smallcmat[1]{\tikz\node[smallmat,fill=#1] {};}
 \newcommand\widecmat[1]{\tikz\node[widemat,fill=#1] {};}
