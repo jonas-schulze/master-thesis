@@ -1,0 +1,28 @@
+\subsection{Alternating-Directions Implicit Method}
+
+\begin{frame}<1>{Alternating-Directions Implicit Method}
+\begin{columns}
+\column{0.7\textwidth}
+  \begin{block}{General Formulation \parencite{Peaceman1955}}
+    ...
+  \end{block}
+  Consider the ALE $A^\T X E + E^\T X A = - GSG^\T$.
+  \begin{itemize}
+    \item
+      LRSIF formulation for ALE: \cite{Lang2017}
+      \begin{gather*}
+        X_0 = 0, R_0 = G,\\
+        (A^\T + \alpha_k E) V_k = R_{k-1},
+        R_k = R_{k-1} - 2\alpha_k E V_k,\\
+        L_k = \begin{bmatrix} L_{k-1} & V_k \end{bmatrix},
+        D_k = \begin{bmatrix} D_{k-1} \\ & -2\Re(\alpha_k) S \end{bmatrix},\\
+      \end{gather*}
+    \item
+      Stopping criterion?
+    \item
+      Self-generating parameters: \cite{Kuerschner2016}
+  \end{itemize}
+\column{0.3\textwidth}
+\bigpicture{5}
+\end{columns}
+\end{frame}

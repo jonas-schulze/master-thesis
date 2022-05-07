@@ -1,75 +1,62 @@
 \subsection{Rosenbrock Method}
 
-\begin{frame}
-  \begin{block}{Rosenbrock Method}
+\begin{frame}<1>{Rosenbrock Method}
+\begin{columns}
+\column{0.7\textwidth}
+  \begin{block}{General Formulation}
+    For the initial value problem $\dot x = f(x)$ the method reads
     \begin{equation*}
     \left\{
     \begin{aligned}
       x_{n+1} &:= x_n + \tau \sum_{j=1}^s b_j k_j
       \\
-      k_i &:= f\left( x_n + \tau \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
-      \qquad
+      k_i &:= \begin{multlined}[t]
+      f\left( x_n + \tau \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
+      \\
       \text{for } i = 1, \ldots, s
       ,
+      \end{multlined}
     \end{aligned}
     \right.
     \end{equation*}
     where $\Jac := f'(x_n)$ denotes the Jacobian.
   \end{block}
+\column{0.3\textwidth}
+\bigpicture{3}
+\end{columns}
 \end{frame}
 
-\begin{frame}
-  \begin{equation*}
-    E\dot X E = C^\T C + A^\T X E + E^\T X A - E^\T X BB^\T X E
-  \end{equation*}
-  %\newcommand\U{\makebox[\widthof{$X_n$}]{U}}
-  \begin{align*}
-    \Ricc(X_n) &= C^\T C + A^\T X_n E + E^\T X_n A - E^\T X_n BB^\T X_n E \\
-    \Jac(U) &= (A - BB^\T X_n)^\T U E + E^\T U (A - BB^\T X_n)
-  \end{align*}
-  The Jacobian is a Lyapunov operator!
-\end{frame}
-
-\begin{frame}
-  \frametitle{1st Order Method \parencite{Mena2007,Lang2017}}
-  Substitute $K_1 = \frac{1}{\tau}(X_{n+1} - X_n)$ into the stage equation.
-  \begin{equation*}
-    \tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n
-    = - GSG^\T
-  \end{equation*}
-  \begin{align*}
-    G &= \begin{bmatrix}
-      C^\T & L
-    \end{bmatrix}
-    \\
-    S &= \begin{bmatrix}
-      I & . \\
-      . & DL^\T BB^\T LD + \tfrac{1}{\tau} D
-    \end{bmatrix}
-  \end{align*}
-\end{frame}
-
-\begin{frame}{2nd Order Method \parencite{Lang2015,Mena2007}}
-  \begin{equation*}
-  \end{equation*}
-\end{frame}
-
-\begin{frame}
+\begin{frame}<1>{Rosenbrock Method}
 \begin{columns}
-\column{0.5\textwidth}
-\begin{block}{Autonomous Initial Value Problem}
-  \begin{equation*}
-  \left\{
-  \begin{aligned}
-    \dot x &= f(x) \\
-    x(t_0) &= x_0
-  \end{aligned}
-  \right.
-  \end{equation*}
-\end{block}
+\column{0.7\textwidth}
+\begin{itemize}
+\item
+  Consider the DRE $E^\T \dot X E = \Ricc(X)$.
+  \newcommand\U{\alert{\makebox[\widthof{$X_n$}]{$U$}}}
+  \begin{align*}
+    \Ricc(X_n) &= C^\T C + A^\T X_n E + E^\T X_n A - E^\T X_n BB^\T X_n E
+    \\
+    \Jac(\alert{U}) &= \makebox[\widthof{$C^\T C$}]{$0$}
+      + A^\T \U E + E^\T \U A
+      \begin{lgathered}[t]
+        {} - E^\T \U BB^\T X_n E \\
+        {} - E^\T X_n BB^\T \U E
+      \end{lgathered} \\
+    &= (A - BB^\T X_n E)^\T \alert U E + E^\T \alert U (A - BB^\T X_n E)
+  \end{align*}
+\item
+  The Jacobian is a Lyapunov operator!
+\end{itemize}
+\column{0.3\textwidth}
+\bigpicture{4}
+\end{columns}
+\end{frame}
 
-\column{0.5\textwidth}
-  \begin{block}{1st Order Method}
+\begin{frame}<1>{Rosenbrock Method \parencite{Mena2007,Lang2017}}
+\begin{columns}
+\column{0.7\textwidth}
+  \begin{block}{1st Order Scheme (Linearly Implicit Euler Scheme)}
+    Consider the IVP $\dot x = f(x)$.
     \begin{equation*}
     \left\{
     \begin{aligned}
@@ -79,8 +66,37 @@
     \right.
     \end{equation*}
   \end{block}
-  \begin{block}{2nd Order Method \parencite{Verwer1999}}
-    \vspace*{-\baselineskip}
+  Consider the DRE $E^\T \dot X E = \Ricc(X)$.
+  \begin{itemize}
+    \item
+      Substitute $K_1 = \frac{1}{\tau}(X_{n+1} - X_n)$ into the stage equation.
+    \item
+      $\tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n = - GSG^\T$
+      \begin{align*}
+        \tilde A_n &= \gamma\tau(A-BB^\T X_n E) - \tfrac{1}{2} E
+        \\
+        G &= \begin{bmatrix}
+          C^\T & E^\T L
+        \end{bmatrix}
+        \\
+        S &= \begin{bmatrix}
+          I & . \\
+          . & DL^\T BB^\T LD + \tfrac{1}{\tau} D
+        \end{bmatrix}
+      \end{align*}
+  \end{itemize}
+  \vfill
+\column{0.3\textwidth}
+\bigpicture{4}
+\end{columns}
+\end{frame}
+
+\begin{frame}<1>{Rosenbrock Method \parencite{Mena2007,Lang2017}}
+\begin{columns}
+\column{0.7\textwidth}
+  \begin{block}{2nd Order Scheme \parencite{Verwer1999}}
+    %\vspace*{-\baselineskip}
+    Consider the IVP $\dot x = f(x)$.
     \begin{equation*}
     \left\{
     \begin{aligned}
@@ -91,5 +107,8 @@
     \right.
     \end{equation*}
   \end{block}
+  Consider the DRE $E^\T \dot X E = \Ricc(X)$.
+\column{0.3\textwidth}
+\bigpicture{4}
 \end{columns}
 \end{frame}

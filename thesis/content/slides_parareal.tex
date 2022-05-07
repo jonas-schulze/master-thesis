@@ -1,7 +1,10 @@
 \subsection{Parareal Method}
 
-\begin{frame}
-  \begin{block}{Parareal Method \parencite{Lions2001}}
+\begin{frame}<1>{Parareal Method}
+\begin{columns}
+\column{0.7\textwidth}
+  \begin{block}{General Formulation \parencite{Lions2001}}
+    For the IVP $\dot u = f(u)$ the method reads
     \begin{equation*}
       \left\{
       \begin{aligned}
@@ -10,15 +13,18 @@
       \end{aligned}
       \right.
     \end{equation*}
+    where $U_0^0 = u(t_0)$.
   \end{block}
-  in low-rank formulation:
-  \begin{equation*}
-    \colorspacing
+  Low-rank formulation (Köhler, Saak, and Lang 2016):
+  % GAMM Annual Meeting
+  \begin{align*}
     U^{k+1}_{n+1}
-    = \underbrace{\colorldlt{\cola}}_{G(U^{k+1}_n)}
+    &= \underbrace{\colorldlt{\cola}}_{G(U^{k+1}_n)}
     + \underbrace{\colorldlt{\colb}}_{F(U^{k}_n)}
     - \underbrace{\colorldlt{\colc}}_{G(U^{k}_n)}
-    =
+    \\
+    &=
+    \colorspacing % must be located in respective cell!
     \Bigg[
     \begin{matrix}
       \tallcmat{\cola} &
@@ -36,9 +42,13 @@
       \widecmat{\colb} \\
       \widecmat{\colc}
     \end{bmatrix}
-  \end{equation*}
+  \end{align*}
+\column{0.3\textwidth}
+\bigpicture{6}
+\end{columns}
 \end{frame}
 
+%TODO: replace caption by parareal update formula?
 \begin{frame}
   \setbeamertemplate{caption}[numbered]
   \frametitle{Parareal Example}
@@ -61,6 +71,7 @@
 \end{columns}
 \end{frame}
 
+\section{Implementation}
 \subsection{Runtime Estimation}
 
 \begin{frame}[fragile]

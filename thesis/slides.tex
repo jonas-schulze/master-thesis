@@ -54,6 +54,8 @@
 
 %TODO: what if the frame needs multiple slides?
 \newcommand\bigpicture[1]{%
+  \onslide
+  \setcounter{beamerpauses}{1}
   \begin{block}{Big Picture}
     \begin{itemize}
       \item
@@ -104,6 +106,7 @@
 
 \input{content/slides_lrsif}
 \input{content/slides_rosenbrock}
+\input{content/slides_adi}
 \input{content/slides_parareal}
 \input{content/slides_results}
 
