@@ -1,0 +1,81 @@
+\subsection{Low-Rank Symmetric Indefinite Factorization}
+
+\begin{frame}<1>{Low-Rank Symmetric Indefinite Factorization (LRSIF)}
+\begin{columns}%[onlytextwidth] % gap seems to be 0.05\textwidth wide
+\column{0.7\textwidth}
+  \begin{itemize}
+    \item
+      \cite{Benner2009}
+    \item
+      Arithmetic:
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} \pm \colorldlt{\colc}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\colc}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \pm \smallcmat{\colc}
+        \end{bmatrix}
+        % flag of the Netherlands:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\colc}
+        \end{bmatrix}
+      \end{equation*}
+    \item
+      Problem: growing storage requirements, \eg
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} + \colorldlt{\cola}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\cola}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \smallcmat{\cola}
+        \end{bmatrix}
+        % flag of Austria:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\cola}
+        \end{bmatrix}
+        %\not\equiv
+        %\mathop{\tallcmat{\cola}}
+        %\mathop{(\smallcmat{\cola} + \smallcmat{\cola})}
+        %\mathop{\widecmat{\cola}}
+      \end{equation*}
+      $\leadsto$ compression necessary
+      (how: \cite{Lang2017})
+    \item
+      Note: \enquote{low-rank} versions of a matrix or algorithm refer to \enquote{LRSIF}
+  \end{itemize}
+\column{0.3\textwidth}
+  \begin{block}{Big Picture}
+    \begin{itemize}
+      \item
+        Differential \Riccati Equation (DRE)
+      \item
+        Solution in LRSIF
+      \pause
+      \item
+        Rosenbrock method\\ to solve DRE
+      \item
+        Rosenbrock stages are ALEs
+      \item
+        ADI method\\ to solve ALE
+      \item
+        Parareal method\\ for speed-up
+    \end{itemize}
+  \end{block}
+\end{columns}
+\end{frame}

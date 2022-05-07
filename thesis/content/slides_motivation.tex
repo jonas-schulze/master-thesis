@@ -1,0 +1,92 @@
+\section{Motivation}
+
+\begin{frame}{Motivation}
+  \begin{columns}[t]
+  \column{0.5\linewidth}
+  \begin{block}{\strut Optimal Control Problem}
+    Consider the \acf{LQR} problem
+    \begin{equation*}
+      \begin{array}{cl}
+        \min_u & \int_{t_0}^{t_f} y^\T y + u^\T u \dt + \tfrac{1}{100} y(t_f)^\T y(t_f) \medskip\\
+        \text{s.t.} & \begin{aligned}[t]
+          E \dot x &= Ax + Bu \\
+          y &= Cx
+        \end{aligned}
+      \end{array}
+    \end{equation*}
+    using
+    \begin{itemize}
+      \item
+        state $x(t)\in\R^n$
+      \item
+        control $u(t)\in\R^m$, $m\ll n$
+      \item
+        output $y(t)\in\R^q$, $q\ll n$
+      \item
+        constant system matrices $E,A,B,C$
+    \end{itemize}
+  \end{block}
+  \pause
+  \column{0.45\linewidth}
+  \begin{block}{\strut Feedback Law \parencite[e.g.][]{Locatelli2011}}
+    The optimal control is given by
+    \begin{equation*}
+      u(t) = -
+        B^\T X(t) E
+      x(t)
+    \end{equation*}
+    where $X(t)\in\R^{n\times n}$ solves the \acf{DRE}
+    \begin{equation*}
+      \left\{
+        \begin{lgathered}
+          E\dot X E = \begin{multlined}[t]
+            C^\T C + A^\T X E + E^\T X A \\ - E^\T X BB^\T X E
+          \end{multlined} \\
+          E^\T X(t_0) E = \tfrac{1}{100} C^\T C
+        \end{lgathered}
+      \right.
+    \end{equation*}
+  \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}<1>{Motivation}
+\begin{columns}%[onlytextwidth] % gap seems to be 0.05\textwidth wide
+\column{0.7\textwidth}
+  \begin{itemize}
+    \item
+      Large-scale problems: a single $X(t)\in\Rnn$, $n=\num{5000000}$, takes \SI{200}{\tera\byte}
+    \item
+      Solution is symmetric and dense, but has low rank
+
+      \parencite[e.g.][]{Penzl2000}
+
+      $\leadsto$ approximation via \acf{LRSIF}:
+      \begin{equation*}
+        \bigmat{X} \approx \mathop{\tallmat{L}} \mathop{\smallmat{D}} \mathop{\widemat{L^{\smash{\T}}}}
+      \end{equation*}
+    \item
+      High accuary requires small time steps or high orders $\leadsto$ \enquote{slow}
+
+      $\leadsto$ Parareal
+  \end{itemize}
+\column{0.3\textwidth}
+  \begin{block}{Big Picture}
+    \begin{itemize}
+      \item
+        Differential \Riccati Equation (DRE)
+      \pause
+      \item
+        Solution in LRSIF
+      \item
+        Rosenbrock method\\ to solve DRE
+      \item
+        Rosenbrock stages are ALEs
+      \item
+        ADI method\\ to solve ALE
+      \item
+        Parareal method\\ for speed-up
+    \end{itemize}
+  \end{block}
+\end{columns}
+\end{frame}
