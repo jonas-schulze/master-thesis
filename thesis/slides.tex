@@ -24,13 +24,14 @@
 \beamertemplatenavigationsymbolsempty
 
 \newcommand\maketocframe[1][]{%
+  \addtocounter{framenumber}{-1}
   \begin{frame}{Outline}
     \tableofcontents[#1]
   \end{frame}
 }
 
 \AtBeginSection{%
-  \maketocframe[currentsection,currentsubsection]
+  \maketocframe[currentsection]
 }
 
 \usepackage[
@@ -95,7 +96,10 @@
   \def\arraystretch{0.75}
 }
 
+\setbeamertemplate{footline}[frame number]
+
 \begin{document}
+\addtocounter{framenumber}{-1} % don't count title page
 
 \frame[plain]{\titlepage}
 \maketocframe
@@ -104,7 +108,7 @@
 
 \input{content/slides_motivation}
 
-\section{Next}
+\section{Mathematical Details}
 
 \input{content/slides_lrsif}
 \input{content/slides_rosenbrock}
@@ -113,14 +117,8 @@
 \input{content/slides_implementation}
 \input{content/slides_results}
 
-\section{Summary}
-
-\begin{frame}
-  \frametitle{Summary}
-  foo
-\end{frame}
-
 \appendix
+\maketocframe
 
 \input{appendix/slides}
 
