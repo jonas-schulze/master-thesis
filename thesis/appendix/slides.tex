@@ -1,35 +1,109 @@
+\section{ADI Stopping Criterion}
 
-\begin{frame}
-  \frametitle{Parareal Dependencies}
-  $
-    U^{k+1}_{n+1} := G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)
-  $
-  \vfill
-  \centering
-  \input{figures/fig_parareal_dag2.tex}
+\begin{frame}{ADI Stopping Criterion}
+  \begin{itemize}
+    \item
+      Spectra of $LDL^\T$ and $L^\T LD$ coincide
+    \item
+      For the LRSIF ADI residual $R_k S R_k^\T$:
+      \begin{equation}
+        \tag{5.30}
+        \norm{R_k^\T R_k S}_F
+        \leq\epsilon \norm{G^\T G S}_F
+      \end{equation}
+  \end{itemize}
 \end{frame}
 
-\section{Larger Rail Configurations}
+\section{Parareal Stopping Criterion}
 
-\begin{frame}[b,fragile]{Duration for Larger Rail Configurations}
+\begin{frame}{Parareal Stopping Criterion}
+  \begin{itemize}
+    \item
+      \texttt{nconverged} successive iterations without significant change:
+      \begin{equation}
+        \tag{7.5}
+        \norm{U_n^k - U_n^{k-1}} \leq \epsilon\max\Set[\big]{
+        \norm{U_n^k}, \norm{U_n^{k-1}}
+        }
+      \end{equation}
+    \item
+      all previous stages must have converged
+
+      (experiments with Van der Pol oscillator: divergence looks like convergence $\implies$ late parareal stages falsly converge)
+
+      \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/3\#note_6343}
+  \end{itemize}
+\end{frame}
+
+\section{Addendum: Larger Rail Configurations}
+\label{app:rail1357}
+
+% worst case estimates: 10 time steps ~> very stiff ~> ADI does likely not converge
+\begin{frame}[b,fragile]{Sequential Runtime for Larger Rail Configurations}
+  \begin{columns}[c]%[onlytextwidth]
+  \column{0.7\textwidth}
+  %TODO: What is wrong with the spacing?!
+  \setlength{\abovecaptionskip}{0pt}
+  \setlength{\intextsep}{0pt}
   \begin{table}
-    \caption{\parbox[t]{0.6\linewidth}{Runtime (as reported by Slurm) of low-rank~Ros1 applied to larger Rail Configurations}}
+    \raggedright
+    \caption{%
+      Runtime (as reported by Slurm) of low-rank~Ros1 applied to larger Rail Configurations.
+      (timings in minutes)
+    }
     \begin{tabular}{%
-      S[table-format=5]
+      c
       S[table-format=3]
-      *{5}{S[input-decimal-markers=:,output-decimal-marker=:,table-format=2:2]}
+      *{1}{S[input-decimal-markers=:,output-decimal-marker=:,table-format=2:2]}
+      c
+      *{3}{S[input-decimal-markers=:,output-decimal-marker=:,table-format=2:2]}
     }
       \toprule
       && \multicolumn{5}{c}{\#Threads} \\
       \cmidrule(rl){3-7}
-      {Size} & {\#Steps} & {1} & {2} & {4} & {8} & {16} \\
+      {Size} & {\#Steps} & {1} & {\alert<2>{2}} & {4} & {8} & {16} \\
       \midrule
-      1357 & 100 & 11:16 & 7:30 & 7:18 & 6:47 & 7:54 \\
-      5177 &  10 & 10:14 & 6:14 & 4:29 & 3:57 & 4:00 \\
-      20209 & 10 & 44:42 & 25:55 & 17:12 & 14:17 & 14:59 \\
+      \alert<2>{\tablenum[table-format=5]{1357}} & 100 & 11:16 & \alert<2>{\tablenum[output-decimal-marker=:,table-format=2.2]{7.30}} & 7:18 & 6:47 & 7:54 \\
+      \tablenum[table-format=5]{5177} &  10 & 10:14 & \tablenum[output-decimal-marker=:,table-format=2.2]{6.14} & 4:29 & 3:57 & 4:00 \\
+      \tablenum[table-format=5]{20209} & 10 & 44:42 & \tablenum[output-decimal-marker=:,table-format=2.2]{25.55} & 17:12 & 14:17 & 14:59 \\
       \bottomrule
     \end{tabular}
   \end{table}
+  \column{0.32\textwidth}
+  \pause
+  \begin{block}{Parareal Runtime}
+    Educated guesses:
+    \begin{itemize}
+      \item
+        $t_G \approx \frac{\SI[output-decimal-marker=:]{7.30}{\minute}}{100} = {}\mathrlap{ \SI[round-precision=1]{4.5}{\second}}$
+      \item
+        $t_F \approx 100 t_G \approx \SI{45}{\second}$
+      \item
+        $\trampup \approx \SI{2}{\second}$
+        % :-(
+      \item
+        $\hattpar < \SI{2}{\hour}$
+        %\rlap{% otherwise the goto button does not render properly
+        %\hyperlink{runtime}{\beamergotobutton{Runtime Model}}
+        %}
+        % $\twarmup$ ignored, $\trampup\approx\SI{2}{\second}$
+        % ignored overheads: Julia start-up, writing results to disk
+        % actual overhead: ~10min
+        % actual t_F much smaller (problem less stiff for smaller time steps ~> fewer ADI steps necessary)
+    \end{itemize}
+    \medskip
+    Actual measurements:
+    \begin{itemize}
+      \item
+        $\tpar \approx \SI{50}{\minute}$
+      \item
+        $\text{overheads} \approx \SI{10}{\minute}$
+    \end{itemize}
+  \end{block}
+  \hyperlink{runtime}{\beamergotobutton{Runtime Model}}
+  \hyperlink{speedup<2>}{\beamergotobutton{Parallel Scaling}}
+  \end{columns}
+  \onslide
   \vfill
   \begin{lstlisting}
 export MY_RAIL=1357 MY_KIND=lowrank MY_N=100 MY_O=1
@@ -39,7 +113,7 @@ done
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[b,fragile,label=rail1357]{Rail1357}
+\begin{frame}[b,fragile,label=rail1357]{Parareal Timeline of LRSIF 1/1 applied to Rail1357}
   \begin{columns}[T]
   \column{0.6\textwidth}
   \begin{figure}
@@ -115,7 +189,7 @@ sbatch -n 225 -c2 -J lr11 par.job
 \section{Errata: Parareal Reference Solution}
 
 \begin{frame}[fragile]
-  \frametitle{Parareal Reference Solution}
+  \frametitle{Errata: Parareal Reference Solution}
   \begin{itemize}
     \item
       Thesis Figure 7.7: parareal order 4/4
