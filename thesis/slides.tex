@@ -52,27 +52,29 @@
   \end{beamercolorbox}
 }
 
-%TODO: what if the frame needs multiple slides?
-\newcommand\bigpicture[1]{%
+% Usage: \bigpicture[2][3]
+% Show the first 3 items for 2 slides/overlays.
+% Afterwards, the items uncover one by one.
+\newcommand\bigpicture[2][1]{%
   \onslide
-  \setcounter{beamerpauses}{1}
+  \setcounter{beamerpauses}{#1}
   \begin{block}{Big Picture}
     \begin{itemize}
       \item
         Differential \Riccati Equation (DRE)
-      \ifnum#1<2 \pause\fi
+      \ifnum#2<2 \pause\fi
       \item
         Solution in LRSIF
-      \ifnum#1<3 \pause\fi
+      \ifnum#2<3 \pause\fi
       \item
         Rosenbrock method\\ to solve DRE
-      \ifnum#1<4 \pause\fi
+      \ifnum#2<4 \pause\fi
       \item
         Rosenbrock stages are ALEs
-      \ifnum#1<5 \pause\fi
+      \ifnum#2<5 \pause\fi
       \item
         ADI method\\ to solve ALE
-      \ifnum#1<6 \pause\fi
+      \ifnum#2<6 \pause\fi
       \item
         Parareal method\\ for speed-up
     \end{itemize}
