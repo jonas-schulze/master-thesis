@@ -13,15 +13,17 @@
       \end{aligned}
       \right.
     \end{equation*}
-    where $U_0^0 = u(t_0)$.
+    where $U_0^0 := u(t_0)$. $U_n^k$ converges to $u(t_n)$ as $k\to\infty$.
   \end{block}
+  \begin{itemize}
+    \item
   Low-rank formulation (Köhler, Saak, and Lang 2016):
   % GAMM Annual Meeting
   \begin{align*}
     U^{k+1}_{n+1}
-    &= \underbrace{\colorldlt{\cola}}_{G(U^{k+1}_n)}
-    + \underbrace{\colorldlt{\colb}}_{F(U^{k}_n)}
-    - \underbrace{\colorldlt{\colc}}_{G(U^{k}_n)}
+    &= \colorldlt{\cola}
+    + \colorldlt{\colb}
+    - \colorldlt{\colc}
     \\
     &=
     \colorspacing % must be located in respective cell!
@@ -43,6 +45,10 @@
       \widecmat{\colc}
     \end{bmatrix}
   \end{align*}
+    \item
+      Speed-up $\approx t_F/t_G$ for large $N$,
+      where $0 \leq n \leq N$
+  \end{itemize}
 \column{0.3\textwidth}
 \bigpicture{6}
 \end{columns}
