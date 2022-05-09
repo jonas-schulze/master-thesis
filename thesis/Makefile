@@ -4,9 +4,11 @@ DEPS = Makefile *.bib *.tex */*.tex githash.txt
 TABLES_CSV = $(wildcard tables/*.csv)
 TABLES_TEX = $(TABLES_CSV:.csv=.tex)
 DEPS += $(TABLES_TEX)
+CODE_JL = $(wildcard code/standalone_*.jl)
+CODE_TXT = $(addsuffix .txt, $(CODE_JL))
 
 .PHONY: update-slides
-update-slides:
+update-slides: $(CODE_TXT)
 	lualatex -output-directory $(BUILDDIR) slides
 
 .PHONY: update
@@ -42,3 +44,6 @@ tables/%.tex: tables/%.csv
 .PHONY: githash.txt
 githash.txt:
 	git rev-parse --short HEAD > $@
+
+code/%.jl.txt: code/%.jl
+	sed -e 's/₀/%\\textsubscript{0}%/g' -e 's/ᵀ/%\\textsuperscript{T}%/g' $< > $@
