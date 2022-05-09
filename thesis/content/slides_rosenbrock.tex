@@ -65,19 +65,19 @@
 \begin{itemize}
 \item
   Consider the DRE $E^\T \dot X E = \Ricc(X)$.
-  \newcommand\U{\alert{\makebox[\widthof{$X_n$}]{$U$}}}
+  \newcommand\U{\structure{\makebox[\widthof{$X_n$}]{$U$}}}
   \begin{align*}
     \Ricc(X_n) &= C^\T C + A^\T X_n E + E^\T X_n A - E^\T X_n BB^\T X_n E
     \\
     \pause
-    \Jac(\alert{U}) &= \makebox[\widthof{$C^\T C$}]{$0$}
+    \Jac(\structure{U}) &= \makebox[\widthof{$C^\T C$}]{$0$}
       + A^\T \U E + E^\T \U A
       \begin{lgathered}[t]
         {} - E^\T \U BB^\T X_n E \\
         {} - E^\T X_n BB^\T \U E
       \end{lgathered} \\
     \pause
-    &= (A - BB^\T X_n E)^\T \alert U E + E^\T \alert U (A - BB^\T X_n E)
+    &= (A - BB^\T X_n E)^\T \structure U E + E^\T \structure U (A - BB^\T X_n E)
   \end{align*}
 \item
   The Jacobian is a Lyapunov operator!
