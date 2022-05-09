@@ -56,26 +56,38 @@
 \end{bigpicturecols}
 \end{frame}
 
-%TODO: replace caption by parareal update formula?
-\begin{frame}[plain]
-  \setbeamertemplate{caption}[numbered]
+\begin{frame}<-18>[plain,label=parareal_anim]
+  \setlength{\intextsep}{0pt}
+  \only<-18>{%
+    \setbeamertemplate{caption}[numbered]
+    \setlength{\abovecaptionskip}{0pt}
+    \renewcommand\thefigure{6.4} % number in thesis
+  }
   \frametitle{Parareal Example}
 \begin{columns}
 \column{0.65\textwidth}
   \begin{figure}
+  $U^{k+1}_{n+1} := G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)$
   \foreach \k in {0,1} {%
   \foreach \n [evaluate={\i=int(1+\n+\k*7)}] in {0,...,6} {%
-    \includegraphics<\i>[width=\textwidth]{figures/parareal-anim/step-\k-\n.pdf}%
+    \includegraphics<\i>[height=0.65\textwidth]{figures/parareal-anim/step-\k-\n.pdf}%
   }}%
-  \includegraphics<15>[width=\textwidth]{figures/parareal-anim/step-2-5.pdf}%
-  \includegraphics<16>[width=\textwidth]{figures/parareal-anim/step-2-6.pdf}%
-  \includegraphics<17>[width=\textwidth]{figures/parareal-anim/step-3-5.pdf}%
-  \includegraphics<18>[width=\textwidth]{figures/parareal-anim/step-3-6.pdf}%
-  \renewcommand\thefigure{6.4} % number in thesis
-  \caption{Parareal method applied to a linear ODE}
+  \includegraphics<15>[height=0.65\textwidth]{figures/parareal-anim/step-2-5.pdf}%
+  \includegraphics<16>[height=0.65\textwidth]{figures/parareal-anim/step-2-6.pdf}%
+  \includegraphics<17>[height=0.65\textwidth]{figures/parareal-anim/step-3-5.pdf}%
+  \includegraphics<18>[height=0.65\textwidth]{figures/parareal-anim/step-3-6.pdf}%
+  \includegraphics<19>[height=0.625\textwidth]{figures/slides_timeline_simple}% WTF is wrong with the height?!
+  % The update is not always visible; for k=3 most take less than 0.001 seconds, while t_F is about
+  \caption{\alt<-18>{%
+    Parareal method applied to a linear ODE
+  }{%
+    Timeline diagram for $n \leq N=10$ and $k \leq K = 4$
+  }}
   \end{figure}
 \column{0.35\textwidth}
   \input{figures/slide_parareal_anim.tex}
 \end{columns}
 \end{frame}
 
+% Move comparison of dependencies and timeline to its own frame:
+\againframe<19>[plain]{parareal_anim}

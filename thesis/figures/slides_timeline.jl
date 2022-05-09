@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 1e94b2e6-cc71-11ec-3960-03c2d41331ac
-using DrWatson
+using DrWatson, Revise
 
 # ╔═╡ 004fbc60-14e1-44b3-867e-8433bbf5d462
 using PlutoUI, Stuff, DataFrames, StatsBase
@@ -63,20 +63,37 @@ desc = Dict(
 	:WarmingUpF => "Warm up fine solver",
 	:ComputingC => "Coarse solver",
 	:ComputingF => "Fine solver",
+	:ComputingU => "Update",
 )
+
+# ╔═╡ c464eccd-43e4-403f-8e21-53e8ef0fb1b7
+colors = to_colormap(:sun, length(tags))
+
+# ╔═╡ 90b2c610-bd07-4334-910a-afd67eb84f92
+mpiblue = Makie.Colors.colorant"#33a5c3"
+
+# ╔═╡ 56a1dc76-345b-4419-a991-e03c51057b02
+begin
+	colormap = Dict(t => colors[i] for (i, t) in enumerate(tags))
+	colormap[:ComputingU] = mpiblue
+	colormap
+end
 
 # ╔═╡ 9073e7f7-212c-4f87-b67e-80dd41ffbe9f
 function fig_timeline(
 	df; 
 	resolution = (800,300), 
 	yticks,
+	xticks::Bool = true,
 	legend_horizontal::Bool = false,
 	xlims = nothing,
 	ylims = nothing,
 	ylabel = "Parareal Stage",
+	tags = tags,
+	figure_padding = 1,
 )
 	fig = Figure(;
-		figure_padding = 1,
+		figure_padding,
 		resolution
 	)
 	ax = Axis(
@@ -85,6 +102,8 @@ function fig_timeline(
 		ylabel,
 		xwalltime...,
 	)
+
+	xticks || hidexdecorations!(ax, label=false)
 
 	# Adjust y limits:
 	if !isnothing(ylims)
@@ -101,8 +120,6 @@ function fig_timeline(
 	end
 
 	# Color events by tag:
-	colors = to_colormap(:sun, length(tags))
-	colormap = Dict(t => colors[i] for (i, t) in enumerate(tags))
 	colorcol = [colormap[t] for t in df.tag]
 	timeline!(ax, df, colorcol)
 
@@ -120,12 +137,6 @@ function fig_timeline(
 
 	fig
 end
-
-# ╔═╡ c464eccd-43e4-403f-8e21-53e8ef0fb1b7
-colors = to_colormap(:sun, length(tags))
-
-# ╔═╡ 56a1dc76-345b-4419-a991-e03c51057b02
-colormap = Dict(t => colors[i] for (i, t) in enumerate(tags))
 
 # ╔═╡ 153e7c69-de0e-424b-ab98-ec06289f8a8c
 md"""
@@ -246,6 +257,77 @@ fig1357_zoom = fig_timeline(
 # ╔═╡ 9e65dd1d-e213-418e-85b9-ac3595b0f7d0
 save(projectdir("thesis", "figures", "slides_timeline1357_zoom.pdf"), fig1357_zoom)
 
+# ╔═╡ 9f8432e8-bea2-48bb-87c8-fa94295631a2
+md"""
+## slides\_timeline\_simple.pdf
+
+Grokking the analogy between a timeline chart and the general parareal dependencies is not straight-forward.
+Create a simple timeline to stress this connection.
+Use the first couple of stages of the Dense 1/1 job ignoring JIT warm-up.
+"""
+
+# ╔═╡ c9feeff0-b743-48e7-aa9f-01be9a2be6c9
+nstages = 10
+
+# ╔═╡ 5c76c03e-d4bf-475f-8820-7f69fd61793b
+K = 3
+
+# ╔═╡ e057ea98-942d-479c-963b-9471ccc96a52
+tags_simple = [
+	:ComputingC,
+	:ComputingF,
+	:ComputingU,
+]
+
+# ╔═╡ c37523cf-904d-4386-8696-39057c6e0c63
+ldir_simple = let
+	_jobid = 351236 # de11
+	#_jobid = 351158 # lr11 TODO: reduce ramp-up delay by warming-up transmission code
+	ldirs = filter(contains(string(_jobid)), readdir(logdir()))
+	filter!(startswith("rail371"), ldirs)
+	only(ldirs)
+end
+
+# ╔═╡ b7de6131-9b16-4086-b43b-759103d6f963
+long_simple = load_eventlog(LogFmt(), logdir(ldir_simple); range=1:nstages);
+
+# ╔═╡ 47b60f01-6332-403e-ab02-780f8b8d9030
+wide_simple = prep_eventlog(long_simple, tags_simple);
+
+# ╔═╡ cce7b7f5-161e-475c-9a1d-95aded14d0e3
+wide_simple2 = filter(:k => <=(K), wide_simple);
+
+# ╔═╡ b98bc108-fb95-4483-8fa9-b56f72d2a7f3
+fig_simple = fig_timeline(
+	wide_simple2;
+	xticks=false,
+	yticks=0:2:nstages,
+	legend_horizontal=true,
+	tags=tags_simple,
+	resolution=(600,400),
+	figure_padding=20, # roughly matches parareal-anim on slides
+)
+
+# ╔═╡ b05bb748-3f30-425c-b34f-99d318d30eae
+save(projectdir("thesis", "figures", "slides_timeline_simple.pdf"), fig_simple)
+
+# ╔═╡ 8f59b5b1-2d88-45ac-94f1-e143b3b6cb99
+projectdir("thesis", "figures", "slides_timeline_simple.pdf")
+
+# ╔═╡ 758aa91b-a854-4291-9b30-f81b397bfb36
+md"""
+The update is not always visible:
+for $k=3$ most take less than 1/1000 second.
+For comparison, $t_F$ is about
+$(round(Int, Stuff.TimelineModel.t_F(wide_simple2)))
+seconds.
+"""
+
+# ╔═╡ e00e5efb-e095-4c90-99e0-8da7e8b0fac7
+filter(wide_simple2) do r
+	r.k == 3 && r.tag == :ComputingU
+end
+
 # ╔═╡ fc26e83e-937e-4e80-850c-8187a664d83d
 md"# Internal Stuff"
 
@@ -265,6 +347,7 @@ TableOfContents()
 # ╠═eae5c032-52ab-457b-95a8-f556bd81a5dd
 # ╠═c464eccd-43e4-403f-8e21-53e8ef0fb1b7
 # ╠═56a1dc76-345b-4419-a991-e03c51057b02
+# ╠═90b2c610-bd07-4334-910a-afd67eb84f92
 # ╟─153e7c69-de0e-424b-ab98-ec06289f8a8c
 # ╠═f2c751c4-db84-421f-aad9-2a5fe0c760d3
 # ╠═52706b20-6b76-4d9a-be3e-a7849efe1af0
@@ -288,6 +371,19 @@ TableOfContents()
 # ╠═d30d494b-ca0d-4a0b-ad31-96709a5db3cd
 # ╠═9dc3e51d-186c-4ed3-87bd-9577524906d8
 # ╠═9e65dd1d-e213-418e-85b9-ac3595b0f7d0
+# ╟─9f8432e8-bea2-48bb-87c8-fa94295631a2
+# ╠═c9feeff0-b743-48e7-aa9f-01be9a2be6c9
+# ╠═5c76c03e-d4bf-475f-8820-7f69fd61793b
+# ╠═e057ea98-942d-479c-963b-9471ccc96a52
+# ╠═c37523cf-904d-4386-8696-39057c6e0c63
+# ╠═b7de6131-9b16-4086-b43b-759103d6f963
+# ╠═47b60f01-6332-403e-ab02-780f8b8d9030
+# ╠═cce7b7f5-161e-475c-9a1d-95aded14d0e3
+# ╠═b98bc108-fb95-4483-8fa9-b56f72d2a7f3
+# ╠═b05bb748-3f30-425c-b34f-99d318d30eae
+# ╠═8f59b5b1-2d88-45ac-94f1-e143b3b6cb99
+# ╟─758aa91b-a854-4291-9b30-f81b397bfb36
+# ╟─e00e5efb-e095-4c90-99e0-8da7e8b0fac7
 # ╠═fc26e83e-937e-4e80-850c-8187a664d83d
 # ╠═1e94b2e6-cc71-11ec-3960-03c2d41331ac
 # ╠═1f9824db-7d97-43ad-b786-0e88d2becd01

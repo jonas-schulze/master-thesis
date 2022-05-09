@@ -104,6 +104,7 @@ end
 module TimelineModel
 
 using DataFrames
+using StatsBase: median
 
 export t_warmup, t_rampup, t_F, t_G, t_par
 export t̂_par, t̂_seq
