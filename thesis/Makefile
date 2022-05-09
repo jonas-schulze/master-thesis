@@ -6,9 +6,10 @@ TABLES_TEX = $(TABLES_CSV:.csv=.tex)
 DEPS += $(TABLES_TEX)
 CODE_JL = $(wildcard code/standalone_*.jl)
 CODE_TXT = $(addsuffix .txt, $(CODE_JL))
+FIGS = figures/Steelprofile1.jpg
 
 .PHONY: update-slides
-update-slides: $(CODE_TXT)
+update-slides: $(CODE_TXT) $(FIGS)
 	lualatex -output-directory $(BUILDDIR) slides
 
 .PHONY: update
@@ -47,3 +48,6 @@ githash.txt:
 
 code/%.jl.txt: code/%.jl
 	sed -e 's/₀/%\\textsubscript{0}%/g' -e 's/ᵀ/%\\textsuperscript{T}%/g' $< > $@
+
+figures/Steelprofile1.jpg:
+	curl https://morwiki.mpi-magdeburg.mpg.de/morwiki/images/8/82/Steelprofile1.jpg > $@

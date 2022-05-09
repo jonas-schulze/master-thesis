@@ -1,6 +1,7 @@
 output
 code/*.jl.txt
 figures/*.pdf
+figures/*.jpg
 figures/*/*.pdf
 githash.txt
 

@@ -27,3 +27,17 @@
 \newcommand\tallmat[2][6mm]{\mat{minimum size=#1, minimum height=2cm}{#2}}
 \newcommand\widemat[2][6mm]{\mat{minimum size=#1, minimum width=2cm}{#2}}
 \newcommand\smallmat[2][6mm]{\mat{minimum size=#1}{#2}}
+
+\newcommand\tallcmat[1]{\tikz[baseline=-0.5ex]\node[tallmat,fill=#1] {};}
+\newcommand\smallcmat[1]{\tikz\node[smallmat,fill=#1] {};}
+\newcommand\widecmat[1]{\tikz\node[widemat,fill=#1] {};}
+\newcommand\colorldlt[1]{%
+  \mathop{\tallcmat{#1}}
+  \mathop{\smallcmat{#1}}
+  \mathop{\widecmat{#1}}
+}
+
+\newcommand\colorspacing{%
+  \arraycolsep=3pt
+  \def\arraystretch{0.75}
+}

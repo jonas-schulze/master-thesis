@@ -23,7 +23,7 @@
       \item
         output $y(t)\in\R^q$, $q\ll n$
       \item
-        constant system matrices $E,A,B,C$
+        constant system matrices $E,A,B,C$.
     \end{itemize}
   \end{block}
   \pause
@@ -32,7 +32,7 @@
     The optimal control is given by
     \begin{equation*}
       u(t) = -
-        B^\T X(t) E
+        B^\T X(t_f+t_0-t) E
       x(t)
     \end{equation*}
     where $X(t)\in\R^{n\times n}$ solves the \acf{DRE}
@@ -43,11 +43,42 @@
             C^\T C + A^\T X E + E^\T X A \\ - E^\T X BB^\T X E
           \end{multlined} \\
           E^\T X(t_0) E = \tfrac{1}{100} C^\T C
+          .
         \end{lgathered}
       \right.
     \end{equation*}
   \end{block}
   \end{columns}
+\end{frame}
+
+\begin{frame}{Oberwolfach Rail}
+\begin{columns}[onlytextwidth]
+\column{0.6\textwidth}
+  \begin{itemize}
+    \item
+      \cite{Benner2005}
+    \item
+      Linearized 2D heat equation:
+      \begin{align*}
+        c \rho\, \partial_t x &= \lambda\,\Delta x, && x\in\Omega\\
+        \lambda\, \partial_n x &= q_k (u_k - x), && x \in\Gamma_k, k=1,\ldots,7\\
+        \partial_n x &= 0, && x\in\Gamma_0
+      \end{align*}
+    \item
+      FEM discretizations / mesh refinements with
+      $n\in\Set{371,1357,5177,\num{20209},\ldots}$ states,\\
+      $m=7$ inputs,
+      $q=6$ outputs
+    \item
+      Time horizon $t\in[\SI{0}{\second}, \SI{45}{\second}]$
+    \item
+      Resulting $(E, A, B, C)$ system:
+      $E \succ 0$ and $A \prec 0$\\
+      $\leadsto$ uniquely solvable
+  \end{itemize}
+\column{0.37\textwidth}
+  \includegraphics[width=\textwidth]{figures/Steelprofile1.jpg}
+\end{columns}
 \end{frame}
 
 \begin{frame}<1>{Motivation}

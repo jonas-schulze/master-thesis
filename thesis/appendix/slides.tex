@@ -1,39 +1,23 @@
-\section{ADI Stopping Criterion}
-
-\begin{frame}{ADI Stopping Criterion}
-  \begin{itemize}
-    \item
-      Spectra of $LDL^\T$ and $L^\T LD$ coincide
-    \item
-      For the LRSIF ADI residual $R_k S R_k^\T$:
-      \begin{equation}
-        \tag{5.30}
-        \norm{R_k^\T R_k S}_F
-        \leq\epsilon \norm{G^\T G S}_F
-      \end{equation}
-  \end{itemize}
-\end{frame}
-
-\section{Parareal Stopping Criterion}
-
-\begin{frame}{Parareal Stopping Criterion}
-  \begin{itemize}
-    \item
-      \texttt{nconverged} successive iterations without significant change:
-      \begin{equation}
-        \tag{7.5}
-        \norm{U_n^k - U_n^{k-1}} \leq \epsilon\max\Set[\big]{
-        \norm{U_n^k}, \norm{U_n^{k-1}}
-        }
-      \end{equation}
-    \item
-      all previous stages must have converged
-
-      (experiments with Van der Pol oscillator: divergence looks like convergence $\implies$ late parareal stages falsly converge)
-
-      \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/3\#note_6343}
-  \end{itemize}
-\end{frame}
+%\section{Parareal Stopping Criterion}
+%
+%\begin{frame}{Parareal Stopping Criterion}
+%  \begin{itemize}
+%    \item
+%      \texttt{nconverged} successive iterations without significant change:
+%      \begin{equation}
+%        \tag{7.5}
+%        \norm{U_n^k - U_n^{k-1}} \leq \epsilon\max\Set[\big]{
+%        \norm{U_n^k}, \norm{U_n^{k-1}}
+%        }
+%      \end{equation}
+%    \item
+%      all previous stages must have converged
+%
+%      (experiments with Van der Pol oscillator: divergence looks like convergence $\implies$ late parareal stages falsly converge)
+%
+%      \url{https://gitlab.mpi-magdeburg.mpg.de/jschulze/ParaReal.jl/-/issues/3\#note_6343}
+%  \end{itemize}
+%\end{frame}
 
 \section{Addendum: Larger Rail Configurations}
 \label{app:rail1357}
@@ -61,9 +45,9 @@
       \toprule
       && \multicolumn{5}{c}{\#Threads} \\
       \cmidrule(rl){3-7}
-      {Size} & {\#Steps} & {1} & {\alert<2>{2}} & {4} & {8} & {16} \\
+      {Size} & {\#Steps} & {1} & {\structure<2>{2}} & {4} & {8} & {16} \\
       \midrule
-      \alert<2>{\tablenum[table-format=5]{1357}} & 100 & 11:16 & \alert<2>{\tablenum[output-decimal-marker=:,table-format=2.2]{7.30}} & 7:18 & 6:47 & 7:54 \\
+      \structure<2>{\tablenum[table-format=5]{1357}} & 100 & 11:16 & \structure<2>{\tablenum[output-decimal-marker=:,table-format=2.2]{7.30}} & 7:18 & 6:47 & 7:54 \\
       \tablenum[table-format=5]{5177} &  10 & 10:14 & \tablenum[output-decimal-marker=:,table-format=2.2]{6.14} & 4:29 & 3:57 & 4:00 \\
       \tablenum[table-format=5]{20209} & 10 & 44:42 & \tablenum[output-decimal-marker=:,table-format=2.2]{25.55} & 17:12 & 14:17 & 14:59 \\
       \bottomrule
@@ -77,12 +61,12 @@
       \item
         $t_G \approx \frac{\SI[output-decimal-marker=:]{7.30}{\minute}}{100} = {}\mathrlap{ \SI[round-precision=1]{4.5}{\second}}$
       \item
-        $t_F \approx 100 t_G \approx \SI{45}{\second}$
+        $t_F \approx 100 t_G \approx \SI{450}{\second}$
       \item
         $\trampup \approx \SI{2}{\second}$
         % :-(
       \item
-        $\hattpar < \SI{2}{\hour}$
+        $\hattpar \approx \SI{130}{\min}$
         %\rlap{% otherwise the goto button does not render properly
         %\hyperlink{runtime}{\beamergotobutton{Runtime Model}}
         %}
@@ -181,7 +165,7 @@ done
   %\begin{visibleenv}<2>
   \begin{lstlisting}
 export MY_ROUNDROBIN=2 MY_RAIL=1357 MY_KIND=lowrank MY_NF=100
-sbatch -n 225 -c2 -J lr11 par.job
+sbatch --time=4:00:00 -n 225 -c2 -J lr11 par.job
   \end{lstlisting}
   %\end{visibleenv}
   %MY_ROUNDROBIN=2 MY_RAIL=1357 MY_KIND=lowrank MY_NF=100 sbatch -pmedium --time=4:00:00 -n 225 -c2 -J lr11-1357 par.job

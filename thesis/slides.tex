@@ -14,6 +14,7 @@
 %\usepackage{dejavu-otf} % default Makie font: DejaVu Sans
 %\usefonttheme{professionalfonts}
 
+%TODO: fix spacing between row 1 and 2
 \title{A Low-Rank Parareal Solver for\\ Differential Riccati Equations\\ Written in Julia}
 \author{Jonas Schulze}
 \institute{Faculty of Mathematics\\ Otto-von-Guericke-Universität Magdeburg}
@@ -26,9 +27,10 @@
 \setbeamertemplate{footline}[default]
 \beamertemplatenavigationsymbolsempty
 
+\newcommand\outlinename{Outline}
 \newcommand\maketocframe[1][]{%
   \addtocounter{framenumber}{-1}
-  \begin{frame}{Outline}
+  \begin{frame}{\outlinename}
     \tableofcontents[#1]
   \end{frame}
 }
@@ -93,20 +95,6 @@
 {\begin{columns}[onlytextwidth]\column{0.7\textwidth}}
 {\end{columns}}
 
-\newcommand\tallcmat[1]{\tikz[baseline=-0.5ex]\node[tallmat,fill=#1] {};}
-\newcommand\smallcmat[1]{\tikz\node[smallmat,fill=#1] {};}
-\newcommand\widecmat[1]{\tikz\node[widemat,fill=#1] {};}
-\newcommand\colorldlt[1]{%
-  \mathop{\tallcmat{#1}}
-  \mathop{\smallcmat{#1}}
-  \mathop{\widecmat{#1}}
-}
-
-\newcommand\colorspacing{%
-  \arraycolsep=3pt
-  \def\arraystretch{0.75}
-}
-
 \begin{document}
 \addtocounter{framenumber}{-1} % don't count title page
 
@@ -127,6 +115,7 @@
 \input{content/slides_results}
 
 \appendix
+\renewcommand\outlinename{Appendix}
 \maketocframe
 
 \input{appendix/slides}
