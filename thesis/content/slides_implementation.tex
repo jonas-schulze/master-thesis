@@ -13,24 +13,25 @@
   \setbeamertemplate{caption}[numbered]
   \frametitle{Effect of JIT Compiler Warm-Up}
   \begin{columns}
-  \column{0.65\textwidth}
+  \column{0.625\textwidth}
     \begin{figure}
     \includegraphics[width=\textwidth]{figures/fig_impl_warmup1.pdf}%
     \renewcommand\thefigure{7.1} % number in thesis
-    \caption{Timeline charts}
+    \caption{Timeline charts\rlap{\hspace{3cm}%
     \lstinline!bash fig:impl:warmup.job!
+    }}
     \end{figure}
   \column{0.35\textwidth}
     \begin{itemize}
       \item
         No warm-up:\\ sequential compilation
-        \vspace{2em}
+        \vspace{2.4em}
       \item
         Warming-up $G$:\\ parallel compilation
-        \vspace{2em}
+        \vspace{2.4em}
       \item
         Warming-up $F,G$:\\ no further benefit
-        \vspace{2em}
+        \vspace{2.4em}
       \pause
       \item[$\leadsto$]
         Always warm-up $G$\\ and $G$ only

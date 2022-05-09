@@ -1,7 +1,7 @@
 \section{Motivation}
 
 \begin{frame}{Motivation}
-  \begin{columns}[t]
+  \begin{columns}[t,onlytextwidth]
   \column{0.5\linewidth}
   \begin{block}{\strut Optimal Control Problem}
     Consider the \acf{LQR} problem
@@ -27,7 +27,7 @@
     \end{itemize}
   \end{block}
   \pause
-  \column{0.45\linewidth}
+  \column{0.47\linewidth}
   \begin{block}{\strut Feedback Law \parencite[e.g.][]{Locatelli2011}}
     The optimal control is given by
     \begin{equation*}
@@ -51,8 +51,7 @@
 \end{frame}
 
 \begin{frame}<1>{Motivation}
-\begin{columns}%[onlytextwidth] % gap seems to be 0.05\textwidth wide
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{itemize}
     \item
       Large-scale problems: a single $X(t)\in\Rnn$, $n=\num{5000000}$, takes \SI{200}{\tera\byte}
@@ -70,7 +69,7 @@
 
       $\leadsto$ Parareal
   \end{itemize}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{1}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}

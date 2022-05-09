@@ -1,8 +1,7 @@
 \subsection{Rosenbrock Method}
 
 \begin{frame}<1>{Rosenbrock Method}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{block}{General Formulation}
     For the initial value problem (IVP) $\dot x = f(x)$ the method reads
     \begin{equation*}
@@ -21,14 +20,13 @@
     \end{equation*}
     where $\Jac := f'(x_n)$ denotes the Jacobian.
   \end{block}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{3}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}
 
 \begin{frame}<1>{Rosenbrock Method}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{block}{1st Order Scheme (Linearly Implicit Euler Scheme)}
     For the IVP $\dot x = f(x)$ the method reads
     \begin{equation*}
@@ -54,14 +52,13 @@
     \right.
     \end{equation*}
   \end{block}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{3}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}
 
 \begin{frame}<-4>{Rosenbrock Method}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
 \begin{itemize}
 \item
   Consider the DRE $E^\T \dot X E = \Ricc(X)$.
@@ -86,14 +83,13 @@
   $I - \gamma\tau\Jac$ is a Lyapunov operator,
   \ie all Rosenbrock stages are Algebraic Lyapunov Equations (ALEs).
 \end{itemize}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture[3]{3}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}
 
 \begin{frame}<1>{1st Order Rosenbrock Scheme}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{itemize}
     \item
       Linearly implicit Euler scheme
@@ -119,16 +115,16 @@
           . & DL^\T BB^\T LD + \tfrac{1}{\tau} D
         \end{bmatrix}
       \end{align*}
+      \vspace{-\baselineskip}
   \end{itemize}
   \vfill
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{4}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}
 
 \begin{frame}<1>{2nd Order Rosenbrock Scheme}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{itemize}
     \item
       \cite{Verwer1999}
@@ -151,7 +147,7 @@
 %    \item
 %      Embedded 1st order method: $\tilde X_{n+1} = X_n + \gamma\tau K_1$
   \end{itemize}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{4}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}

@@ -1,8 +1,7 @@
 \subsection{Parareal Method}
 
 \begin{frame}<-2>{Parareal Method}
-\begin{columns}
-\column{0.7\textwidth}
+\begin{bigpicturecols}
   \begin{block}{General Formulation \parencite{Lions2001}}
     For the IVP $\dot u = f(u)$ the method reads
     \begin{equation*}
@@ -52,13 +51,13 @@
       Speed-up $\approx t_F/t_G$ for large $N$,
       where $0 \leq n \leq N$
   \end{itemize}
-\column{0.3\textwidth}
+\column{\bigpicturewidth}
 \bigpicture{6}
-\end{columns}
+\end{bigpicturecols}
 \end{frame}
 
 %TODO: replace caption by parareal update formula?
-\begin{frame}
+\begin{frame}[plain]
   \setbeamertemplate{caption}[numbered]
   \frametitle{Parareal Example}
 \begin{columns}

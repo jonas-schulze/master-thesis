@@ -19,8 +19,9 @@
 \subject{subject}
 
 % beamer appearance
-\setbeamercolor{block body}{bg=mpi} % for debugging
+\usetheme[english,CSC,compacthead]{mpi2015}
 \setbeamercovered{transparent}
+\setbeamertemplate{footline}[default]
 \beamertemplatenavigationsymbolsempty
 
 \newcommand\maketocframe[1][]{%
@@ -71,7 +72,7 @@
         Rosenbrock method\\ to solve DRE
       \ifnum#2<4 \pause\fi
       \item
-        Rosenbrock stages are ALEs
+        Rosenbrock stages\\ are ALEs
       \ifnum#2<5 \pause\fi
       \item
         ADI method\\ to solve ALE
@@ -81,6 +82,14 @@
     \end{itemize}
   \end{block}
 }
+
+% gap between column and border seems to be 0.05\textwidth wide
+% except: 0.03\textwidth for mpi2015 theme using [onlytextwidth]
+\newcommand\bigpicturewidth{0.27\textwidth}
+
+\newenvironment{bigpicturecols}
+{\begin{columns}[onlytextwidth]\column{0.7\textwidth}}
+{\end{columns}}
 
 \newcommand\tallcmat[1]{\tikz[baseline=-0.5ex]\node[tallmat,fill=#1] {};}
 \newcommand\smallcmat[1]{\tikz\node[smallmat,fill=#1] {};}
@@ -95,8 +104,6 @@
   \arraycolsep=3pt
   \def\arraystretch{0.75}
 }
-
-\setbeamertemplate{footline}[frame number]
 
 \begin{document}
 \addtocounter{framenumber}{-1} % don't count title page

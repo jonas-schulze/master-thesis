@@ -4,13 +4,14 @@
 
 \begin{frame}{Numerical Results}
   \setbeamertemplate{caption}[numbered]
-  \begin{columns}
+  \begin{columns}[onlytextwidth]
   \column{0.7\textwidth}
   \begin{minipage}[b][0.75\textwidth][c]{\textwidth}
+  \setlength{\belowcaptionskip}{0pt}
 \only<+>{
   \begin{figure}
   \renewcommand\thefigure{7.7} % number in thesis
-  \includegraphics[width=\textwidth]{figures/fig_results_parareal.pdf}%
+  \includegraphics[width=0.9\textwidth]{figures/fig_results_parareal.pdf}%
   \caption{Trajectory $X_{1,77}$ and relative error in $K$ for Rail371}
   \label{fig:7.7}
   \end{figure}
@@ -18,14 +19,14 @@
 \only<+>{
   \begin{figure}
   \renewcommand\thefigure{7.8} % number in thesis
-  \includegraphics[width=\textwidth]{figures/fig_results_parareal_rank.pdf}%
+  \includegraphics[width=0.9\textwidth]{figures/fig_results_parareal_rank.pdf}%
   \caption{Rank of $X=LDL^\T$ for Rail371}
   \end{figure}
 }
 \only<+>{
   \begin{figure}
   \renewcommand\thefigure{7.9} % number in thesis
-  \includegraphics[width=\textwidth]{figures/fig_timeline_all.pdf}%
+  \includegraphics[width=0.85\textwidth]{figures/fig_timeline_all.pdf}%
   \caption{Timeline chart of parareal method applied to Rail371}
   \end{figure}
 }
@@ -56,10 +57,12 @@
 
 \begin{frame}[b,fragile,label=speedup]{Parallel Scaling}
   \setbeamertemplate{caption}[numbered]
-  \begin{columns}[c]
+  \begin{columns}[c,onlytextwidth]
   \column{0.65\textwidth}
   \begin{table}
+  \setlength{\abovecaptionskip}{0pt}
   %TODO: use hanging captions
+  \raggedright
   \renewcommand\thetable{7.3} % number in thesis
   \caption{%
     Speed-up and parallel efficiency of parareal method applied to Rail371 using $N=450$ cores.
@@ -117,7 +120,8 @@
       % $\tpar = \SI{3600}{\second}$ (Slurm job duration)
   \end{itemize}
   \end{block}
-  \hyperlink{app:rail1357}{\beamergotobutton{Appendix}}
+  {\hfill\hyperlink{app:rail1357}{\beamergotobutton{Appendix}}}
+  \vspace{-\baselineskip}
   \end{columns}
   \onslide
   \vfill

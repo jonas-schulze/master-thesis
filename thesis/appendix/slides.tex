@@ -40,8 +40,8 @@
 
 % worst case estimates: 10 time steps ~> very stiff ~> ADI does likely not converge
 \begin{frame}[b,fragile]{Sequential Runtime for Larger Rail Configurations}
-  \begin{columns}[c]%[onlytextwidth]
-  \column{0.7\textwidth}
+  \begin{columns}[c,onlytextwidth]
+  \column{0.67\textwidth}
   %TODO: What is wrong with the spacing?!
   \setlength{\abovecaptionskip}{0pt}
   \setlength{\intextsep}{0pt}
@@ -100,8 +100,10 @@
         $\text{overheads} \approx \SI{10}{\minute}$
     \end{itemize}
   \end{block}
+  \centering
   \hyperlink{runtime}{\beamergotobutton{Runtime Model}}
   \hyperlink{speedup<2>}{\beamergotobutton{Parallel Scaling}}
+  \vspace*{-\baselineskip}
   \end{columns}
   \onslide
   \vfill
@@ -115,7 +117,7 @@ done
 
 \begin{frame}[b,fragile,label=rail1357]{Parareal Timeline of LRSIF 1/1 applied to Rail1357}
   \begin{columns}[T]
-  \column{0.6\textwidth}
+  \column{0.5\textwidth}
   \begin{figure}
     \includegraphics<1>[width=\textwidth]{figures/slides_timeline1357_1.pdf}%
     \includegraphics<2>[width=\textwidth]{figures/slides_timeline1357_2.pdf}%
@@ -165,10 +167,10 @@ done
     \item
       Stages $417, \ldots, 449$ hit $k=K$
     }{\item Stages $417, \ldots, 449$}
-    \alt<+->{%
+    \temporal<+>{}{%
     \item
       Stage 450 had converged, restarts, and hits $k=K$
-    }{}
+    }{\item Stage 450}
     \alt<+->{%
     \item
       The final gap on stage~449\\ is due to synchronous\\ data transfer.
