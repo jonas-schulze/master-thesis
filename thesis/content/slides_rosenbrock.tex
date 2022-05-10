@@ -1,8 +1,8 @@
 \subsection{Rosenbrock Method}
 
 \begin{frame}<1>{Rosenbrock Method}
+\framesubtitle{General Formulation}
 \begin{bigpicturecols}
-  \begin{block}{General Formulation}
     For the initial value problem (IVP) $\dot x = f(x)$
     on a time grid $t_0 < t_1 < \ldots < t_N = t_f$,
     the method reads
@@ -21,13 +21,13 @@
     \right.
     \end{equation*}
     where $\Jac := f'(x_n)$ denotes the Jacobian.
-  \end{block}
 \column{\bigpicturewidth}
 \bigpicture{3}
 \end{bigpicturecols}
 \end{frame}
 
 \begin{frame}<1>{Rosenbrock Method}
+\framesubtitle{Method Selection}
 \begin{bigpicturecols}
   \begin{block}{1st Order Scheme (Linearly Implicit Euler Scheme)}
     For the IVP $\dot x = f(x)$ the method reads
@@ -60,6 +60,7 @@
 \end{frame}
 
 \begin{frame}<-4>{Rosenbrock Method}
+\framesubtitle{Derivative of \Riccati Operator}
 \begin{bigpicturecols}
 \begin{itemize}
 \item
@@ -90,7 +91,8 @@
 \end{bigpicturecols}
 \end{frame}
 
-\begin{frame}<1>{1st Order Rosenbrock Scheme}
+\begin{frame}<1>{\subsecname}
+\framesubtitle{1st Order Rosenbrock Scheme}
 \begin{bigpicturecols}
   \begin{itemize}
     \item
@@ -125,7 +127,8 @@
 \end{bigpicturecols}
 \end{frame}
 
-\begin{frame}<1>{2nd Order Rosenbrock Scheme}
+\begin{frame}<1>{\subsecname}
+\framesubtitle{2nd Order Rosenbrock Scheme}
 \begin{bigpicturecols}
   \begin{itemize}
     \item

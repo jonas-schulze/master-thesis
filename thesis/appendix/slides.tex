@@ -23,7 +23,8 @@
 \label{app:rail1357}
 
 % worst case estimates: 10 time steps ~> very stiff ~> ADI does likely not converge
-\begin{frame}[b,fragile]{Sequential Runtime for Larger Rail Configurations}
+\begin{frame}[b,fragile]{\secname}
+\framesubtitle{Sequential Runtime for Larger Rail Configurations}
   \begin{columns}[c,onlytextwidth]
   \column{0.67\textwidth}
   %TODO: What is wrong with the spacing?!
@@ -99,7 +100,8 @@ done
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}[b,fragile,label=rail1357]{Parareal Timeline of LRSIF 1/1 applied to Rail1357}
+\begin{frame}[b,fragile,label=rail1357]{\secname}
+\framesubtitle{Parareal Timeline of LRSIF 1/1 applied to Rail1357}
   \begin{columns}[T]
   \column{0.5\textwidth}
   \begin{figure}
@@ -175,7 +177,7 @@ sbatch --time=4:00:00 -n 225 -c2 -J lr11 par.job
 \section{Errata: Parareal Reference Solution}
 
 \begin{frame}[fragile]
-  \frametitle{Errata: Parareal Reference Solution}
+  \frametitle{\secname}
   \begin{itemize}
     \item
       Thesis Figure 7.7: parareal order 4/4
@@ -193,7 +195,7 @@ MY_KIND=dense MY_N=45000 MY_O=4 sbatch -n1 -c1 -J de4 seq.job
       \end{lstlisting}
       % MY_N=45000 MY_KIND=dense MY_O=4 sbatch --partition=long --time=2-00:00:00 -n1 -c1 -J de4-c1 seq.job
     \item
-      Relative error negligible:
+      But: relative error negligible
       \begin{minipage}{\linewidth}
       \begin{columns}[totalwidth=\linewidth]
         \column{0.5\linewidth}
