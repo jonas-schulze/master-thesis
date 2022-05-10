@@ -32,17 +32,17 @@
     The optimal control is given by
     \begin{equation*}
       u(t) = -
-        B^\T X(t_f+t_0-t) E
+        B^\T \structure X(t_f+t_0-t) E
       x(t)
     \end{equation*}
-    where $X(t)\in\R^{n\times n}$ solves the \acf{DRE}
+    where $\structure X(t)\in\R^{n\times n}$ solves the \acf{DRE}
     \begin{equation*}
       \left\{
         \begin{lgathered}
-          E\dot X E = \begin{multlined}[t]
-            C^\T C + A^\T X E + E^\T X A \\ - E^\T X BB^\T X E
+          E^\T \dot{\structure X} E = \begin{multlined}[t]
+            C^\T C + A^\T \structure X E + E^\T \structure X A \\ - E^\T \structure X BB^\T \structure X E
           \end{multlined} \\
-          E^\T X(t_0) E = \tfrac{1}{100} C^\T C
+          E^\T \structure X(t_0) E = \tfrac{1}{100} C^\T C
           .
         \end{lgathered}
       \right.

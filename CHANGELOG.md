@@ -1,3 +1,7 @@
+# v1.1
+
+- Add slide deck for defense (!17)
+
 # v1.0
 
 - Get low-rank solvers running (#3 and #4)
