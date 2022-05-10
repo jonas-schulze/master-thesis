@@ -33,3 +33,5 @@ test-thesis-codes:
     - julia -e 'using InteractiveUtils; versioninfo()'
     - julia -e 'using Pkg; Pkg.instantiate()'
     - julia thesis/code/parareal_counting.jl
+    - julia thesis/code/standalone_dre.jl
+    - julia thesis/code/standalone_parareal.jl
