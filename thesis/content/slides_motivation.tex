@@ -1,0 +1,109 @@
+\section{Motivation}
+
+\begin{frame}{Motivation}
+  \begin{columns}[t,onlytextwidth]
+  \column{0.5\linewidth}
+  \begin{block}{\strut Optimal Control Problem}
+    Consider the \acf{LQR} problem
+    \begin{equation*}
+      \begin{array}{cl}
+        \min_u & \int_{t_0}^{t_f} y^\T y + u^\T u \dt + \tfrac{1}{100} y(t_f)^\T y(t_f) \medskip\\
+        \text{s.t.} & \begin{aligned}[t]
+          E \dot x &= Ax + Bu \\
+          y &= Cx
+        \end{aligned}
+      \end{array}
+    \end{equation*}
+    using
+    \begin{itemize}
+      \item
+        state $x(t)\in\R^n$
+      \item
+        control $u(t)\in\R^m$, $m\ll n$
+      \item
+        output $y(t)\in\R^q$, $q\ll n$
+      \item
+        constant system matrices $E,A,B,C$.
+    \end{itemize}
+  \end{block}
+  \pause
+  \column{0.47\linewidth}
+  \begin{block}{\strut Feedback Law \parencite[e.g.][]{Locatelli2011}}
+    The optimal control is given by
+    \begin{equation*}
+      u(t) = -
+        B^\T X(t_f+t_0-t) E
+      x(t)
+    \end{equation*}
+    where $X(t)\in\R^{n\times n}$ solves the \acf{DRE}
+    \begin{equation*}
+      \left\{
+        \begin{lgathered}
+          E\dot X E = \begin{multlined}[t]
+            C^\T C + A^\T X E + E^\T X A \\ - E^\T X BB^\T X E
+          \end{multlined} \\
+          E^\T X(t_0) E = \tfrac{1}{100} C^\T C
+          .
+        \end{lgathered}
+      \right.
+    \end{equation*}
+  \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Oberwolfach Rail}
+\begin{columns}[onlytextwidth]
+\column{0.6\textwidth}
+  \begin{itemize}
+    \item
+      \cite{Benner2005}
+    \item
+      Linearized 2D heat equation:
+      \begin{align*}
+        c \rho\, \partial_t x &= \lambda\,\Delta x, && x\in\Omega\\
+        \lambda\, \partial_n x &= q_k (u_k - x), && x \in\Gamma_k, k=1,\ldots,7\\
+        \partial_n x &= 0, && x\in\Gamma_0
+      \end{align*}
+    \item
+      FEM discretizations / mesh refinements with
+      $n\in\Set{371,1357,5177,\num{20209},\ldots}$ states,\\
+      $m=7$ inputs,
+      $q=6$ outputs
+    \item
+      Time horizon $t\in[\SI{0}{\second}, \SI{45}{\second}]$
+    \item
+      Resulting $(E, A, B, C)$ system:
+      $E \succ 0$ and $A \prec 0$\\
+      $\leadsto$ uniquely solvable
+  \end{itemize}
+\column{0.37\textwidth}
+  \includegraphics[width=\textwidth]{figures/Steelprofile1.jpg}
+\end{columns}
+\end{frame}
+
+\begin{frame}<1>{Motivation}
+\begin{bigpicturecols}
+  \begin{itemize}
+    \item
+      Large-scale problems: a single (dense) $X(t)\in\Rnn$\\
+      takes \SI{200}{\tera\byte} for
+      $n=\num{5000000}$
+    \item
+      Solution $X$ is symmetric and dense, but has low rank
+
+      \parencite[e.g.][]{Penzl2000}
+    \item[$\leadsto$]
+      Approximation via \rlap{\acl{LRSIF}:}
+      \begin{equation*}
+        \bigmat{X} \approx \mathop{\tallmat{L}} \mathop{\smallmat{D}} \mathop{\widemat{L^{\smash{\T}}}}
+      \end{equation*}
+    \item
+      DRE is highly stiff, \ie\\
+      high accuracy requires small time steps or high orders
+    \item[$\leadsto$]
+      Parareal method for speed-up
+  \end{itemize}
+\column{\bigpicturewidth}
+\bigpicture{1}
+\end{bigpicturecols}
+\end{frame}

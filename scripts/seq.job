@@ -24,6 +24,7 @@ export MY_N=${MY_N:-1}
 export MY_O=${MY_O:-1}
 
 # specify from outside: MY_KIND=dense|lowrank
+echo "Launching ${MY_KIND} rail${MY_RAIL:-371}"
 
 module load apps/julia/1.6
 

@@ -1,0 +1,64 @@
+\subsection{Low-Rank Symmetric Indefinite Factorization}
+
+\begin{frame}<1>{Low-Rank Symmetric Indefinite Factorization (LRSIF)}
+\begin{bigpicturecols}
+  \begin{itemize}
+    \item
+      \cite{Benner2009}
+    \item
+      Arithmetic:
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} \pm \colorldlt{\colc}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\colc}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \pm \smallcmat{\colc}
+        \end{bmatrix}
+        % flag of the Netherlands:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\colc}
+        \end{bmatrix}
+      \end{equation*}
+    \item
+      Problem: growing storage requirements, \eg
+      \begin{equation*}
+        \colorspacing
+        \colorldlt{\cola} + \colorldlt{\cola}
+        :=
+        \Bigg[
+        \begin{matrix}
+          \tallcmat{\cola} &
+          \tallcmat{\cola}
+        \end{matrix}
+        \Bigg]
+        \begin{bmatrix}
+          \smallcmat{\cola} \\
+          & \smallcmat{\cola}
+        \end{bmatrix}
+        % flag of Austria:
+        \begin{bmatrix}
+          \widecmat{\cola} \\
+          \widecmat{\cola}
+        \end{bmatrix}
+        %\not\equiv
+        %\mathop{\tallcmat{\cola}}
+        %\mathop{(\smallcmat{\cola} + \smallcmat{\cola})}
+        %\mathop{\widecmat{\cola}}
+      \end{equation*}
+    \item[$\leadsto$]
+      \cite{Lang2017}: column compression technique
+    \item
+      \enquote{Low-rank} versions of a matrix or algorithm refer to LRSIF
+  \end{itemize}
+\column{\bigpicturewidth}
+\bigpicture{2}
+\end{bigpicturecols}
+\end{frame}

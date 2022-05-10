@@ -1,0 +1,43 @@
+\subsection{Alternating-Directions Implicit Method}
+
+\begin{frame}<1>{Alternating-Directions Implicit (ADI) Method}
+\begin{bigpicturecols}
+  \begin{block}{General Formulation \parencite{Peaceman1955}}
+    For $Ax=b$ with $A = H+V$ the method reads
+    \begin{equation*}
+    \left\{
+    \begin{aligned}
+      \Aip  x^{k+\frac{1}{2}} &= b - \Aiim x^k \\
+      \Aiip x^{k+1}           &= b - \Aim x^{k+\frac{1}{2}}
+    \end{aligned}
+    \right.
+    \end{equation*}
+    where
+    $\Aip  := H + \alpha_k I_n$,
+    $\Aiip := V + \beta_k  I_n$,
+    $\Aim  := H - \beta_k  I_n$,
+    $\Aiim := V - \alpha_k I_n$,
+    and $\alpha_k, \beta_k\in\C$.
+  \end{block}
+  \begin{itemize}
+    \item
+      \cite{Lang2017}: LRSIF formulation for ALE
+      \begin{equation*}
+        \Lyap(X) := A^\T X E + E^\T X A = -GSG^\T
+      \end{equation*}
+%    \item
+%      Consider the ALE $A^\T X E + E^\T X A = - GSG^\T$.
+%      \begin{gather*}
+%        X_0 = 0, R_0 = G,\\
+%        (A^\T + \alpha_k E) V_k = R_{k-1},
+%        R_k = R_{k-1} - 2\alpha_k E V_k,\\
+%        L_k = \begin{bmatrix} L_{k-1} & V_k \end{bmatrix},
+%        D_k = \begin{bmatrix} D_{k-1} \\ & -2\Re(\alpha_k) S \end{bmatrix},\\
+%      \end{gather*}
+    \item
+      \cite{Kuerschner2016}: self-generating parameters
+  \end{itemize}
+\column{\bigpicturewidth}
+\bigpicture{5}
+\end{bigpicturecols}
+\end{frame}

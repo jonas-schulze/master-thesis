@@ -1,0 +1,158 @@
+\subsection{Rosenbrock Method}
+
+\begin{frame}<1>{Rosenbrock Method}
+\framesubtitle{General Formulation}
+\begin{bigpicturecols}
+    For the initial value problem (IVP) $\dot x = f(x)$
+    on a time grid $t_0 < t_1 < \ldots < t_N = t_f$,
+    the method reads
+    \begin{equation*}
+    \left\{
+    \begin{aligned}
+      x_{n+1} &:= x_n + \tau \sum_{j=1}^s b_j k_j
+      \\
+      k_i &:= \begin{multlined}[t]
+      f\left( x_n + \tau \sum_{j=1}^{i-1} \alpha_{ij} k_j \right) + \tau \Jac \sum_{j=1}^i \gamma_{ij} k_j
+      \\
+      \text{for } i = 1, \ldots, s
+      ,
+      \end{multlined}
+    \end{aligned}
+    \right.
+    \end{equation*}
+    where $\Jac := f'(x_n)$ denotes the Jacobian.
+\column{\bigpicturewidth}
+\bigpicture{3}
+\end{bigpicturecols}
+\end{frame}
+
+\begin{frame}<1>{Rosenbrock Method}
+\framesubtitle{Method Selection}
+\begin{bigpicturecols}
+  \begin{block}{1st Order Scheme (Linearly Implicit Euler Scheme)}
+    For the IVP $\dot x = f(x)$ the method reads
+    \begin{equation*}
+    \left\{
+    \begin{aligned}
+      x_{n+1} &= x_n + \tau k_1 \\
+      (I - \gamma\tau \Jac) k_1 &= f(x_n)
+      .
+    \end{aligned}
+    \right.
+    \end{equation*}
+  \end{block}
+  \begin{block}{2nd Order Scheme \parencite{Verwer1999}}
+    %\vspace*{-\baselineskip}
+    %For the IVP $\dot x = f(x)$ the method reads
+    \begin{equation*}
+    \left\{
+    \begin{aligned}
+      x_{n+1} &= x_n + \tfrac{3}{2} \tau k_1 + \tfrac{1}{2} \tau k_2 \\
+      (I - \gamma\tau \Jac) k_1 &= f(x_n) \\
+      (I - \gamma\tau \Jac) k_2 &= f(x_n + \tau k_1) - 2k_1
+    \end{aligned}
+    \right.
+    \end{equation*}
+  \end{block}
+\column{\bigpicturewidth}
+\bigpicture{3}
+\end{bigpicturecols}
+\end{frame}
+
+\begin{frame}<-4>{Rosenbrock Method}
+\framesubtitle{Derivative of \Riccati Operator}
+\begin{bigpicturecols}
+\begin{itemize}
+\item
+  Consider the DRE $E^\T \dot X E = \Ricc(X)$.
+  \newcommand\U{\structure{\makebox[\widthof{$X_n$}]{$U$}}}
+  \begin{align*}
+    \Ricc(X_n) &= C^\T C + A^\T X_n E + E^\T X_n A - E^\T X_n BB^\T X_n E
+    \\
+    \pause
+    \Jac(\structure{U}) &= \makebox[\widthof{$C^\T C$}]{$0$}
+      + A^\T \U E + E^\T \U A
+      \begin{lgathered}[t]
+        {} - E^\T \U BB^\T X_n E \\
+        {} - E^\T X_n BB^\T \U E
+      \end{lgathered} \\
+    \pause
+    &= (A - BB^\T X_n E)^\T \structure U E + E^\T \structure U (A - BB^\T X_n E)
+  \end{align*}
+\item
+  The Jacobian is a Lyapunov operator!
+\pause
+\item[$\leadsto$]
+  $I - \gamma\tau\Jac$ is a Lyapunov operator,
+  \ie all Rosenbrock stages are Algebraic Lyapunov Equations (ALEs).
+\end{itemize}
+\column{\bigpicturewidth}
+\bigpicture[3]{3}
+\end{bigpicturecols}
+\end{frame}
+
+\begin{frame}<1>{\subsecname}
+\framesubtitle{1st Order Rosenbrock Scheme}
+\begin{bigpicturecols}
+  \begin{itemize}
+    \item
+      Linearly implicit Euler scheme
+    \item
+      \cite{Mena2007}: Formulation for DRE $E^\T \dot X E = \Ricc(X)$
+    \item
+      \cite{Lang2017}: Formulation for LRSIF $X(t) = LDL^\T$
+    \item
+      1 ALE per step:
+      \begin{equation*}
+        \tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n = - GSG^\T
+      \end{equation*}
+      where $X_n = LDL^\T$ and
+      \begin{align*}
+        \tilde A_n &= \gamma\tau(A-BB^\T X_n E) - \tfrac{1}{2} E
+        \\
+        G &= \begin{bmatrix}
+          C^\T & E^\T L
+        \end{bmatrix}
+        \\
+        S &= \begin{bmatrix}
+          I & . \\
+          . & DL^\T BB^\T LD + \tfrac{1}{\tau} D
+        \end{bmatrix}
+      \end{align*}
+      \vspace{-\baselineskip}
+  \end{itemize}
+  \vfill
+\column{\bigpicturewidth}
+\bigpicture{4}
+\end{bigpicturecols}
+\end{frame}
+
+\begin{frame}<1>{\subsecname}
+\framesubtitle{2nd Order Rosenbrock Scheme}
+\begin{bigpicturecols}
+  \begin{itemize}
+    \item
+      \cite{Verwer1999}
+    \item
+      \cite{Mena2007}: Formulation for DRE $E^\T \dot X E = \Ricc(X)$
+    \item
+      \cite{Lang2017}: Formulation for LRSIF $X(t) = LDL^\T$
+    \item
+      2 ALEs per step:
+      \begin{equation*}
+      \left\{
+      \begin{aligned}
+        X_{n+1} &= X_n + \big( 2 - \tfrac{1}{2\gamma} \big) \tau K_1 - \tfrac{1}{2} \tau K_{21} \\
+        \hat A_n^\T K_1 E + E^\T K_1 \hat A_n &= -\Ricc(X_n) \\
+        \hat A_n^\T K_{21} E + E^\T K_{21} \hat A_n &= -\big( \tau^2 K_1 BB^\T K_1 + \big( 2-\tfrac{1}{\gamma} \big) K_1 \big)
+      \end{aligned}
+      \right.
+      \end{equation*}
+      (LRSIF right-hand sides not shown)
+%    \item
+%      Embedded 1st order method: $\tilde X_{n+1} = X_n + \gamma\tau K_1$
+  \end{itemize}
+\column{\bigpicturewidth}
+\bigpicture{4}
+\end{bigpicturecols}
+\end{frame}

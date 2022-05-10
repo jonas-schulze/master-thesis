@@ -1,0 +1,55 @@
+\usepackage{mathtools}
+\usepackage{xparse,xspace}
+\usepackage{booktabs}
+\usepackage{csquotes}
+\usepackage[shortcuts]{glossaries}
+\usepackage[binary-units]{siunitx}
+\usepackage{listings}
+
+% inspired by: https://tex.stackexchange.com/a/212794/95100
+\lstdefinelanguage{julia}{%
+  morekeywords={abstract,begin,break,case,catch,const,continue,do,else,elseif,%
+      end,export,false,for,function,immutable,import,importall,if,in,%
+      macro,module,otherwise,quote,return,struct,true,try,type,typealias,%
+      using,where,while},%
+  sensitive=true,%
+  morecomment=[l]\#,%
+}[keywords,comments]
+
+\lstdefinestyle{julia}{%
+  language=julia,
+  basicstyle=\small\ttfamily,
+  commentstyle=\color{black!15},
+  keywordstyle=\fontseries{b}\selectfont,
+  numberstyle=\scriptsize\sffamily\color{black!15},
+  numbers=left,
+  xleftmargin=20pt,
+  % use special julia comments as range markers: #== text ==#
+  rangeprefix=\#\=\=\ ,
+  rangesuffix=\ \=\=\#,
+  includerangemarker=false,
+  % add latex labels using #* \label{line:...}
+  escapeinside={\#*}{\^^M},
+}
+
+\lstdefinestyle{remark}{%
+  language=,
+  numbers=none,
+  xleftmargin=0pt,
+  basicstyle=\small\ttfamily\color{black!15}, % should match transparency of covered
+}
+
+\lstset{
+  columns=flexible,
+  style=remark,
+}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{graphs,arrows.meta}
+\tikzset{>=Stealth}
+
+\sisetup{
+  round-mode = places,
+  round-precision = 2,
+}

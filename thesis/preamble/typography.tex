@@ -16,3 +16,11 @@
 \renewcommand{\chaptermark}[1]{%
   \markboth{\bfseries\MakeUppercase{\chapappifchapterprefix{~}}\thechapter\mdseries\quad\MakeUppercase{#1}}%
            {\mdseries\MakeUppercase{#1}\quad\bfseries\MakeUppercase{\chapappifchapterprefix{~}}\thechapter}}
+
+% Footnote numbering
+\counterwithout*{footnote}{chapter}
+
+% Float placement
+\setcounter{topnumber}{1} % max number of floats at top of page
+\renewcommand{\bottomfraction}{0.5}
+\renewcommand{\listtheoremname}{List of Theorems and Examples}

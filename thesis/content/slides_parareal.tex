@@ -1,0 +1,93 @@
+\subsection{Parareal Method}
+
+\begin{frame}<-2>{Parareal Method}
+\begin{bigpicturecols}
+  \begin{block}{General Formulation \parencite{Lions2001}}
+    For the IVP $\dot u = f(u)$ the method reads
+    \begin{equation*}
+      \left\{
+      \begin{aligned}
+        U^0_{n+1} &:= G(U^0_n) \\
+        U^{k+1}_{n+1} &:= G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)
+      \end{aligned}
+      \right.
+    \end{equation*}
+    where $U_0^0 := u(t_0)$. $U_n^k$ converges to $u(t_n)$ as $k\to\infty$.
+  \end{block}
+  \begin{itemize}
+    \item
+      Köhler, Saak, and Lang 2016 (GAMM):
+      LRSIF formulation
+  % GAMM Annual Meeting
+  \begin{equation*}
+    U^{k+1}_{n+1}
+    =\vphantom{\Bigg[}\parbox{6cm}{$%
+    \alt<1>{
+      \colorldlt{\cola}
+    + \colorldlt{\colb}
+    - \colorldlt{\colc}
+    }{
+    \colorspacing % must be located in respective cell!
+    \Bigg[
+    \begin{matrix}
+      \tallcmat{\cola} &
+      \tallcmat{\colb} &
+      \tallcmat{\colc}
+    \end{matrix}
+    \Bigg]
+    \begin{bmatrix}
+      \smallcmat{\cola} \\
+      & \smallcmat{\colb} \\
+      && -\smallcmat{\colc}
+    \end{bmatrix}
+    \begin{bmatrix}
+      \widecmat{\cola} \\
+      \widecmat{\colb} \\
+      \widecmat{\colc}
+    \end{bmatrix}
+    }$}
+  \end{equation*}
+    \item
+      Speed-up $\approx t_F/t_G$ for large $N$,
+      where $0 \leq n \leq N$.
+  \end{itemize}
+\column{\bigpicturewidth}
+\bigpicture{6}
+\end{bigpicturecols}
+\end{frame}
+
+\begin{frame}<-18>[plain,label=parareal_anim]
+  \setlength{\intextsep}{0pt}
+  \only<-18>{%
+    \setbeamertemplate{caption}[numbered]
+    \setlength{\abovecaptionskip}{0pt}
+    \renewcommand\thefigure{6.4} % number in thesis
+  }
+  \frametitle{Parareal Example}
+\begin{columns}
+\column{0.65\textwidth}
+  \begin{figure}
+  $U^{k+1}_{n+1} := G(U^{k+1}_n) + F(U^k_n) - G(U^k_n)$
+  \foreach \k in {0,1} {%
+  \foreach \n [evaluate={\i=int(1+\n+\k*7)}] in {0,...,6} {%
+    \includegraphics<\i>[height=0.65\textwidth]{figures/parareal-anim/step-\k-\n.pdf}%
+  }}%
+  \includegraphics<15>[height=0.65\textwidth]{figures/parareal-anim/step-2-5.pdf}%
+  \includegraphics<16>[height=0.65\textwidth]{figures/parareal-anim/step-2-6.pdf}%
+  \includegraphics<17>[height=0.65\textwidth]{figures/parareal-anim/step-3-5.pdf}%
+  \includegraphics<18>[height=0.65\textwidth]{figures/parareal-anim/step-3-6.pdf}%
+  \includegraphics<19>[height=0.625\textwidth]{figures/slides_timeline_simple}% WTF is wrong with the height?!
+  % The update is not always visible; for k=3 most take less than 0.001 seconds, while t_F is about
+  \caption{\alt<-18>{%
+    Parareal method applied to a linear ODE
+  }{%
+    Timeline diagram for $n \leq N=10$ and $k \leq K = 4$
+  }}
+  \end{figure}
+\column{0.35\textwidth}
+  \input{figures/slide_parareal_anim.tex}
+\end{columns}
+\end{frame}
+
+% Move comparison of dependencies and timeline to its own frame:
+\againframe<19>[plain]{parareal_anim}

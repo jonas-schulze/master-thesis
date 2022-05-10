@@ -1,0 +1,122 @@
+\documentclass[
+  aspectratio=1610,
+]{beamer}
+
+%\includeonlyframes{current,other}
+
+\usepackage[american]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[scaled=0.83]{beramono} % Use Bera Mono as monospace font
+
+% needs https://tex.stackexchange.com/questions/423848/xelatex-xy-and-dejavu-otf#423854
+%\usepackage{dejavu-otf} % default Makie font: DejaVu Sans
+%\usefonttheme{professionalfonts}
+
+\title{\vphantom{q}A Low-Rank Parareal Solver for\\ Differential Riccati Equations\\ Written in Julia}
+\author{Jonas Schulze}
+\institute{Faculty of Mathematics\\ Otto-von-Guericke-Universität Magdeburg}
+\date{May 10, 2022}
+\subject{subject}
+
+% beamer appearance
+\usetheme[english,CSC,compacthead]{mpi2015}
+\setbeamercovered{transparent}
+\setbeamertemplate{footline}[default]
+\beamertemplatenavigationsymbolsempty
+
+\newcommand\outlinename{Outline}
+\newcommand\maketocframe[1][]{%
+  \addtocounter{framenumber}{-1}
+  \begin{frame}{\outlinename}
+    \tableofcontents[#1]
+  \end{frame}
+}
+
+\AtBeginSection{%
+  \maketocframe[currentsection]
+}
+
+\usepackage[
+  style=authoryear,
+]{biblatex}
+\addbibresource{stuff.bib}
+
+\input{preamble/packages-slides}
+\input{preamble/math.tex}
+\input{preamble/other.tex}
+\input{preamble/abbreviations}
+\input{preamble/drawing}
+
+\renewcommand\mathrm\mathsf % fix \umach
+\newcommand\emptyblock[1]{%
+  \begin{beamercolorbox}{block title}
+    \usebeamerfont{block title}%
+    #1
+  \end{beamercolorbox}
+}
+
+% Usage: \bigpicture[2][3]
+% Show the first 3 items for 2 slides/overlays.
+% Afterwards, the items uncover one by one.
+\newcommand\bigpicture[2][1]{%
+  \onslide
+  \setcounter{beamerpauses}{#1}
+  \begin{block}{Big Picture}
+    \begin{itemize}
+      \item
+        Differential \Riccati Equation (DRE)
+      \ifnum#2<2 \pause\fi
+      \item
+        Solution in LRSIF
+      \ifnum#2<3 \pause\fi
+      \item
+        Rosenbrock method\\ to solve DRE
+      \ifnum#2<4 \pause\fi
+      \item
+        Rosenbrock stages\\ are ALEs
+      \ifnum#2<5 \pause\fi
+      \item
+        ADI method\\ to solve ALE
+      \ifnum#2<6 \pause\fi
+      \item
+        Parareal method\\ for speed-up
+    \end{itemize}
+  \end{block}
+}
+
+% gap between column and border seems to be 0.05\textwidth wide
+% except: 0.03\textwidth for mpi2015 theme using [onlytextwidth]
+\newcommand\bigpicturewidth{0.27\textwidth}
+
+\newenvironment{bigpicturecols}
+{\begin{columns}[onlytextwidth]\column{0.7\textwidth}}
+{\end{columns}}
+
+\begin{document}
+\addtocounter{framenumber}{-1} % don't count title page
+
+\frame[plain]{\titlepage}
+\maketocframe
+
+\everymath{\displaystyle}
+
+\input{content/slides_motivation}
+
+\section{Mathematical Details}
+
+\input{content/slides_lrsif}
+\input{content/slides_rosenbrock}
+\input{content/slides_adi}
+\input{content/slides_parareal}
+\input{content/slides_implementation}
+\input{content/slides_results}
+
+\appendix
+\renewcommand\outlinename{Appendix}
+\maketocframe
+
+\input{appendix/slides}
+
+\end{document}

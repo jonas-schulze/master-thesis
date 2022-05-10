@@ -10,7 +10,7 @@ using Reexport
 using DifferentialRiccatiEquations: DRESolution
 using ParaReal: fetch_from_owner
 using SlurmClusterManager
-using MAT
+using MAT, MatrixMarket
 using SparseArrays
 
 """
@@ -47,13 +47,13 @@ function parareal_setup()
     (; nstages, nc, nf, oc, of, wc, wf)
 end
 
-abstract type Config{X} end
-Base.@kwdef struct SequentialConfig{X} <: Config{X}
+abstract type Config{X,N} end
+Base.@kwdef struct SequentialConfig{X,N} <: Config{X,N}
     ncpus::Int # slurm c
     nsteps::Int
     order::Int
 end
-Base.@kwdef struct ParallelConfig{X} <: Config{X}
+Base.@kwdef struct ParallelConfig{X,N} <: Config{X,N}
     # number of parareal steps:
     nstages::Int # parareal N, slurm n
     ncpus::Int # slurm c
@@ -70,7 +70,7 @@ Base.@kwdef struct ParallelConfig{X} <: Config{X}
     jobid::String="0"
 end
 
-kind(::Config{X}) where {X} = X
+kind(::Config{X,N}) where {X,N} = X
 
 function ParallelConfig(X::Symbol)
     X in (:dense, :lowrank) || throw(ArgumentError("type must be `:dense` or `:lowrank`; got $X"))
@@ -80,6 +80,7 @@ function ParallelConfig(X::Symbol)
         readenv("SLURM_NTASKS"),
         Sys.CPU_THREADS ÷ 2,
     )
+    nstages *= something(readenv("MY_ROUNDROBIN"), 1)
     ncpus = something(
         readenv("SLURM_CPUS_PER_TASK"),
         readenv("OMP_NUM_THREADS"),
@@ -93,7 +94,8 @@ function ParallelConfig(X::Symbol)
     wf = something(readenv("MY_WF"), false)
     jobid = get(ENV, "SLURM_JOBID", "0")
 
-    ParallelConfig{X}(; nstages, ncpus, nc, nf, oc, of, wc, wf, jobid)
+    N = something(readenv("MY_RAIL"), 371)
+    ParallelConfig{X,N}(; nstages, ncpus, nc, nf, oc, of, wc, wf, jobid)
 end
 
 function SequentialConfig(X::Symbol)
@@ -106,10 +108,11 @@ function SequentialConfig(X::Symbol)
     nsteps = something(readenv("MY_N"), 1)
     order = something(readenv("MY_O"), 1)
 
-    SequentialConfig{X}(; ncpus, nsteps, order)
+    N = something(readenv("MY_RAIL"), 371)
+    SequentialConfig{X,N}(; ncpus, nsteps, order)
 end
 
-DrWatson.default_prefix(c::Config{X}) where {X} = "rail371-$X"
+DrWatson.default_prefix(c::Config{X,N}) where {X,N} = "rail$N-$X"
 
 include("addworkers.jl")
 include("compare.jl")
@@ -126,7 +129,7 @@ export load_rail, algorithms, Δt
 
 export readenv
 export δ
-export logdir, timeline, timeline!, load_eventlog
+export logdir, timeline, timeline!, load_eventlog, prep_eventlog
 export addworkers, set_num_threads, log_worker_info
 export storemeta, readdata, mergedata
 

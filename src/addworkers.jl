@@ -13,7 +13,9 @@ function addworkers(c::ParallelConfig)
         return addprocs(SlurmManager())
     else
         @info "Adding workers locally"
-        return addprocs(c.nstages)
+        # TODO: make this less ugly ...
+        rr = something(readenv("MY_ROUNDROBIN", 1))
+        return addprocs(c.nstages ÷ rr)
     end
 end
 
