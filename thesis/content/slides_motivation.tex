@@ -85,20 +85,23 @@
 \begin{bigpicturecols}
   \begin{itemize}
     \item
-      Large-scale problems: a single $X(t)\in\Rnn$, $n=\num{5000000}$, takes \SI{200}{\tera\byte}
+      Large-scale problems: a single (dense) $X(t)\in\Rnn$\\
+      takes \SI{200}{\tera\byte} for
+      $n=\num{5000000}$
     \item
-      Solution is symmetric and dense, but has low rank
+      Solution $X$ is symmetric and dense, but has low rank
 
       \parencite[e.g.][]{Penzl2000}
-
-      $\leadsto$ approximation via \acf{LRSIF}:
+    \item[$\leadsto$]
+      Approximation via \rlap{\acl{LRSIF}:}
       \begin{equation*}
         \bigmat{X} \approx \mathop{\tallmat{L}} \mathop{\smallmat{D}} \mathop{\widemat{L^{\smash{\T}}}}
       \end{equation*}
     \item
-      High accuary requires small time steps or high orders $\leadsto$ \enquote{slow}
-
-      $\leadsto$ Parareal
+      DRE is highly stiff, \ie\\
+      high accuracy requires small time steps or high orders
+    \item[$\leadsto$]
+      Parareal method for speed-up
   \end{itemize}
 \column{\bigpicturewidth}
 \bigpicture{1}

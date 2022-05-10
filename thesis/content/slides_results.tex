@@ -2,7 +2,7 @@
 
 \subsection{Numerical Results}
 
-\begin{frame}{\secname}
+\begin{frame}[label=other]{\secname}
 \framesubtitle{\subsecname}
   \setbeamertemplate{caption}[numbered]
   \begin{columns}[onlytextwidth]
@@ -134,12 +134,66 @@ MY_KIND=dense MY_NF=100 MY_OF=1 MY_OC=1 sbatch -n450 -J de11 par.job
 
 \subsection{Conclusion}
 
-\begin{frame}[label=conclusion]{\secname}
+\begin{frame}<1>[label=conclusion]{\secname}
 \framesubtitle{\subsecname}
+\begin{block}{Parareal Method}
   \begin{itemize}
     \item
-      ...
+      Offers large speed-ups, but has low efficiency
     \item
-      Problem with LRSIF Ros2
+      Present implementation has severe ramp-up delay
+
+      \uncover<2>{due to Julia's JIT compiler warm-up}
+    \item
+      Low-rank codes allow/require much smaller (temporal) resolutions
+
+      \uncover<2>{to reach similar speed-ups as dense codes}
+    \item
+      Runtime of low-rank solvers varies from evaluation to evaluation
+
+      \uncover<2>{due to varying rank and stiffness}
+      $\leadsto$ complicates load balancing
   \end{itemize}
+\end{block}
+\begin{block}{DRE Solvers}
+  \begin{itemize}
+    \item
+      Ros1 performs identically for dense and low-rank data
+    \item
+      Reproduced issues with low-rank Ros2 in Julia
+
+      \uncover<2>{\cite{Lang2015} had used MATLAB}
+  \end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}<1>[label=conclusion]{\secname}
+\framesubtitle{Open Problems}
+\begin{block}{ParaReal.jl}
+  \begin{itemize}
+    \item
+      Currently limited to processes as executors
+    \item
+      Lacks asynchronous communication
+    \item
+      How to eliminate the ramp-up delay?
+
+      \uncover<2>{\ie compile more code ahead-of-time}
+    \item
+      How to improve load balancing?
+
+      \uncover<2>{%
+      \eg via round-robin scheduling or threaded oversubscription;\\
+      but how to handle threads \& processes?
+      }
+  \end{itemize}
+\end{block}
+\begin{block}{DifferentialRiccatiEquations.jl}
+  \begin{itemize}
+    \item
+      Needs to record more metrics
+    \item
+      \texttt{\LDLt} (and \texttt{LowRankUpdate}) types could be separated into their own packages
+  \end{itemize}
+\end{block}
 \end{frame}

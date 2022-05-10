@@ -7,9 +7,10 @@ DEPS += $(TABLES_TEX)
 CODE_JL = $(wildcard code/standalone_*.jl)
 CODE_TXT = $(addsuffix .txt, $(CODE_JL))
 FIGS = figures/Steelprofile1.jpg
+SLIDE_DEPS = $(CODE_TXT) $(FIGS)
 
 .PHONY: update-slides
-update-slides: $(CODE_TXT) $(FIGS)
+update-slides: $(SLIDE_DEPS) | $(DIRS)
 	lualatex -output-directory $(BUILDDIR) slides
 
 .PHONY: update
@@ -27,9 +28,10 @@ $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 
 .PHONY: $(BUILDDIR)/slides.pdf
-$(BUILDDIR)/slides.pdf:
+$(BUILDDIR)/slides.pdf: $(SLIDE_DEPS) | $(DIRS)
 	lualatex -output-directory $(BUILDDIR) slides
 	biber --output-directory $(BUILDDIR) slides
+	lualatex -output-directory $(BUILDDIR) slides
 	lualatex -output-directory $(BUILDDIR) slides
 
 $(DIRS):

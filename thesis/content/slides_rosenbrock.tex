@@ -82,7 +82,7 @@
 \item
   The Jacobian is a Lyapunov operator!
 \pause
-\item %TODO: when \leadsto, when \implies?
+\item[$\leadsto$]
   $I - \gamma\tau\Jac$ is a Lyapunov operator,
   \ie all Rosenbrock stages are Algebraic Lyapunov Equations (ALEs).
 \end{itemize}
@@ -106,7 +106,7 @@
       \begin{equation*}
         \tilde A_n^\T X_{n+1} E + E^\T X_{n+1} \tilde A_n = - GSG^\T
       \end{equation*}
-      where
+      where $X_n = LDL^\T$ and
       \begin{align*}
         \tilde A_n &= \gamma\tau(A-BB^\T X_n E) - \tfrac{1}{2} E
         \\
