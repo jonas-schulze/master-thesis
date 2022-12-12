@@ -30,6 +30,7 @@
   backref=true,
 ]{biblatex}
 \addbibresource{stuff.bib}
+\usepackage{csquotes}
 
 %\usepackage{todonotes}
 
@@ -42,6 +43,11 @@
 \input{preamble/typography}
 
 \makeglossaries
+
+% props to:
+% https://tex.stackexchange.com/questions/567985/problems-with-inputtable-tex-hline-after-2020-fall-latex-release
+% https://tex.stackexchange.com/questions/144625/misplaced-noalign-error-in-table-but-only-when-using-include
+\makeatletter\let\expandableinput\@@input\makeatother
 
 \begin{document}
 
