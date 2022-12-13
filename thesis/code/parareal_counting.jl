@@ -24,7 +24,6 @@ end
         G::Int
     end
     ParaReal.value(c::Counters) = c #* \label{line:impl:parareal_counting:value}
-
     # Needed by default parareal update implementation:
     Base.:(+)(c1::Counters, c2::Counters) = Counters(c1.F + c2.F, c1.G + c2.G)
     Base.:(-)(c::Counters) = c
