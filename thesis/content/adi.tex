@@ -947,13 +947,13 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
   }
   \Comment{Compute initial parameters, \cf \autoref{sec:adi:parameters}:}
   $Q \gets \orth G$\;
-  $ \Set{\alpha_1, \alpha_2, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
+  $ \Set{\alpha_0, \alpha_1, \ldots} \gets \Lambda\big( Q^\HT A Q, Q^\HT E Q \big) \cap \Cneg$\;
   \Comment{Perform actual \ac{ADI}:}
   $R_0 \gets G$\;
-  $k \gets 1$\;
+  $k \gets 0$\;
   % Watch out: k as in the final condition already has the value for the next/upcoming iteration,
   % therefore subtract one:
-  \Repeat{$\norm[\big]{R_{k-1}^\T R_{k-1} S}_F \leq \epsilon \norm[\big]{G^\T GS}_F$}{%
+  \Repeat{$\norm[\big]{R_{k}^\T R_{k} S}_F \leq \epsilon \norm[\big]{G^\T GS}_F$}{%
   %TODO: ...or $j > J$
     \If{$\alpha_k$ is not available}{%
       $Q \gets$ \leIf{$\alpha_{k-1}\in\R$}{%
@@ -971,36 +971,36 @@ Thus, the procedure leads to $d \leq r \leq un_G$ new shifts.
     \eIf{$\alpha_k \in\R$}{%
       \Comment{Perform single step, \cf Subsections~\ref{sec:adi:lr1step} and \ref{sec:adi:lrstop}:}
       Solve $A^+_k V_k = R_k$ for $V_k$\;
-      $L_k \gets \begin{bmatrix}
-        L_{k-1} &
+      $L_{k+1} \gets \begin{bmatrix}
+        L_k &
         V_k
       \end{bmatrix}$,\quad
-      $D_k \gets \begin{bmatrix}
-        D_{k-1} \\
+      $D_{k+1} \gets \begin{bmatrix}
+        D_k \\
         & Y_k
       \end{bmatrix}$\;
-      $R_k \gets R_{k-1} - 2\alpha_k E V_k$\;
+      $R_{k+1} \gets R_{k} - 2\alpha_k E V_k$\;
       $k \gets k+1$\;
     }{%
       \Comment{Perform double-step, \cf \autoref{sec:adi:lr2step}:}
       Solve $A^+_k V_k = R_k$ for $V_k$\;
       $\delta_k \gets \Re(\alpha_k) / \Im(\alpha_k)$\;
-      $\hat V_k \gets \sqrt{2} \big( \Re(V) + \delta_k \Im(V) \big)$\;
-      $\hat V_{k+1} \gets \sqrt{\smash[b]{2\big( \delta_k^2 + 1 \big)}} \Im(V)$\;
-      $L_{k+1} \gets \begin{bmatrix}
-        L_{k-1} &
+      $\hat V_k \gets \sqrt{2} \big( \Re(V_k) + \delta_k \Im(V_k) \big)$\;
+      $\hat V_{k+1} \gets \sqrt{\smash[b]{2\big( \delta_k^2 + 1 \big)}} \Im(V_k)$\;
+      $L_{k+2} \gets \begin{bmatrix}
+        L_k &
         \hat V_k &
         \hat V_{k+1}
       \end{bmatrix}$,\quad
-      $D_{k+1} \gets \begin{bmatrix}
-        D_{k-1} \\
+      $D_{k+2} \gets \begin{bmatrix}
+        D_k \\
         & Y_k \\
         && Y_k
       \end{bmatrix}$\;
-      $R_{k+1} \gets R_{k-1} - 4\Re(\alpha_k) E \big( \Re(V) + \delta_k \Im(V) \big)$\;
+      $R_{k+2} \gets R_{k} - 4\Re(\alpha_k) E \big( \Re(V) + \delta_k \Im(V) \big)$\;
       $ k \gets k + 2$\;
     }
-    Compress $L_{k-1}, D_{k-1}$ if necessary, \cf~\autoref{alg:lowrank:compression}\;
+    Compress $L_{k}, D_{k}$ if necessary, \cf~\autoref{alg:lowrank:compression}\;
   }(,~\cf \autoref{sec:adi:lrstop})
 \end{algorithm}
 
