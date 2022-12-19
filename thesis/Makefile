@@ -23,6 +23,7 @@ all: $(BUILDDIR)/thesis.pdf $(BUILDDIR)/slides.pdf
 $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 	biber --output-directory $(BUILDDIR) thesis
+	pdflatex -output-directory $(BUILDDIR) thesis
 	makeglossaries -d $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
