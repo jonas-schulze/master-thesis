@@ -21,10 +21,6 @@ test-julia:
     - julia -e 'using InteractiveUtils; versioninfo()'
     - julia -e 'using Pkg; Pkg.instantiate()'
     - julia test/runtests.jl
-  rules:
-    - if: $CI_COMMIT_BRANCH =~ /^thesis.*/
-      when: manual
-    - when: always
 
 test-thesis-codes:
   interruptible: true
