@@ -30,10 +30,10 @@ $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 
 .PHONY: $(BUILDDIR)/slides.pdf
 $(BUILDDIR)/slides.pdf: $(SLIDE_DEPS) | $(DIRS)
-	lualatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
 	biber --output-directory $(BUILDDIR) slides
-	lualatex -output-directory $(BUILDDIR) slides
-	lualatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
 
 $(DIRS):
 	mkdir -p $@
