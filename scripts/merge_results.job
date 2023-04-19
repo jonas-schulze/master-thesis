@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH -J merge
+#SBATCH -o %x-%A_%a.out
+#SBATCH -e %x-%A_%a.err
+#SBATCH --array=1-1
+#
+#SBATCH --dependency=afterok:351270:351271
+#
+#SBATCH -n 1
+#SBATCH --time=00-4:00:00
+#SBATCH --partition=medium
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=jschulze@mpi-magdeburg.mpg.de
+
+set -eu
+
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-1}
+export MKL_ENABLE_INSTRUCTIONS=AVX2
+export JULIA_PROJECT=@.
+
+module load apps/julia/1.6
+
+julia merge_results.jl
