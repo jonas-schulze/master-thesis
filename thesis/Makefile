@@ -23,16 +23,17 @@ all: $(BUILDDIR)/thesis.pdf $(BUILDDIR)/slides.pdf
 $(BUILDDIR)/thesis.pdf: $(DEPS) | $(DIRS)
 	pdflatex -output-directory $(BUILDDIR) thesis
 	biber --output-directory $(BUILDDIR) thesis
+	pdflatex -output-directory $(BUILDDIR) thesis
 	makeglossaries -d $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
 	pdflatex -output-directory $(BUILDDIR) thesis
 
 .PHONY: $(BUILDDIR)/slides.pdf
 $(BUILDDIR)/slides.pdf: $(SLIDE_DEPS) | $(DIRS)
-	lualatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
 	biber --output-directory $(BUILDDIR) slides
-	lualatex -output-directory $(BUILDDIR) slides
-	lualatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
+	pdflatex -output-directory $(BUILDDIR) slides
 
 $(DIRS):
 	mkdir -p $@

@@ -94,6 +94,11 @@
 {\begin{columns}[onlytextwidth]\column{0.7\textwidth}}
 {\end{columns}}
 
+% props to:
+% https://tex.stackexchange.com/questions/567985/problems-with-inputtable-tex-hline-after-2020-fall-latex-release
+% https://tex.stackexchange.com/questions/144625/misplaced-noalign-error-in-table-but-only-when-using-include
+\makeatletter\let\expandableinput\@@input\makeatother
+
 \begin{document}
 \addtocounter{framenumber}{-1} % don't count title page
 

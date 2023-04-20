@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - given-names: Jonas
+    family-names: Schulze
+    orcid: https://orcid.org/0000-0002-2086-7686
+type: mastersthesis
+title: >-
+  A Low-Rank Parareal Solver for
+  Differential Riccati Equations
+  Written in Julia
+license: CC-BY-4.0
+date-released: 2022-05-10
+doi: "10.5281/zenodo.7843198"
+repository-code: https://github.com/jonas-schulze/master-thesis
+

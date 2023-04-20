@@ -108,7 +108,7 @@ Start by launching some worker processes and loading the necessary packages:
   %caption={User-defined problem type for \code{ParaReal.jl}},
   %label={lst:impl:parareal_counting},
   caption={[User interface of \code{ParaReal.jl}]},
-  lastline=4,
+  lastline=5,
 ]{code/parareal_counting.jl}
 Next, define the problem type and ensure that its definition is available on all processes.
 The only requirement to the problem type is to have a \julia{tspan} field.\footnote{%
@@ -271,9 +271,9 @@ $t_{\JIT(G)}$ denotes the compile time of $G$.
     {$\hattpar$} &
     {$\abs*{\frac{\hattpar-\tpar}{\tpar}}$} \\
     \midrule
-    \input{tables/warmup8.tex}
+    \expandableinput{tables/warmup8.tex}
     \addlinespace
-    \input{tables/warmup4.tex}
+    \expandableinput{tables/warmup4.tex}
     \bottomrule
   \end{tabular}
   % The caption must not get too large, otherwise figure and table won't be on the same page.

@@ -21,10 +21,6 @@ test-julia:
     - julia -e 'using InteractiveUtils; versioninfo()'
     - julia -e 'using Pkg; Pkg.instantiate()'
     - julia test/runtests.jl
-  rules:
-    - if: $CI_COMMIT_BRANCH =~ /^thesis.*/
-      when: manual
-    - when: always
 
 test-thesis-codes:
   interruptible: true
@@ -35,3 +31,15 @@ test-thesis-codes:
     - julia thesis/code/parareal_counting.jl
     - julia thesis/code/standalone_dre.jl
     - julia thesis/code/standalone_parareal.jl
+
+build-thesis:
+  interruptible: true
+  image: docker-registry.csc.mpi-magdeburg.mpg.de:5000/ci-images/minimal/latex:jammy
+  script:
+    - cd thesis && make output/thesis.pdf
+    - locale
+    - make output/slides.pdf
+  artifacts:
+    paths:
+      - "thesis/output/thesis.pdf"
+      - "thesis/output/slides.pdf"

@@ -314,11 +314,11 @@ which also does not fulfill all the assumptions of the runtime model~\eqref{eq:i
     {$\abs*{\frac{\hattpar-\tpar}{\tpar}}$} \\
     \midrule
     %TODO: Add uncertainties for low-rank t_F and t_G?
-    \input{tables/warmup450_lr.tex}
+    \expandableinput{tables/warmup450_lr.tex}
     \addlinespace
-    \input{tables/warmup450_de.tex}
+    \expandableinput{tables/warmup450_de.tex}
     \addlinespace
-    \input{tables/warmup450_ref.tex}
+    \expandableinput{tables/warmup450_ref.tex}
     \bottomrule
   \end{tabular}
   \caption[Timeline measurements for parareal algorithm, $N=450$, $K=10$]{%
@@ -346,17 +346,17 @@ which also does not fulfill all the assumptions of the runtime model~\eqref{eq:i
     {$\frac{\hattseq}{\tpar}$} &
     {$\frac{\hattseq}{N\cdot\tpar}$} \\
     \midrule
-    \input{tables/speedup450_lr.tex}
+    \expandableinput{tables/speedup450_lr.tex}
     \addlinespace
-    \input{tables/speedup450_de.tex}
+    \expandableinput{tables/speedup450_de.tex}
     \addlinespace
-    \input{tables/speedup450_ref.tex}
+    \expandableinput{tables/speedup450_ref.tex}
     \bottomrule
   \end{tabular}
   \caption[Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$]{%
     Speed-up and parallel efficiency of parareal algorithm, $N=450$, $K=10$.
     This table complements \autoref{tab:results:warmup}.
-    The sequential runtime $\hattseq$ is estimated according to~\eqref{eq:impl:tseq}.
+    The sequential runtime $\hattseq$ is estimated according to Equation~\eqref{eq:impl:tseq}.
     The parallel efficiency is evaluated for $N$ processors.
   }
   \label{tab:impl:pr:speedup}

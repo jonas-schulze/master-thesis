@@ -129,6 +129,7 @@ using the Sherman-Morrison-Woodbury formula,
 See \autoref{lst:impl:LowRankUpdate} for the basic definition of \julia{LowRankUpdate} and the aforementioned functions.
 
 \def\mi{\textsuperscript{-1}}
+\def\ma{\protect\makebox[\widthof{a}]{$\alpha$}}
 \begin{lstlisting}[
   float=tp,
   caption={%
@@ -145,33 +146,33 @@ See \autoref{lst:impl:LowRankUpdate} for the basic definition of \julia{LowRankU
 ]
 struct LowRankUpdate{TA,T,TU,TV}
     A::TA
-    %$\alpha$%::T
+    %\ma%::T
     U::TU
     V::TV
 end
 
 function Base.adjoint(AUV::LowRankUpdate)
-    A, %$\alpha$%, U, V = AUV
-    LowRankUpdate(A', %$\alpha$%', V', U')
+    A, %\ma%, U, V = AUV
+    LowRankUpdate(A', %\ma%', V', U')
 end
 
 function Base.:(+)(AUV::LowRankUpdate, E::AbstractMatrix)
     @assert issparse(E)
-    A, %$\alpha$%, U, V = AUV
-    LowRankUpdate(A+E, %$\alpha$%, U, V)
+    A, %\ma%, U, V = AUV
+    LowRankUpdate(A+E, %\ma%, U, V)
 end
 
 function Base.:(\)(AUV::LowRankUpdate, B::AbstractVecOrMat)
-    A, %$\alpha$%, U, V = AUV
+    A, %\ma%, U, V = AUV
 
     FA = factorize(A)
     A%\mi%B = FA \ B
     A%\mi%U = FA \ U
 
-    S = %$\alpha$%*I + V * A%\mi%U
+    S = %\ma% * I + V * A%\mi%U
     S%\mi%VA%\mi%B = S \ (V * A%\mi%B)
 
-    X = A%\mi%B - A%\mi%U*S%\mi%VA%\mi%B
+    X = A%\mi%B - A%\mi%U * S%\mi%VA%\mi%B
     return X
 end
 \end{lstlisting}

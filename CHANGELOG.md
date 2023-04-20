@@ -1,3 +1,12 @@
+# v1.2
+
+- Add ORCiD and date of defense to title page of thesis
+- Fix minor wording and type-setting issues within thesis
+- Fix page references within Glossary
+- Fix inconsistent subscript `k` within Algorithm 5.1
+- Build thesis and slides in CI
+- Add missing `merge_results.*` scripts
+
 # v1.1
 
 - Add slide deck for defense (!17)
