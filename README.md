@@ -1,12 +1,12 @@
-# Playground
+# Master Thesis
 
 * playing with ParaReal and DifferentialRiccatiEquations
 * sharing data with Mechthild
 
 ## Rail Benchmark
 
-* modelreduction.org/index.php/Steel_Profile
-* configuration `n=371` already included in `data/Rail371.mat`
+* [MOR Wiki]
+* configuration `n=371` already included in `data/Rail371.mat` (see [License](#section) section below)
 * download bigger configurations from above URL, unzip and store them inside `data/`,
   e.g. `data/SteelProfile-dim1e3-rail_1357/rail_1357_c60.?`
 
@@ -60,3 +60,25 @@ savepath
 The latter needs to be done only once. 🤞
 
 [DrWatson.jl]: https://juliadynamics.github.io/DrWatson.jl/stable/
+
+# License
+
+This work is licensed under a [Creative Commons Attribution 4.0 International License][CC-BY-4.0 orig].
+
+![CC-BY-4.0 image](https://i.creativecommons.org/l/by/4.0/88x31.png)
+
+The following files/directories are merely redistributed under their own licenses:
+
+* `data/Rail371.mat`: The data stems from [BennerSaak2005] and is licensed under [CC-BY-4.0].
+  See [MOR WIKI] for further information.
+
+  > **Warning**
+  > The output matrix `C` of the included configuration differs from all the other configurations hosted at [MOR WIKI] by a factor of 10.
+* `src/DifferentialRiccatiEquations.jl`: [MIT]
+* `src/ParaReal.jl`: [MIT]
+
+[BennerSaak2005]: http://nbn-resolving.de/urn:nbn:de:swb:ch1-200601597
+[CC-BY-4.0]: https://spdx.org/licenses/CC-BY-4.0.html
+[CC-BY-4.0 orig]: https://creativecommons.org/licenses/by/4.0/
+[MIT]: https://spdx.org/licenses/MIT.html
+[MOR Wiki]: http://modelreduction.org/index.php/Steel_Profile
