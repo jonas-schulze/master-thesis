@@ -1,16 +1,56 @@
 # Master Thesis
 
-* playing with ParaReal and DifferentialRiccatiEquations
-* sharing data with Mechthild
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7843198)][Zenodo]
+
+This repository has been used to
+
+* play around with [ParaReal.jl] and [DifferentialRiccatiEquations.jl], and
+* share data with [Mechthild].
+
+Download the thesis and slides from [Zenodo],
+or build them as follows.
+
+```
+cd thesis
+make all
+```
+
+All necessary images are included in this repository.
+Use `thesis/figures/*.jl` to recreate them, if needed.
+Most of these scripts as well as `notebooks/*.jl` are [Pluto.jl] notebooks.
+
+[ParaReal.jl]: https://github.com/mpimd-csc/ParaReal.jl
+[DifferentialRiccatiEquations.jl]: https://github.com/mpimd-csc/DifferentialRiccatiEquations.jl
+[Pluto.jl]: https://github.com/fonsp/Pluto.jl
+[Zenodo]: https://doi.org/10.5281/zenodo.7843198
+[Mechthild]: https://www.mpi-magdeburg.mpg.de/cluster/mechthild
 
 ## Rail Benchmark
 
-* [MOR Wiki]
+All computations have been conducted using the [Steel Profile][MOR Wiki] benchmark problem:
+
 * configuration `n=371` already included in `data/Rail371.mat` (see [License](#section) section below)
-* download bigger configurations from above URL, unzip and store them inside `data/`,
+* download bigger configurations from [MOR Wiki], unzip and store them inside `data/`,
   e.g. `data/SteelProfile-dim1e3-rail_1357/rail_1357_c60.?`
 
-## Environment Variables
+## Usage
+
+The main working scripts are
+
+* `scripts/compute_seq.jl` to solve a DRE sequentially, and
+* `scripts/compute_par.jl` to solve a DRE using parareal.
+
+If you are working inside a [Slurm] environment,
+these scripts may be launched using `scripts/seq.job` and `scripts/par.job`, respectively.
+Refer to the slides of the defense for some specific usage examples.
+
+> **Note**
+> The parareal solvers will create one [HDF5] container containing the DRE solution trajectories per process.
+> You may use `scripts/merge_results.jl` (must be adapted) to merge these into one.
+> See `scripts/README.md`.
+
+[HDF5]: https://en.wikipedia.org/wiki/Hierarchical_Data_Format
+[Slurm]: https://slurm.schedmd.com/
 
 Most scripts are configured using environment variables:
 
@@ -70,10 +110,10 @@ This work is licensed under a [Creative Commons Attribution 4.0 International Li
 The following files/directories are merely redistributed under their own licenses:
 
 * `data/Rail371.mat`: The data stems from [BennerSaak2005] and is licensed under [CC-BY-4.0].
-  See [MOR WIKI] for further information.
+  See [MOR Wiki] for further information.
 
   > **Warning**
-  > The output matrix `C` of the included configuration differs from all the other configurations hosted at [MOR WIKI] by a factor of 10.
+  > The output matrix `C` of the included configuration differs from all the other configurations hosted at [MOR Wiki] by a factor of 10.
 * `src/DifferentialRiccatiEquations.jl`: [MIT]
 * `src/ParaReal.jl`: [MIT]
 
