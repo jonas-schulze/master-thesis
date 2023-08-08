@@ -47,7 +47,7 @@ tables/%.tex: tables/%.csv
 
 .PHONY: githash.txt
 githash.txt:
-	git rev-parse --short HEAD > $@
+	(git rev-parse --short HEAD || echo '\\emph{unknown}') > $@
 
 code/%.jl.txt: code/%.jl
 	sed -e 's/₀/%\\textsubscript{0}%/g' -e 's/ᵀ/%\\textsuperscript{T}%/g' $< > $@
