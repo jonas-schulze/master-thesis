@@ -7,6 +7,10 @@
 - Build thesis and slides in CI
 - Add missing `merge_results.*` scripts
 
+Technical/internal:
+- Rename default git branch to `main`
+- Update git submodule paths to point to GitHub
+
 # v1.1
 
 - Add slide deck for defense (!17)
